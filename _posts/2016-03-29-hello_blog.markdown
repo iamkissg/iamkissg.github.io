@@ -39,14 +39,14 @@ tags:
 以下的指令全部基于Ubuntu14.04 LTS,其他操作系统可能略有不同,请自行更正.
 
 首先,安装`git`,这个似乎不需多描述.使用Ubuntu的包管理工具下载的git是1.9.1版的,并不影响使用.
-```
+```bash
 sudo apt-get install git
 ```
 
 其次就是安装`Jekyll`了.
 
 根据`Jekyll`官网的推荐,我安装的是`node.js`,是下载的源码,自行编译安装的.
-```
+```bash
 cd Downloads/ && wget https://nodejs.org/dist/v4.4.0/node-v4.4.0.tar.gz #强迫症使然,一定要下载到/Downloas下
 sudo apt-get gcc make g++                                               #编译需要用到的工具
 tar -xvf node-v4.4.0.tar.gz && cd node-v4.4.0/
@@ -58,14 +58,14 @@ make install                                                            #可通�
 我一开始使用Ubuntu的包管理工具安装`ruby`,版本比较旧,是1.9.3的,而2.0以下的`ruby`并不支持`Jekyll3.0`及以上.当我询问过Hux之后,被告知`Github Pages`官方进行了升级,要升级至`Jekyll3`以上(原话).因此,我也其实并没有尝试使用`Jekyll2`来搭配Hux的模板.
 
 然后卸载ruby,重新安装.这次通过`ruby`管理工具来安装最新版本的`ruby`.我选择的是`rvm`,以下是安装过程:
-```
+```bash
 gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
 \curl -sSL https://get.rvm.io | bash -s stable
 source ~/.rvm/scripts/rvm
 ```
 
 再安装`ruby2.3.0`,以及`Jekyll`:
-```
+```bash
 rvm install 2.3.0
 gem source -r https://rubygems.org/ -a https://ruby.taobao.org/ #更新源
 gem install jekyll
