@@ -30,7 +30,7 @@ tags:
   2. _config.yml的baseurl没有设置好.
 
 对于第一点,Github上有明确的说明:
-![Github Pages Publishing branch 说明](/img/hello_blog/github-pages-repos.png)
+![Github Pages Publishing branch 说明](/img/hello-blog/github-pages-repos.png)
 而阮一峰老师的教程里使用的是`gh-pages`分支,因此是无法通过"username.github.io"直接访问博客的,而域名又直接绑定到"username.github.io"上,因此一直都会是404错误.可惜当时没明白,兴致缺缺然,也就没再玩了.
 
 时隔半年,就在我差点就要忘了那个域名的存在的时候,邂逅了Hux的博客(好吧,这里我真的很想用"惊为天人"来描述我当时的感受).再加上一些其他因素,就再次萌生了写博客的冲动.
