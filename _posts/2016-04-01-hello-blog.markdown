@@ -24,7 +24,7 @@ tags:
 
 第一次想写博客是在去年10月份.那天我生日,好友Coffee送了我一个域名.没错,是域名!看着我一脸懵逼的表情,他说:如果你不知道干嘛的话,去Google一下“Github + Jekyll”写博客吧.
 
-头几天,兴致很足,跟着[阮一峰老师的教程](www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html)走了一遍,成功!能通过 "username.github.io/xxx" 的方式访问博客了.但是绑定域名就一直失败.当时不知道原因所在,现在想想,原因应该是
+头几天,兴致很足,跟着[阮一峰老师的教程](http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html)走了一遍,成功!能通过 "username.github.io/xxx" 的方式访问博客了.但是绑定域名就一直失败.当时不知道原因所在,现在想想,原因应该是
 
   1. publishing branch不正确;
   2. _config.yml的baseurl没有设置好.
@@ -35,7 +35,7 @@ tags:
 
 时隔半年,就在我差点就要忘了那个域名的存在的时候,邂逅了Hux的博客(好吧,这里我真的很想用"惊为天人"来描述我当时的感受).再加上一些其他因素,就再次萌生了写博客的冲动.
 
-以下记录了本人搭建“Github Pages+ Jekyll”写作环境的全过程.希望能对其他有写博客想法的同学有所帮助.(如果有想学习如何写博客的同学,请移步[阮一峰老师的教程](www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html))
+以下记录了本人搭建“Github Pages+ Jekyll”写作环境的全过程.希望能对其他有写博客想法的同学有所帮助.(如果有想学习如何写博客的同学,请移步[阮一峰老师的教程](http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html))
 
 以下的指令全部基于Ubuntu14.04 LTS,其他操作系统可能略有不同,请自行更正.
 
