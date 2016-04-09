@@ -20,11 +20,11 @@ tas:
 
 ## 正文
 
-要理解`generator`,我们先从`迭代()iteration)`与`迭代器(iterator)`讲起.当然,本文的重点是`generator`,`iteration`与`iterator`的知识将点到即止.[直接看`generator`](#generator)
+要理解`generator`,我们先从`迭代(iteration)`与`迭代器(iterator)`讲起.当然,本文的重点是`generator`,`iteration`与`iterator`的知识将点到即止.[直接看`generator`](#generator)
 
 > 迭代是重复反馈过程的活动，其目的通常是为了接近并到达所需的目标或结果。每一次对过程的重复被称为一次“迭代”，而每一次迭代得到的结果会被用来作为下一次迭代的初始值。
 
-以上是[维基百科](://zh.wikipedia.org/wiki/%E8%BF%AD%E4%BB%A3)对迭代的定义.在python中,迭代通常是通过`for ... in ...`来完成的,而且只要是`可迭代对象(iterable)`,都能进行迭代.这里简单讲下`iterable`与`iterator`的区别:
+以上是[维基百科](http://zh.wikipedia.org/wiki/%E8%BF%AD%E4%BB%A3)对迭代的定义.在python中,迭代通常是通过`for ... in ...`来完成的,而且只要是`可迭代对象(iterable)`,都能进行迭代.这里简单讲下`iterable`与`iterator`的区别:
 
 > `iterable`是实现了`__iter__()`方法的对象.更确切的说,是`container.__iter__()`方法,该方法返回的是的一个`iterator`对象,因此`iterable`是你可以从其获得`iterator`的对象.使用`iterable`时,将一次性返回所有结果,都存放在内存中,并且这些值都能重复使用.
 
@@ -33,11 +33,13 @@ tas:
   1. 更新`iterator`状态,令其指向后一项,以便下一次调用
   2. 返回当前结果
 
-如果你学过`C++`,它其实跟指针的概念很像(如果你还学过链表的话,或许能更好地理解).正是`__next__()`,使得`iterator`能在每次被调用时,返回一个单一的值(有些教程里,称为一边循环,一边计算,我觉得这个说法不是太准确.但如果这样的说法有助于你的理解,我建议你就这样记),从而极大的节省了内存资源.另一点需要格外注意的是,`iterator`是消耗型的,即每一个值被使用过后,就消失了.因此,你可以将以上的操作2理解成`pop`.对`iterator`进行遍历之后,其就变成了一个空的容器了,但不等于`None`哦.因此,若要重复使用`iterator`,利用`list()`方法将其结果保存起来是一个不错的选择.
+如果你学过`C++`,它其实跟指针的概念很像(如果你还学过链表的话,或许能更好地理解).
+
+正是`__next__()`,使得`iterator`能在每次被调用时,返回一个单一的值(有些教程里,称为一边循环,一边计算,我觉得这个说法不是太准确.但如果这样的说法有助于你的理解,我建议你就这样记),从而极大的节省了内存资源.另一点需要格外注意的是,`iterator`是消耗型的,即每一个值被使用过后,就消失了.因此,你可以将以上的操作2理解成`pop`.对`iterator`进行遍历之后,其就变成了一个空的容器了,但不等于`None`哦.因此,若要重复使用`iterator`,利用`list()`方法将其结果保存起来是一个不错的选择.
 
 我们通过代码来感受一下.
 
-```python3
+```python
 >>> from collections import Iterable, Iterator
 >>> a = [1,2,3]   # 众所周知,list是一个iterable 
 >>> b = iter(a)   # 通过iter()方法,得到iterator,iter()实际上调用了__iter__(),此后不再多说
@@ -51,13 +53,16 @@ True
 True
 # 可见,iterable是iterator,但iterator不一定是iterable
 
-# iterator是消耗型的,用一次少一次.但是,空的iterator并不等于None.
+# iterator是消耗型的,用一次少一次.对iterator进行变量,iterator就空了!
 >>> c = list(b)
 >>> c
 [1, 2, 3]
 >>> d = list(b)
 >>> d
 [] 
+
+
+# 空的iterator并不等于None.
 >>> if b:
 ...   print(1)
 ... 
@@ -76,10 +81,10 @@ True
 
 既然提到了`for ... in ...`语句,我们再来简单讲下其工作原理吧,或许能帮助理解以上所讲的内容.
 
-```python3
-x = [1, 2, 3]
-for i in x:
-    ...
+```python
+>>> x = [1, 2, 3]
+>>> for i in x:
+...     ...
 ```
 
 我们对一个`iterable`用`for ... in ...`进行迭代时,实际是先通过调用`iter()`方法得到一个`iterator`,假设叫做X.然后循环地调用X的`next()`方法取得每一次的值,直到iterator为空,返回的`StopIteration`作为循环结束的标志.`for ... in ... `会自动处理`StopIteration`异常,从而避免了抛出异常而使程序中断.如图所示
@@ -100,7 +105,7 @@ for i in x:
 
 以上的定义均来自[python官方文档](https://docs.python.org/3/glossary.html#term-generator).可见,我们常说的`生成器`,就是带有`yield`的函数,而`generator iterator`则是`generator function`的返回值,即一个`generator`对象,而形如`(elem for elem in [1, 2, 3])`的表达式,称为`generator expression`,实际使用与`generator`无异.
 
-```python3
+```python
 >>> a = (elem for elem in [1, 2, 3])
 >>> a
 <generator object <genexpr> at 0x7f0d23888048>
@@ -124,7 +129,7 @@ for i in x:
 
 前文讲到`iterator`通过`__next__()`方法实现了每次调用,返回一个单一值的功能.而`yield`就是实现`generator`的`__next__()`方法的关键!先来看一个最简单的例子:
 
-```python3
+```python
 >>> def g():
 ...     print("1 is")
 ...     yield 1
@@ -155,11 +160,13 @@ StopIteration
 
 事实上,`generator`确实在遇到`yield`之后暂停了,确切点说,是先返回了`yield`表达式的值,再暂停的.当再次调用`next()`时,从先前暂停的地方开始执行,直到遇到下一个`yield`.这与上文介绍的对`iterator`调用`next()`方法,执行原理一般无二.
 
-有些教程里说`generator`保存的是算法,而我觉得用`中断服务子程序`来描述`generator`或许能更好理解,这样你就能将`yield`理解成一个中断服务子程序的`断点`,没错,是中断服务子程序的断点.我们每次对一个`generator`对象调用`next()`时,函数内部代码执行到"断点"`yield`,然后返回这一部分的结果,并保存上下文环境,"中断"返回.怎么样,是不是瞬间就明白了`yield`的用法?
+有些教程里说`generator`保存的是算法,而我觉得用`中断服务子程序`来描述`generator`或许能更好理解,这样你就能将`yield`理解成一个中断服务子程序的`断点`,没错,是中断服务子程序的断点.我们每次对一个`generator`对象调用`next()`时,函数内部代码执行到"断点"`yield`,然后返回这一部分的结果,并保存上下文环境,"中断"返回.
+
+怎么样,是不是瞬间就明白了`yield`的用法?
 
 我们再来看另一段代码.
 
-```python3
+```python
 >>> def gen():
 ...     while True:
 ...         s = yield
@@ -175,11 +182,13 @@ TypeError: can't send non-None value to a just-started generator
 kissg
 ```
 
-我正是看到这个形式的`generator`,懵了,才想要深入学习`generator`与`yield`的.结合以上的知识,我再告诉你,`generator`其实有第2种调用方法(恢复执行),即通过`send(value)`方法将`value`作为`yield`表达式的当前值,你可以用该值再对其他变量进行赋值,这一段代码就很好理解了.当我们调用`send(value)`方法时,`generator`正由于`yield`的缘故被暂停了.此时,`send(value)`方法传入的值作为`yield`表达式的值,函数中又将该值赋给了变量`s`,然后print函数打印`s`,循环再遇到`yield`,暂停返回.调用`send(value)`时要注意,要确保,`generator`是在`yield`处被暂停了,如此才能向`yield`表达式传值,否则将会报错(如上所示),可通过`next()`方法或`send(None)`使`generator`执行到`yield`.
+我正是看到这个形式的`generator`,懵了,才想要深入学习`generator`与`yield`的.结合以上的知识,我再告诉你,`generator`其实有第2种调用方法(恢复执行),即通过`send(value)`方法将`value`作为`yield`表达式的当前值,你可以用该值再对其他变量进行赋值,这一段代码就很好理解了.当我们调用`send(value)`方法时,`generator`正由于`yield`的缘故被暂停了.此时,`send(value)`方法传入的值作为`yield`表达式的值,函数中又将该值赋给了变量`s`,然后print函数打印`s`,循环再遇到`yield`,暂停返回.
+
+调用`send(value)`时要注意,要确保,`generator`是在`yield`处被暂停了,如此才能向`yield`表达式传值,否则将会报错(如上所示),可通过`next()`方法或`send(None)`使`generator`执行到`yield`.
 
 再来看一段`yield`更复杂的用法,或许能加深你对`generator`的`next()`与`send(value)`的理解.
 
-```python3
+```python
 >>> def echo(value=None):
 ...   while 1:
 ...     value = (yield value)
@@ -209,6 +218,7 @@ The value is None
 ## 小结
 
 ![iterable-iterator-generator](/img/python-generator-yield/iterators-generators-iterables.png)
+
 1. 可迭代对象(Iterable)是实现了`__iter__()`方法的对象,通过调用`iter()`方法可以获得一个迭代器(Iterator)
 
 2. 迭代器(Iterator)是实现了`__iter__()`和`__next__()`的对象
