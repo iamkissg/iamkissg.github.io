@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      ""
+title:      "Python之生成器详解"
 subtitle:   "从Iterable,Iterator知Generator,Yield"
 date:       2016-04-09
 author:     "kissg"
@@ -12,7 +12,7 @@ tas:
     - yield
 --- 
 
-> 一叶落知天下秋.知秋更可知叶落.
+> 一叶落知天下秋,知秋更可知叶落.
 
 ## 引文
 
