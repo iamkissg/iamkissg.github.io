@@ -5,9 +5,10 @@ subtitle:   "从Iterable,Iterator知Generator,Yield"
 date:       2016-04-09
 author:     "kissg"
 header-img: "img/python-generator-yield/sisyphus.jpg"
+catalog:    true
 tas:
-    - pythonh
-    - iterator
+    - 菜鸟成长日记
+    - python
     - generator
     - yield
 --- 
@@ -228,3 +229,5 @@ The value is None
 4. 生成器(generator)是一个特殊的迭代器,它的实现更简单优雅.
 
 5. `yield`是生成器实现`__next__()`方法的关键.它作为生成器执行的暂停恢复点,可以对`yield`表达式进行赋值,也可以将`yield`表达式的值返回.
+
+> (本人刚开始写博客,本文写得狠辛苦,转载希望著明出处,不胜感谢.)
