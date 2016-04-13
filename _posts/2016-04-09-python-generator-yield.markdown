@@ -24,11 +24,22 @@ tags:
 
 > 迭代是重复反馈过程的活动，其目的通常是为了接近并到达所需的目标或结果。每一次对过程的重复被称为一次“迭代”，而每一次迭代得到的结果会被用来作为下一次迭代的初始值。
 
-以上是[维基百科](http://zh.wikipedia.org/wiki/%E8%BF%AD%E4%BB%A3)对迭代的定义.在python中,迭代通常是通过`for ... in ...`来完成的,而且只要是`可迭代对象(iterable)`,都能进行迭代.这里简单讲下`iterable`与`iterator`的区别:
+以上是[维基百科](http://zh.wikipedia.org/wiki/%E8%BF%AD%E4%BB%A3)对迭代的定义.在python中,迭代通常是通过`for ... in ...`来完成的,而且只要是`可迭代对象(iterable)`,都能进行迭代.这里简单讲下`iterable`与`iterator`:
 
-> `iterable`是实现了`__iter__()`方法的对象.更确切的说,是`container.__iter__()`方法,该方法返回的是的一个`iterator`对象,因此`iterable`是你可以从其获得`iterator`的对象.使用`iterable`时,将一次性返回所有结果,都存放在内存中,并且这些值都能重复使用.
+> `iterable`是实现了`__iter__()`方法的对象.更确切的说,是`container.__iter__()`方法,该方法返回的是的一个`iterator`对象,因此`iterable`是你可以从其获得`iterator`的对象.~~使用`iterable`时,将一次性返回所有结果,都存放在内存中,并且这些值都能重复使用.~~以上说法严重错误!我有以上错误的理解,是因为我们常用`iterable`来一次性生成所有的元素.比如使用列表生成式来获得一个列表.
 
-> `iterator`是实现了`itetor.__iter__()`和`iterator.__next__()`方法的对象.`iterator.__iter__()`方法返回的是`iterator`对象本身.根据官方的说法,正是这个方法,实现了`for ... in ...`语句.而`iterator.__next__()`是`iterator`区别于`iterable`的关键了.当调用`next()`方法时,实际上产生了2个操作:
+```python
+>>>from collections import Iterable
+>>>isinstance(range(10), Iterable)
+True
+>>> L = [x for x in range(10)]
+>>> L
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+> 根据官方的说法:`iterable: An object capable of returning its members one at a time. `(能一次返回一个成员的对象.)我们几乎都是将`iterable`转成`iterator`来使用的,所以我们可能会以为`iterator`才是"一次返回一个成员的对象",这个说法没有错.但`iterator`能一次返回一个成员,前提是它是`iterable`!
+
+> `iterator`是实现了`itetor.__iter__()`和`iterator.__next__()`方法的对象.`iterator.__iter__()`方法返回的是`iterator`对象本身.根据官方的说法,正是这个方法,实现了`for ... in ...`语句.而`iterator.__next__()`是`iterator`区别于`iterable`的关键了,它允许我们***显式***地获取一个元素.当调用`next()`方法时,实际上产生了2个操作:
 
   1. 更新`iterator`状态,令其指向后一项,以便下一次调用
   2. 返回当前结果
