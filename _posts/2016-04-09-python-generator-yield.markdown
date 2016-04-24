@@ -10,7 +10,7 @@ tags:
     - python
     - generator
     - yield
---- 
+---
 
 > 一叶落知天下秋,知秋更可知叶落.
 
@@ -41,7 +41,7 @@ tags:
 
 ```python
 >>> from collections import Iterable, Iterator
->>> a = [1,2,3]   # 众所周知,list是一个iterable 
+>>> a = [1,2,3]   # 众所周知,list是一个iterable
 >>> b = iter(a)   # 通过iter()方法,得到iterator,iter()实际上调用了__iter__(),此后不再多说
 >>> isinstance(a, Iterable)
 True
@@ -59,13 +59,13 @@ True
 [1, 2, 3]
 >>> d = list(b)
 >>> d
-[] 
+[]
 
 
 # 空的iterator并不等于None.
 >>> if b:
 ...   print(1)
-... 
+...
 1
 >>> if b == None:
 ...   print(1)
@@ -97,7 +97,7 @@ True
 
 首先先理清几个概念:
 
-> `generator`: A function which returns a generator iterator. It looks like a normal function except that it contains yield expressions for producing a series of values usable in a for-loop or that can be retrieved one at a time with the next() function. 
+> `generator`: A function which returns a generator iterator. It looks like a normal function except that it contains yield expressions for producing a series of values usable in a for-loop or that can be retrieved one at a time with the next() function.
 
 > `generator iterator`: An object created by a generator funcion.
 
@@ -114,7 +114,7 @@ True
 ...     while True:
 ...         yield b
 ...         a, b = b, a + b
-... 
+...
 >>> fib
 <function fib at 0x7f0d238796a8>
 >>> b = fib()
@@ -137,7 +137,7 @@ True
 ...     yield 2
 ...     print("3 is")
 ...     yield 3
-... 
+...
 >>> z = g()
 >>> z
 <generator object g at 0x7f0d2387c8b8>
@@ -171,7 +171,7 @@ StopIteration
 ...     while True:
 ...         s = yield
 ...         print(s)
-... 
+...
 >>> g = gen()
 >>> g.send("kissg")
 Traceback (most recent call last):
@@ -223,7 +223,7 @@ The value is None
 
 2. 迭代器(Iterator)是实现了`__iter__()`和`__next__()`的对象
 
-3. `for ... in ...`的迭代,实际是将可迭代对象转换成迭代器,再重复调用`next()`方法实现的 
+3. `for ... in ...`的迭代,实际是将可迭代对象转换成迭代器,再重复调用`next()`方法实现的
 
 4. 生成器(generator)是一个特殊的迭代器,它的实现更简单优雅.
 
