@@ -1,8 +1,8 @@
 ---
 layout:     post
-title:      "Python之元类助解"
-subtitle:   ""
-date:       2016-04-24
+title:      "Python之元类笔记"
+subtitle:   "这是一篇关于python3　metaclass的读书笔记整理"
+date:       2016-04-25
 author:     "kissg"
 header-img: "img/python-metaclass/light.jpg"
 tags:
@@ -11,7 +11,7 @@ tags:
     - metaclass
 ---
 
-> 凡事都是有讲究的.
+> 凡事最怕是认真.
 
 ## 引文
 
