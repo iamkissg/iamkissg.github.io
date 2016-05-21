@@ -51,7 +51,7 @@ False
 True
 >>> isinstance(b, Iterator)
 True
-# 可见,iterable是iterator,但iterator不一定是iterable
+# 可见,itertor一定是iterable,但iterable不一定是itertor
 
 # iterator是消耗型的,用一次少一次.对iterator进行变量,iterator就空了!
 >>> c = list(b)
