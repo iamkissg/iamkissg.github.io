@@ -1,7 +1,7 @@
 ---
 layout:	    post
-title:      "[先睹为快]Python网络数据采集那些事儿"
-subtitle:   "\"Python网络数据采集\"读书笔记"
+title:      "[笔记]Python网络数据采集"
+subtitle:   "Notes on \"Web Scraping with Python\""
 date:       2016-06-01
 author:     "kissg"
 header-img: "img/2016-06-01-note-on-web-scraping-with-python/face-to-the-sea.jpg"
