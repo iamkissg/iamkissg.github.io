@@ -11,9 +11,10 @@ tags:
     - 菜鸟成长日记
 ---
 
-> 原文作者: e-satis\\
+> 原文作者: e-satis(Kevin Samuel)\\
 原文连接: [stackoverflow - How can I make a chain of function decorators in Python](http://stackoverflow.com/questions/739654/how-can-i-make-a-chain-of-function-decorators-in-python/1594484#1594484)\\
-译者: kissg(赵喧典)
+译者: kissg(赵喧典)\\
+本译文已征得原作者同意, 转载请同时注明原文. 如果能注明译文出处就更好啦~
 
 ---
 
