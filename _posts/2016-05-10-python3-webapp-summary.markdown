@@ -49,9 +49,9 @@ Awesome Python3 WebApp 这个博客系统, 我已经部署到服务器上了.
 让我们先来看看, 开发`awesome`主要用到了哪些库. 用好工具的基础, 是了解, 因此有必要花点时间了解一下这些工具都干嘛的:
 
 - `jinja2` - 前端模板引擎. 所有的前端页面都是通过`jinja2`调用模板并渲染得到的 \\
-详情: [官方文档](http://jinja.pocoo.org/docs/dev/) \| [我的简单笔记](https://github.com/Engine-Treasure/learning-notebook/blob/master/jinja2-note.markdown)
+详情: [官方文档](http://jinja.pocoo.org/docs/dev/) \| [我的简单笔记](https://github.com/Engine-Treasure/learning-notebook/blob/master/python/jinja2-note.markdown)
 - `aiohttp` - 基于`asyncio`的异步http框架. 此处主要用于实现 web 服务器, 提供单线程多用户高并发支持\\
-详情: [官方文档](http://aiohttp.readthedocs.io/en/stable/) \| [我的简单笔记](https://github.com/Engine-Treasure/learning-notebook/blob/master/aiohttp-note.markdown)
+详情: [官方文档](http://aiohttp.readthedocs.io/en/stable/) \| [我的简单笔记](https://github.com/Engine-Treasure/learning-notebook/blob/master/python/aiohttp-note.markdown)
 - `aiomysql` - mysql的python异步驱动程序\\
 详情: [官方文档](http://aiomysql.readthedocs.io/en/latest/)
 - `asyncio` - python内置的异步io库. 几乎所有的异步IO操作都与之有关.\\
