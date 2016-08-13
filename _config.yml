@@ -79,15 +79,14 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 
 
 # Friends
-friends: [
-    {
+friends: [{
     title: "kissg WebAPP",
         href: "http://googlegeeks.xyz:23333"
+    },{
+        title: "编程派",
+        href: "http://www.codingpy.com/"
     }
     #,{
-    #    title: "Foo",
-    #    href: "#"
-    #},{
     #    title: "Bar",
     #    href: "#"
     #},{
