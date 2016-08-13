@@ -9,6 +9,7 @@ tags:
     - python
     - decorator
     - 菜鸟成长日记
+    - 译
 ---
 
 > 原文作者: e-satis(Kevin Samuel)\\
