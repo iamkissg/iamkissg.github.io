@@ -15,7 +15,7 @@ tags:
 > 原文作者: Ned Batchelder\\
 原文连接: [Breaking out of two loops](http://nedbatchelder.com//blog/201608/breaking_out_of_two_loops.html)\\
 译者：kissg(赵喧典)\\
-本文最先发表于微信公众号"编程派"。因此，虽是本人翻译，但性质仍是转载。[编程派地址](http://codingpy.com/article/breaking-out-of-two-loops/)。如需转载，请联系微信公众号"编程派"获得授权。转载时注明来源，作者及原文链接。
+本文最先发表于微信公众号"编程派"，是本人在 PythonTG 翻译组的译文，相当于自我转载。[编程派地址](http://codingpy.com/article/breaking-out-of-two-loops/)，如需转载，请联系微信公众号"编程派"获得授权。转载时注明来源，作者及原文链接。
 
 
 一个普遍存在的问题是，如何立即跳出嵌套的两重循环？例如，要检验字符串中是否存在相同的字符，如何在找到一对相同的字符之后就停止循环？经典的做法是，写一个两重嵌套循环，对字符串的索引进行迭代：
