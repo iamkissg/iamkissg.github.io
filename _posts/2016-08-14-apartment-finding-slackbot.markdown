@@ -4,7 +4,7 @@ title:      "[译|转]我是如何写一个 Slack 机器人以帮助我在旧金
 subtitle:   "硅谷码农用 Python 写了个机器人，租到了让女友满意的房子"
 date:       2016-08-14
 author:     "kissg"
-header-img: "img/2016-08-14-apartment-finding-slackbot/covery.jpeg"
+header-img: "img/2016-08-14-apartment-finding-slackbot/covery.jpg"
 tags:
     - 菜鸟成长日记
     - python
