@@ -266,7 +266,7 @@ socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(0x0003))
 
 看了上面的说明之后，相信大家对此处参数的使用已经有所了解了：`AF_PACKET`表示创建一个packet socket，从而使我们能在数据链路层*收发*raw packets，而`SOCK_RAW`则让系统保留了数据链路层头部，`0x0003`放行了所有包，`socket.ntohs(..)`函数将收到的所有包的字节顺序从网络顺序转换到本机顺序。如此一层层下来，我们就实现了对本机所有收发的以太网帧的捕获。
 
-参考代码,请看[这里](https://github.com/Engine-Treasure/the-little-python/blob/master/packet_sniffer.py)
+参考代码,请看[这里](https://github.com/Engine-Treasure/the-little-python/blob/master/others/packet_sniffer.py)
 
 ## 小结
 
