@@ -4,7 +4,7 @@ title:      "ML之梯度下降算法"
 subtitle:   "机器学习初学者的梯度下降算法"
 date:       2017-07-23
 author:     "kissg"
-header-img: "img/2017-07-23-gradient-descent/gradient_descent.png"
+header-img: "img/2017-07-23-gradient-descent/cover.jpg"
 tags:
     - ML
 ---
@@ -308,7 +308,7 @@ if __name__ == '__main__':
 
 执行以上代码, 得到 3 类梯度下降算法的函数图像如下图所示.
 
-![梯度下降, 成本-时间曲线](img/2017-07-23-gradient-descent/gradient_descent_cost-iteration.png)
+![梯度下降, 成本-时间曲线](/img/2017-07-23-gradient-descent/gradient_descent_cost-iteration.png)
 
 * 黑色是 BGD 的图像, 是一条光滑的曲线, 因为 BGD 每一次迭代求得的都是全局最优解;
 * 红色是 SGD 的图像, 可见抖动很剧烈, 有不少局部最优解;
