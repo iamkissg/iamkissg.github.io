@@ -5,7 +5,7 @@ subtitle:   "Notes on \"The C programming language\""
 date:       2016-07-10
 author:     "kissg"
 header-img: "img/2016-07-10-notes-on-the-c-programming-language/covery.jpg"
-comment:    true
+comments:    true
 tags:
     - c
     - 笔记

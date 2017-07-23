@@ -5,7 +5,7 @@ subtitle:   "硅谷码农用 Python 写了个机器人，租到了让女友满�
 date:       2016-08-14
 author:     "kissg"
 header-img: "img/2016-08-14-apartment-finding-slackbot/covery.jpg"
-comment:    true
+comments:    true
 tags:
     - 菜鸟成长日记
     - python

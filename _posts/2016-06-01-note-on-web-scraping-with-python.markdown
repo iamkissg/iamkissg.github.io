@@ -5,7 +5,7 @@ subtitle:   "Notes on \"Web Scraping with Python\""
 date:       2016-06-01
 author:     "kissg"
 header-img: "img/2016-06-01-note-on-web-scraping-with-python/face-to-the-sea.jpg"
-comment:    true
+comments:    true
 tags:
     - python
     - 菜鸟成长日记

@@ -5,7 +5,7 @@ subtitle:   "一次\"职慧\"听课记录——解决问题"
 date:       2016-05-22
 author:     "kissg"
 header-img: "img/2016-05-22-ci-how-to-solve-it/the-water-bridge.jpg"
-comment:    true
+comments:    true
 tags:
     - 职慧
     - 杂

@@ -5,7 +5,7 @@ subtitle:   "A translation of e-satis' answer about Python's decorator in stacko
 date:       2016-07-16
 author:     "kissg"
 header-img: "img/2016-07-16-translation-about-python-decorator/covery.jpg"
-comment:    true
+comments:    true
 tags:
     - python
     - decorator

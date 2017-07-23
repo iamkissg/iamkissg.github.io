@@ -5,7 +5,7 @@ subtitle:   "用python3实现简单抓包器"
 date:       2016-05-01
 author:     "kissg"
 header-img: "img/python-socket-packet-sniffer/road.jpg"
-comment:    true
+comments:    true
 tags:
     - 菜鸟成长日记
     - python

@@ -5,7 +5,7 @@ subtitle:   "Python 高级特性之迭代抽象化"
 date:       2016-08-13
 author:     "kissg"
 header-img: "img/2016-08-13-breaking-out-of-two-loops/covery.jpg"
-comment:    true
+comments:    true
 tags:
     - 菜鸟成长日记
     - python

@@ -5,7 +5,7 @@ subtitle:   "这是一篇关于python3　metaclass的读书笔记整理"
 date:       2016-04-25
 author:     "kissg"
 header-img: "img/python-metaclass/light.jpg"
-comment:    true
+comments:    true
 tags:
     - 菜鸟成长日记
     - python

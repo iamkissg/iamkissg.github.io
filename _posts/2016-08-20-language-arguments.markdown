@@ -5,7 +5,7 @@ subtitle:   "程序猿与作家与翻译家"
 date:       2016-08-20
 author:     "kissg"
 header-img: "img/2016-08-20-language-arguments/covery.jpg"
-comment:    true
+comments:    true
 tags:
     - 杂
     - 小说

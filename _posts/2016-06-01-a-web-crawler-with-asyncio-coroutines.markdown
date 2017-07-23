@@ -5,7 +5,7 @@ subtitle:   "换种姿势写爬虫~"
 date:       2016-06-01
 author:     "kissg"
 header-img: "img/2016-06-01-a-web-crawler-with-asyncio-coroutines/covery.jpg"
-comment:    true
+comments:    true
 tags:
     - python
     - 菜鸟成长日记

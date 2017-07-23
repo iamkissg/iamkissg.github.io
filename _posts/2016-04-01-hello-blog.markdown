@@ -5,7 +5,7 @@ subtitle:   " \"Hello wolrd, Hello Blog\""
 date:      2016-04-01
 author:    "kissg"
 header-img: "img/hello-blog/post-bg-hello-blog.jpg"
-comment:    true
+comments:    true
 tags:
     - 无始
     - 菜鸟成长日记

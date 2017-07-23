@@ -5,7 +5,7 @@ subtitle:   "\"Python网络数据采集\"笔记整理 + 个人心得"
 date:       2016-06-02
 author:     "kissg"
 header-img: "img/2016-06-02-not-a-tutorial-on-crawler/cloud_with_mountain_with_lake.jpg"
-comment:    true
+comments:    true
 tags:
     - python
     - 菜鸟成长日记
