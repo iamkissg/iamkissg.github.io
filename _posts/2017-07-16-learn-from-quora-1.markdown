@@ -5,6 +5,7 @@ subtitle:   "习自 Quora 的一些人生哲理 (1)"
 date:       2017-07-16
 author:     "kissg"
 header-img: "img/2017-07-16-learn-from-quora-1/cover.jpg"
+comment:    true
 tags:
     - Life
 ---

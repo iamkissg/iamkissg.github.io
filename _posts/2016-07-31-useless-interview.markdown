@@ -5,6 +5,7 @@ subtitle:   "失败者的面经"
 date:       2016-07-31
 author:     "kissg"
 header-img: "img/2016-07-31-useless-interview/covery.jpg"
+comment:    true
 tags:
     - 杂
     - 面经

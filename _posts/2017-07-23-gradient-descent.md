@@ -5,6 +5,7 @@ subtitle:   "机器学习初学者的梯度下降算法"
 date:       2017-07-23
 author:     "kissg"
 header-img: "img/2017-07-23-gradient-descent/cover.jpg"
+comment:    true
 tags:
     - ML
 ---

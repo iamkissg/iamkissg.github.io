@@ -5,6 +5,7 @@ subtitle:   "记一次webapp开发经历"
 date:       2016-05-10
 author:     "kissg"
 header-img: "img/awesome-python3-webapp/awesome-cover.jpg"
+comment:    true
 tags:
     - 菜鸟成长日记
     - python

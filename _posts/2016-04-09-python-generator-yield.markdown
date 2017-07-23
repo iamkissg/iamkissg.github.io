@@ -5,6 +5,7 @@ subtitle:   "从Iterable,Iterator知Generator,Yield"
 date:       2016-04-09
 author:     "kissg"
 header-img: "img/python-generator-yield/sisyphus.jpg"
+comment:    true
 tags:
     - 菜鸟成长日记
     - python

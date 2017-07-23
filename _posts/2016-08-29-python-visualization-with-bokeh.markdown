@@ -5,6 +5,7 @@ subtitle:   "Bokeh 的极简教程"
 date:       2016-08-29
 author:     "kissg"
 header-img: "img/2016-08-29-python-visualization-with-bokeh/covery.jpg"
+comment:    true
 tags:
     - 菜鸟成长日记
     - python
