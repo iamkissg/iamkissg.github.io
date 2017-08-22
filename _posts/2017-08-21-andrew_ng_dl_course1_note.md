@@ -1,6 +1,6 @@
 ---
 layout:	    post
-title:      "吴恩达 Deep Learning Course 1 笔记"
+title:      "吴恩达深度学习第一课笔记"
 subtitle:   "Neural Networks and Deep Learning"
 date:       2017-08-21
 author:     "kissg"
