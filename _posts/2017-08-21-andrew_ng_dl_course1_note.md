@@ -1,7 +1,7 @@
 ---
 layout:	    post
 title:      "吴恩达 Deep Learning Course 1 笔记"
-subtitle:   "深度学习笔记 1"
+subtitle:   "Neural Networks and Deep Learning"
 date:       2017-08-21
 author:     "kissg"
 header-img: "img/2017-08-21-andrew_ng_dl_course1_note/cover.jpg"
