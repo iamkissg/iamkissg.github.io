@@ -6,6 +6,7 @@ date:       2017-07-23
 author:     "kissg"
 header-img: "img/2017-07-23-gradient-descent/cover.jpg"
 comments:    true
+mathjax:     true
 tags:
     - ML
 ---
