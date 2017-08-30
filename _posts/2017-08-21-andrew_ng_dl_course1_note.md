@@ -13,8 +13,6 @@ tags:
     - Note
 ---
 
-## Course 1: Neural Network and Deep Learning
-
 ### week 1: Introduction to Deep Learning
 
 * 机器学习的数据分为: _结构化数据 (structured data)_ 与 _非结构化数据(unstructured data)_. 非结构化数据包括: 音频, 图片, 文本等
@@ -54,8 +52,17 @@ tags:
 * `激活函数 activation function` 的必要性: 如果没有激活函数, 或令 $$g(z)=z$$, 无论神经网络规模变得多大, 训练得到的模型都可以表示为一个线性模型: $$w'x + b$$, 就无法学习复杂的特征.
 * simoid func 的微分: $$g'(z) = g(z)(1 - g(z))$$
 * tanh func 的微分: $$g'(z) = 1 - g(z)^2$$
-* relu func 的微分: $$g'(z) = 0 if z lt 0; 1 if z ge 0$$ (lt: less than; ge: greater or equal)
-* leaky relu func 的微分: $$g'(z) = k if z lt 0; 1 if z ge 0$$
+* relu func 的微分: g'(z)=
+\begin{cases}
+0, & \text{z \lt 0}\\
+1, & \text{z \ge 0}
+\end{cases}
+* leaky relu func 的微分:g'(z)=
+\begin{cases}
+k, & \text{z \lt 0}\\
+1, & \text{z \ge 0}
+\end{cases}
+
 * `随机初始化的必要性`: 初始化权值为 0, 将引入`对称问题 symmetry problem`. 后果是: 第一隐层的每个神经元进行相同的计算, 输出同一结果, 以致于经过多次迭代, 第一隐层的神经元计算结果仍然相同.
 
 ### week 4: Deep Neural Networks
@@ -66,13 +73,13 @@ tags:
 
 ![/img/2017-08-21-andrew_ng_dl_course1_note/dimensions_of_za.png](/img/2017-08-21-andrew_ng_dl_course1_note/dimensions_of_za.png)
 
-* 深度神经网络更关注隐层的数量, 而不是神经元的数量. L 层的_小型_深度神经网络可能比拥有大量隐层单元的浅度网络, 拥有更好的性能. 例如下图所示的例子, 要计算 n 个特征的异或, 深度神经网络时间复杂度为 O(log(n)), 而单隐层神经网络, 时间复杂度为 O(2^n).
+* 深度神经网络更关注隐层的数量, 而不是神经元的数量. L 层的**小型**深度神经网络可能比拥有大量隐层单元的浅度网络, 拥有更好的性能. 例如下图所示的例子, 要计算 n 个特征的异或, 深度神经网络时间复杂度为 $$O(\log{n})$$, 而单隐层神经网络, 时间复杂度为 $$O(2^n)$$.
 
 ![/img/2017-08-21-andrew_ng_dl_course1_note/circuit-theory_deep-learning.png](/img/2017-08-21-andrew_ng_dl_course1_note/circuit-theory_deep-learning.png)
 
 * 深度神经网络, 从第一隐层到输出层, 逐层学习更复杂的特征, 比如人脸识别 (语音识别), 第一隐层用于学习面部的线条 (低级音频特征), 第二层用于学习五官特征 (音素, phoneme), 第三层用于学习面部整体特征 (单词, 词组, 句子).
 
-* 第 l 层的前向传播计算, 输入 a[l-1], 输出 a[l], 并缓存 z[l], w[l], b[l] (用于反向传播); 第 l 层的反向传播计算, 输入 da[l], 输出 da[l-1], dW[l], db[l]
+* 第 l 层的前向传播计算, 输入 $$a^[l-1]$$, 输出 $$a^[l]$$, 并缓存 $$z^[l]$$, $$w^[l]$$, $$b^[l]$$ (用于反向传播); 第 l 层的反向传播计算, 输入 $$da^[l]$$, 输出 $$da^[l-1]$$, $$dW^[l]$$, $$db[l]$$
 
 ![/img/2017-08-21-andrew_ng_dl_course1_note/forwardprop-backprop_kiank.png](/img/2017-08-21-andrew_ng_dl_course1_note/forwardprop-backprop_kiank.png)
 
