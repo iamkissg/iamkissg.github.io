@@ -6,6 +6,7 @@ date:       2017-08-22
 author:     "kissg"
 header-img: "img/2017-08-22-andrew_ng_dl_course2_note/cover.jpg"
 comments:    true
+mathjax:     true
 tags:
     - Deep Learning
     - Machine Learning
