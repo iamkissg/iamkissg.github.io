@@ -1,6 +1,21 @@
-# Course 3
+---
+layout:	    post
+title:      "吴恩达深度学习第三课笔记"
+subtitle:   "Structuring Machine Learning Projects"
+date:       2017-08-23
+author:     "kissg"
+header-img: "img/2017-08-23-andrew_ng_dl_course3_note/cover.jpg"
+comments:    true
+mathjax:     true
+tags:
+    - Deep Learning
+    - Machine Learning
+    - Note
+---
 
-## week1: Machine Learning Strategy 1
+## Course 3
+
+### week1: Machine Learning Strategy 1
 
 * 训练时可采取的一些机器学习策略罗列:
     - 收集更多数据
@@ -62,7 +77,7 @@
     - 正则化 (L2, dropout, 数据增强)
     - 调整神经网络架构/超参数搜索
 
-## week2: Machine Learning Strategy 2
+### week2: Machine Learning Strategy 2
 
 * 深度学习对于训练集的随机误差有相当强的鲁棒性
 * `误差分析 Error Analysis` 就是分析错误, 找出原因. 一种方法是表格分析法: 比如分类任务, 选择一定数量的误分类样本, 列出一系列误分类的原因, 然后统计分析, 找出主要原因, 或定位易解决的原因. 下图是表格分析的一个例子
