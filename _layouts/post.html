@@ -8,6 +8,7 @@ layout: default
 
 <head>
     {% include mathjax.html %}
+    {% include disqus.html %}
 </head>
 
 <!-- Post Header -->
@@ -147,10 +148,8 @@ layout: default
     </div>
 </article>
 
-{% include disqus.html %}
 
 {% if site.disqus_username %}
-    {% include disqus.html %}
 <!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
 <script type="text/javascript">
     /* * * CONFIGURATION VARIABLES * * */
