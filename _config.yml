@@ -2,7 +2,7 @@
 title: kissg Blog
 SEOTitle: kissg Blog | 菜鸟成长日记
 header-img: img/home-bg.jpg
-email: enginechen07@gmail.com 
+email: enginechen07@gmail.com
 description: "这是@kissg赵喧典的个人博客."
 keyword: "赵喧典, Engine, kissg, kissg Blog, 赵喧典的博客,菜鸟成长日记, 个人网站"
 url: "http://kissg.me"              # your host, for absolute URL
@@ -33,6 +33,10 @@ anchorjs: true                          # if you want to customize anchor. check
 # from PR#40, to support local preview for Jekyll 3.0
 gems: [jekyll-paginate]
 
+
+# Atom feed
+plugins:
+    - jekyll-feed
 
 
 # Markdown settings
