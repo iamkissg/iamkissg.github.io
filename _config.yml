@@ -3,7 +3,7 @@ title: kissg Blog
 SEOTitle: kissg Blog | 菜鸟成长日记
 header-img: img/home-bg.jpg
 email: enginechen07@gmail.com
-description: "这是@kissg赵喧典的个人博客."
+description: "This is kissg Blog."
 keyword: "赵喧典, Engine, kissg, kissg Blog, 赵喧典的博客,菜鸟成长日记, 个人网站"
 url: "http://kissg.me"              # your host, for absolute URL
 baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
@@ -11,7 +11,7 @@ baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
 
 
 # SNS settings
-RSS: false
+RSS: true
 weibo_username:     kissg07
 zhihu_username:     chen-wen-fan-79
 github_username:    Engine-Treasure
@@ -35,8 +35,8 @@ gems: [jekyll-paginate]
 
 
 # Atom feed
-plugins:
-    - jekyll-feed
+# plugins:
+#     - jekyll-feed
 
 
 # Markdown settings
