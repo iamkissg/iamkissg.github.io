@@ -1,7 +1,7 @@
 ---
 layout:	    post
-title:      "[译记]Word Embeddings"
-subtitle:   "从 1 到 2"
+title:      "[译记]Word Embeddings 2"
+subtitle:   "Softmax s"
 date:       2017-12-25
 author:     "kissg"
 header-img: "img/2017-12-25-word_embeddings_0to1/cover2.jpg"
@@ -13,7 +13,7 @@ tags:
     - note
 ---
 
-## Softmax in Word Embeddings
+> 本文与上一篇的笔记师出同源, 主要讲 Softmax, 单独拎出来.
 
 * softmax 的高计算开销在于需要计算 hidden state ***h*** 和所有单词的 output word embeddings 的内积, 求和作为分母.
 
