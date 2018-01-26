@@ -1,10 +1,10 @@
 ---
 ayout:	    post
-title:      "论文笔记"
+title:      "论文笔记 4"
 subtitle:   "Word Embeddings 炒冷饭"
 date:       2018-01-26
 author:     "kissg"
-header-img: "/img/2018-01-26-word_embeddings_3/cover.jpg"
+header-img: "img/2018-01-26-word_embeddings_3/cover.jpg"
 comments:    true
 mathjax:     true
 tags:
@@ -80,7 +80,7 @@ Subsampling 带来的另一个好处是, 使得单词的 context 比实际大. �
 
 所有学习 word representations 的无监督方法, 主要利用了 statistics of word occurences. 但是问题是, 词意是如何从统计中涌现出来的, word vectors 是如何表示词意的? 对此, 本文分享了作者的理解, 提出了 Global Vectors `GloVe` 模型, 即用模型直接捕获语料的全局统计量.
 
-> 符号说明: 用$X$表示单词间同时出现次数的矩阵, $X_{ij}$表示词 j 出现在词 i 上下文中的次数, $X_i=\Sigma_k X_{ik}$表示出现在词 i 的上下文中单词总数. $P_{ij}=P(j|i)=X_{ij}/X_i$表示词 j 出现在词 i 上下文的概率.
+> 符号说明: 用$X$表示单词间同时出现次数的矩阵, $X_{ij}$表示词 j 出现在词 i 上下文中的次数, $X_i=\Sigma_k X_{ik}$表示出现在词 i 的上下文中单词总数. $P_{ij}=P(j\|i)=X_{ij}/X_i$表示词 j 出现在词 i 上下文的概率.
 
 作者们的想法是这样的: 单词间的关系可通过它们与不同`probe words`同时出现的比例来估计. 要估计 ice 与 steam 的关系, 令 i=ice, j=steam, k 为 probe word. 首先取 k=solid, $P_{ik}/P_{jk}$会是一个大的值 (solid 常出现在 ice 上下文, 但几乎不出现在 steam 上下文, 下同); 而取 k=gas, $P_{ik}/P_{jk}$会是一个很小的值. 而取 k=water 或 k=fashion 时, $P_{ik}/P_{jk}$会是一个接近 1 的值 (water 与 ice, steam 都相关, 出现在它们上下文中词频差不多; fashion 与 ice, steam 都不怎么相关). 如此一来, $P_{ik}/P_{jk}$就能比较好地区分与两个词各自相关的词 (solid 和 gas) 和都相关或都不相关的词 (water 和 fashion), 同时也能区分各自相关的词.
 
