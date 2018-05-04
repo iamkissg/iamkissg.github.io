@@ -1,5 +1,5 @@
 ---
-ayout:	    post
+layout:	    post
 title:      "papernotes"
 subtitle:   "Neural Machine Translation by Jointly Learning to Align and Translate"
 date:       2018-05-04
