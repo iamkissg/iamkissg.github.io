@@ -24,7 +24,7 @@ tags:
 * 指出传统 encoder-decoder 框架的不足之处. 随着序列的增长, 将输入的所有信息压缩进一个固定长度的向量越来越困难, 模型性能将急剧下降.
 * 引入了 aligment model, decoder 每生成一个词的翻译, 都会对输入序列进行搜索, 找出与当前翻译最相关的部分; 结合之前的输出与查询结果, 进行更好的翻译.
 * 给出了 alignment model 的一个范式:
-    * 根据之前的输出和对齐结果生成下一个词: $p(y_i|y_1, \dots, y_{i-1}, x)=g(y_{i-1}, s_i, c_i)$; $s_i$, $c_i$ 分别是 decoder RNN 第 i 时刻的 state 与查询得的 context.
+    * 根据之前的输出和对齐结果生成下一个词: $p(y_i\|y_1, \dots, y_{i-1}, x)=g(y_{i-1}, s_i, c_i)$; $s_i$, $c_i$ 分别是 decoder RNN 第 i 时刻的 state 与查询得的 context.
     * 根据之前的输出和 context 计算当前状态: $s_i=f(s_{i-1}, y_{i-1}, c_i)$;
     * context vector 是加权求和的结果: $c_i=\Sigma_{j=1}^{T_x} \alpha_{ij}h_j$; $h_j$ 是 endoder 在第 i 时刻的状态, $\alpha_{ij}$ 是对应的权值.
     * 使用 decoder 的上一个状态计算和 encoder 某时刻状态的相似度, 即对齐程度: $e_{ij}=a(s_{i-1}, h_j)$; (按照原文的表示, 此处为小写的 A)
@@ -36,6 +36,6 @@ tags:
 
 #### Notes/Questions
 
-* 从概率的角度看, translation 可以理解为 conditional language modeling. 即找出最优的翻译, 最大化 $p(target|source)$ 的概率.
+* 从概率的角度看, translation 可以理解为 conditional language modeling. 即找出最优的翻译, 最大化 $p(target\|source)$ 的概率.
 * 将 $s_i＄ 和 $y_i$ 分离开, 视觉上和数学上似乎都不太美.
 * 给出了 Attention 的一个范式, 但计算方法上还比较粗糙, 这也为后面的各种论文提供了发挥空间.
