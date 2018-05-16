@@ -1,6 +1,6 @@
 ---
 layout:	    post
-title:      "papernotes"
+title:      "Papernotes"
 subtitle:   "Neural Machine Translation by Jointly Learning to Align and Translate"
 date:       2018-05-04
 author:     "kissg"

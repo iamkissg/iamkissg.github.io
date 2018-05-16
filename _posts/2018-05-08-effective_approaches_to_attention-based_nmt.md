@@ -1,6 +1,6 @@
 ---
 layout:	    post
-title:      "papernotes"
+title:      "Papernotes"
 subtitle:   "Effective Approaches to Attention-based Neural Machine Translation"
 date:       2018-05-08
 author:     "kissg"
