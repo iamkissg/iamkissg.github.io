@@ -4,7 +4,7 @@ title:      "【Papernotes】Applying Deep Learning to Airbnb Search"
 subtitle:   ""
 date:       2020-06-07
 author:     "kissg"
-header-img: "img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/cover.jpg"
+header-img: "img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/cover.jpg"
 comments:    true
 mathjax:     true
 tags:
@@ -29,7 +29,7 @@ tags:
 
 按照他们的说法，将模型迁移到深度模型并非一蹴而就的，而是一系列迭代优化的最终结果。截止 18 年 6 月，主要有四个阶段性的成果，模型性能的提升如下所示。
 
-![Airbnb Performance Gains](img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/airbnb_performance_gains.png)
+![Airbnb Performance Gains](/img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/airbnb_performance_gains.png)
 
 ### Simple NN
 
@@ -60,7 +60,7 @@ NN 逐渐成为了 Airbnb 提供搜索排名的主要模型。不过依然有其
 
 受混合模型的启发，他们将 FM 输出的最终预测作为 NN 的一项输入，并将 GBDT 中每棵决策树中最终被激活的叶节点的索引视为类别特征输入 NN，构造了一个搜索排名的混合模型。模型结构如下所示。
 
-![NN with GBDT tree nodes and FM prediction as features](img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/airbnb_nn_with_gbdt_and_fm.png)
+![NN with GBDT tree nodes and FM prediction as features](/img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/airbnb_nn_with_gbdt_and_fm.png)
 
 ## Deep NN
 
@@ -100,7 +100,7 @@ Airbnb 的简单神经网络经过 3 次进化之后，在2018年6月，终于�
 
 观察到“房源详情页的浏览时长与预订之间具有相关性”，他们提出了同时预测预订概率和浏览时长的多任务学习方式，模型结构如下所示。
 
-![Multi-Task Learning](img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/airbnb_multi_task_learning.png)
+![Multi-Task Learning](/img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/airbnb_multi_task_learning.png)
 
 可以看到，在这个模型中，他们依然使用了房源 ID 嵌入的方式。实际上，使用多任务学习框架的目的之一就是为了处理房源 ID 过拟合的问题。
 
@@ -141,7 +141,7 @@ Airbnb 的简单神经网络经过 3 次进化之后，在2018年6月，终于�
 
 第二，平滑的分布能增强模型的泛化能力。DNN 的泛化能力为什么这么强，一直是学界研究的一个热点。对此，Airbnb 也有自己的发现与思考。他们通过绘制 DNN 每一层输出的分布（如下所示），发现这些分布在逐层变得更加平滑。
 
-![Distributions from disfferent layers](img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/airbnb_distributions.png)
+![Distributions from disfferent layers](/img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/airbnb_distributions.png)
 
 据此，他们给出了对 DNN 泛化能力的一个解释：当特征很多时，特征值的组合空间几乎无限大，而训练只能覆盖到一部分的特征组合。此时，低层输出的平滑分布确保了高层能够为未见过的数据正确地插值。
 
@@ -221,17 +221,17 @@ Airbnb 通过以下方式尝试去理解单一特征对于 NN 的重要性。
 
 如下图所示，使用的模型对价格敏感，但对于评论数不太敏感。
 
-![Airbnb Topbot Analysis](img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/airbnb_topbot.png)
+![Airbnb Topbot Analysis](/img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/airbnb_topbot.png)
 
 ## 结语
 
 最后，作者们用下图描述了他们引入深度学习的心路历程：从准备大干一场的极度乐观，下降到失望的谷底，再到度过最黑的夜重新踏上征途。
 
-![Anatomy of a journey](img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/airbnb_journey.png)
+![Anatomy of a journey](/img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/airbnb_journey.png)
 
 >  这一过程，同样符合 Gartner 曲线[^6]。
 >
->  ![Gartner Curve](img/2020-06-07_papernotes_applying_deep_learning_to_airbnb_search/gartner_curve.png)
+>  ![Gartner Curve](/img/2020-06-07-papernotes_applying_deep_learning_to_airbnb_search/gartner_curve.png)
 
 ## 参考资料
 
