@@ -102,7 +102,7 @@ arXiv，一个著名的论文预印本发布平台，它的统计显示：
 
 ### 增量阅读
 
-![Overwhelming Papers](/img/2020-06-21-do_not_be_afraid_of_the_overwhelming_papers/overwhelming_papers.jpg)
+![Papers blowing in the wind](/img/2020-06-21-do_not_be_afraid_of_the_overwhelming_papers/papers_blowing_in_the_wind.jpg)
 
 你开始做研究了。然而论文们不会因此停止产生，它还会源源不断、源源不断地产生，直到把你淹没。
 
