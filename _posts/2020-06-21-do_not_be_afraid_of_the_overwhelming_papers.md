@@ -4,7 +4,7 @@ title:      "存量阅读+增量阅读，助你在学术的海洋上乘风破浪
 subtitle:   "研究生老学长给学弟学妹的一份临别赠礼"
 date:       2020-06-21
 author:     "kissg"
-header-img: "img/2020-06-21-do_not_be_afrad_of_the_overwhelming_papers/cover.jpg"
+header-img: "img/2020-06-21-do_not_be_afraid_of_the_overwhelming_papers/cover.jpg"
 comments:    true
 mathjax:     true
 tags:
@@ -24,14 +24,14 @@ tags:
 
 微软学术的统计[^1]显示，自 2013 年以来，所有学科合起来，年新增出版物（包括图书、期刊/会议论文、专利等）每年都超过了一千万。
 
-![Microsoft Academic New Publications per Year](/img/2020-06-21-do_not_be_afrad_of_the_overwhelming_papers/ms_academic_new_publications_per_year.png)
+![Microsoft Academic New Publications per Year](/img/2020-06-21-do_not_be_afraid_of_the_overwhelming_papers/ms_academic_new_publications_per_year.png)
 
 arXiv，一个著名的论文预印本发布平台，它的统计显示：
 
 1. 2019 年的年新增论文数已经超过了 15 万，具体为 155,866 篇，月均 12,989 篇（左图[^2]）；
 2. 2020 年 4 月，月新增论文数已经超过了 15,000 篇，日均 500 篇（右图[^3]）。
 
-![arXiv New Submissions per Year](/img/2020-06-21-do_not_be_afrad_of_the_overwhelming_papers/arxiv_new_submissions_year_month.jpg)
+![arXiv New Submissions per Year](/img/2020-06-21-do_not_be_afraid_of_the_overwhelming_papers/arxiv_new_submissions_year_month.jpg)
 
 如果所有学科的出版物与多学科论文的激增并没有让你产生被淹没的感觉，那么你可以留意下自己所在领域的顶级期刊或者会议的投稿量与录用论文数的逐年变化。
 
@@ -40,7 +40,7 @@ arXiv，一个著名的论文预印本发布平台，它的统计显示：
 1. 许多会议 2019 年的投稿量相对于 2018 年都出现了激增，相对于 2017 年都翻了一倍有余（左图[^4]）；
 2. 无论录用率是保持不变还是下调了，随着投稿量的激增，会议录用的论文数同样在激增。对于一些会议，录用论文数也是两年翻一倍（右图）。
 
-![2014-2019 Top Conferences Received and Accepted Papers](/img/2020-06-21-do_not_be_afrad_of_the_overwhelming_papers/14-19_top_conferences_received_accepted.jpg)
+![2014-2019 Top Conferences Received and Accepted Papers](/img/2020-06-21-do_not_be_afraid_of_the_overwhelming_papers/14-19_top_conferences_received_accepted.jpg)
 
 > 我不清楚其他学科或者计算机的其他领域是什么情况。但是 AI 是一个重会议轻期刊的领域，相对而言的轻和重。它近年来得以快速发展，其中一个原因就是会议论文的短平快，极大地促进了学术交流。
 
@@ -102,7 +102,7 @@ arXiv，一个著名的论文预印本发布平台，它的统计显示：
 
 ### 增量阅读
 
-![Overwhelming Papers](/img/2020-06-21-do_not_be_afrad_of_the_overwhelming_papers/overwhelming_papers.jpg)
+![Overwhelming Papers](/img/2020-06-21-do_not_be_afraid_of_the_overwhelming_papers/overwhelming_papers.jpg)
 
 你开始做研究了。然而论文们不会因此停止产生，它还会源源不断、源源不断地产生，直到把你淹没。
 
