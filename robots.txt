@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://iamkissg.github.io/sitemap.xml
