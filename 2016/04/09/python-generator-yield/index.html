@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><meta name="description" content="从Iterable,Iterator知Generator,Yield"><link rel="canonical" href="https://iamkissg.github.io/2016/04/09/python-generator-yield/"><link rel="alternate" type="application/rss+xml" href="/feed.xml"><title>Python之生成器详解</title><style>:root{color-scheme:light;font-family:ui-serif,Georgia,Noto Serif SC,serif}body{color:#25211d;background:#fbf8f2;margin:0;line-height:1.75}header,main,footer{width:min(760px,100% - 2rem);margin-inline:auto}header{border-bottom:1px solid #ded7cc;padding-block:2rem 1rem}nav{gap:1rem;display:flex}main{padding-block:2rem 4rem}footer{color:#6b625a;border-top:1px solid #ded7cc;padding-block:1.5rem 3rem}a{color:#855a35;text-underline-offset:.2em}img,video{max-width:100%;height:auto}pre{background:#efe9df;padding:1rem;overflow-x:auto}blockquote{border-left:.2rem solid #b98a5f;margin-inline:0;padding-left:1rem}.entries{gap:1.25rem;padding:0;list-style:none;display:grid}.entries article{background:#fff;border:1px solid #e6ded3;border-radius:.5rem;padding:1rem 1.25rem}.meta{color:#766c63;font-size:.9rem}
+</style></head><body><header><nav aria-label="主导航"><a href="/">iamkissg</a><a href="/tavern-letters/">酒馆来信</a><a href="/archive/">文章归档</a><a href="/feed.xml">RSS</a></nav></header><main data-pagefind-body><article><header><h1>Python之生成器详解</h1><p class="meta"><time datetime="2016-04-09T00:00:00.000Z">2016/4/9</time></p></header><div data-legacy-body><blockquote>
+<p>一叶落知天下秋,知秋更可知叶落.</p>
+</blockquote>
+<h2 id="引文">引文</h2>
+<p>编程派前几天推送了一篇文章,叫<a href="http://codingpy.com/article/python-progression-path-simple-version/">“Python学习进阶路线(简版)”</a>,<code>生成器(generator)</code>赫然在列.可是我不太会.不会怎么办?学咯.于是上网看了不少教程,又看了官方文档,学到了不少知识.在此,权且做个学习笔记,也与大家分享一下.</p>
+<h2 id="正文">正文</h2>
+<p>要理解<code>generator</code>,我们先从<code>迭代(iteration)</code>与<code>迭代器(iterator)</code>讲起.当然,本文的重点是<code>generator</code>,<code>iteration</code>与<code>iterator</code>的知识将点到即止.<a href="#generator">直接看<code>generator</code></a></p>
+<blockquote>
+<p>迭代是重复反馈过程的活动，其目的通常是为了接近并到达所需的目标或结果。每一次对过程的重复被称为一次“迭代”，而每一次迭代得到的结果会被用来作为下一次迭代的初始值。</p>
+</blockquote>
+<p>以上是<a href="http://zh.wikipedia.org/wiki/%E8%BF%AD%E4%BB%A3">维基百科</a>对迭代的定义.在python中,迭代通常是通过<code>for ... in ...</code>来完成的,而且只要是<code>可迭代对象(iterable)</code>,都能进行迭代.这里简单讲下<code>iterable</code>与<code>iterator</code>:</p>
+<blockquote>
+<p><code>iterable</code>是实现了<code>__iter__()</code>方法的对象.更确切的说,是<code>container.__iter__()</code>方法,该方法返回的是的一个<code>iterator</code>对象,因此<code>iterable</code>是你可以从其获得<code>iterator</code>的对象.~~使用<code>iterable</code>时,将一次性返回所有结果,都存放在内存中,并且这些值都能重复使用.~~以上说法严重错误!对于<code>iterable</code>,我们该关注的是,它是一个能一次返回一个成员的对象(iterable is an object capable of returning its members one at a time),一些<code>iterable</code>将所有值都存储在内存中,比如<code>list</code>,而另一些并不是这样,比如我们下面将讲到的<code>iterator</code>.</p>
+</blockquote>
+<blockquote>
+<p><code>iterator</code>是实现了<code>iterator.__iter__()</code>和<code>iterator.__next__()</code>方法的对象.<code>iterator.__iter__()</code>方法返回的是<code>iterator</code>对象本身.根据官方的说法,正是这个方法,实现了<code>for ... in ...</code>语句.而<code>iterator.__next__()</code>是<code>iterator</code>区别于<code>iterable</code>的关键了,它允许我们<em><strong>显式</strong></em>地获取一个元素.当调用<code>next()</code>方法时,实际上产生了2个操作:</p>
+</blockquote>
+<ol>
+<li>更新<code>iterator</code>状态,令其指向后一项,以便下一次调用</li>
+<li>返回当前结果</li>
+</ol>
+<p>如果你学过<code>C++</code>,它其实跟指针的概念很像(如果你还学过链表的话,或许能更好地理解).</p>
+<p>正是<code>__next__()</code>,使得<code>iterator</code>能在每次被调用时,返回一个单一的值(有些教程里,称为一边循环,一边计算,我觉得这个说法不是太准确.但如果这样的说法有助于你的理解,我建议你就这样记),从而极大的节省了内存资源.另一点需要格外注意的是,<code>iterator</code>是消耗型的,即每一个值被使用过后,就消失了.因此,你可以将以上的操作2理解成<code>pop</code>.对<code>iterator</code>进行遍历之后,其就变成了一个空的容器了,但不等于<code>None</code>哦.因此,若要重复使用<code>iterator</code>,利用<code>list()</code>方法将其结果保存起来是一个不错的选择.</p>
+<p>我们通过代码来感受一下.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> from</span><span style="color:#E1E4E8"> collections </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> Iterable, Iterator</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> a </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">,</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">,</span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">]   </span><span style="color:#6A737D"># 众所周知,list是一个iterable</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> b </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> iter</span><span style="color:#E1E4E8">(a)   </span><span style="color:#6A737D"># 通过iter()方法,得到iterator,iter()实际上调用了__iter__(),此后不再多说</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> isinstance</span><span style="color:#E1E4E8">(a, Iterable)</span></span>
+<span class="line"><span style="color:#79B8FF">True</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> isinstance</span><span style="color:#E1E4E8">(a, Iterator)</span></span>
+<span class="line"><span style="color:#79B8FF">False</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> isinstance</span><span style="color:#E1E4E8">(b, Iterable)</span></span>
+<span class="line"><span style="color:#79B8FF">True</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> isinstance</span><span style="color:#E1E4E8">(b, Iterator)</span></span>
+<span class="line"><span style="color:#79B8FF">True</span></span>
+<span class="line"><span style="color:#6A737D"># 可见,itertor一定是iterable,但iterable不一定是itertor</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># iterator是消耗型的,用一次少一次.对iterator进行变量,iterator就空了!</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> c </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> list</span><span style="color:#E1E4E8">(b)</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> c</span></span>
+<span class="line"><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> d </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> list</span><span style="color:#E1E4E8">(b)</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> d</span></span>
+<span class="line"><span style="color:#E1E4E8">[]</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 空的iterator并不等于None.</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> if</span><span style="color:#E1E4E8"> b:</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">   print</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span></span>
+<span class="line"><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> if</span><span style="color:#E1E4E8"> b </span><span style="color:#F97583">==</span><span style="color:#79B8FF"> None</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">   print</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 再来感受一下next()</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> e </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> iter</span><span style="color:#E1E4E8">(a)</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(e)     </span><span style="color:#6A737D">#next()实际调用了__next__()方法,此后不再多说</span></span>
+<span class="line"><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(e)</span></span>
+<span class="line"><span style="color:#79B8FF">2</span></span></code></pre>
+<p>既然提到了<code>for ... in ...</code>语句,我们再来简单讲下其工作原理吧,或许能帮助理解以上所讲的内容.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> x </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> for</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> x:</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">     ...</span></span></code></pre>
+<p>我们对一个<code>iterable</code>用<code>for ... in ...</code>进行迭代时,实际是先通过调用<code>iter()</code>方法得到一个<code>iterator</code>,假设叫做X.然后循环地调用X的<code>next()</code>方法取得每一次的值,直到iterator为空,返回的<code>StopIteration</code>作为循环结束的标志.<code>for ... in ... </code>会自动处理<code>StopIteration</code>异常,从而避免了抛出异常而使程序中断.如图所示</p>
+<p><img src="/img/python-generator-yield/for-in.png" alt="what-really-happens-in-for-in-statement"></p>
+<p id = "generator"></p>
+<p>磨刀不误砍柴工,有了前面的知识,我们再来理解<code>generator</code>与<code>yield</code>将会事半功倍.</p>
+<p>首先先理清几个概念:</p>
+<blockquote>
+<p><code>generator</code>: A function which returns a generator iterator. It looks like a normal function except that it contains yield expressions for producing a series of values usable in a for-loop or that can be retrieved one at a time with the next() function.</p>
+</blockquote>
+<blockquote>
+<p><code>generator iterator</code>: An object created by a generator funcion.</p>
+</blockquote>
+<blockquote>
+<p><code>generator expression</code>: An expression that returns an iterator.</p>
+</blockquote>
+<p>以上的定义均来自<a href="https://docs.python.org/3/glossary.html#term-generator">python官方文档</a>.可见,我们常说的<code>生成器</code>,就是带有<code>yield</code>的函数,而<code>generator iterator</code>则是<code>generator function</code>的返回值,即一个<code>generator</code>对象,而形如<code>(elem for elem in [1, 2, 3])</code>的表达式,称为<code>generator expression</code>,实际使用与<code>generator</code>无异.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> a </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> (elem </span><span style="color:#F97583">for</span><span style="color:#E1E4E8"> elem </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> a</span></span>
+<span class="line"><span style="color:#F97583">&lt;</span><span style="color:#E1E4E8">generator </span><span style="color:#79B8FF">object</span><span style="color:#F97583"> &lt;</span><span style="color:#E1E4E8">genexpr</span><span style="color:#F97583">&gt;</span><span style="color:#E1E4E8"> at </span><span style="color:#F97583">0x</span><span style="color:#79B8FF">7f0d23888048</span><span style="color:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> def</span><span style="color:#B392F0"> fib</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#E1E4E8">     a, b </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">     while</span><span style="color:#79B8FF"> True</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">         yield</span><span style="color:#E1E4E8"> b</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#E1E4E8">         a, b </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> b, a </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> b</span></span>
+<span class="line"><span style="color:#79B8FF">...</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> fib</span></span>
+<span class="line"><span style="color:#F97583">&lt;</span><span style="color:#E1E4E8">function fib at </span><span style="color:#F97583">0x</span><span style="color:#79B8FF">7f0d238796a8</span><span style="color:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> b </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> fib()</span></span>
+<span class="line"><span style="color:#F97583">&lt;</span><span style="color:#E1E4E8">generator </span><span style="color:#79B8FF">object</span><span style="color:#E1E4E8"> fib at </span><span style="color:#F97583">0x</span><span style="color:#79B8FF">7f0d20bbfea0</span><span style="color:#F97583">&gt;</span></span></code></pre>
+<p>其实说白了,<code>generator</code>就是<code>iterator</code>的一种,以更优雅的方式实现的<code>iterator</code>.官方的说法是:</p>
+<blockquote>
+<p>Python’s generators provide a convenient way to implement the iterator protocol.</p>
+</blockquote>
+<p>你完全可以像使用<code>iterator</code>一样使用<code>generator</code>,当然除了定义.定义一个<code>iterator</code>,你需要分别实现<code>__iter__()</code>方法和<code>__next__()</code>方法,但<code>generator</code>只需要一个小小的<code>yield</code>(好吧,<code>generator expression</code>的使用比较简单,就不展开讲了.)</p>
+<p>前文讲到<code>iterator</code>通过<code>__next__()</code>方法实现了每次调用,返回一个单一值的功能.而<code>yield</code>就是实现<code>generator</code>的<code>__next__()</code>方法的关键!先来看一个最简单的例子:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> def</span><span style="color:#B392F0"> g</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">     print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"1 is"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">     yield</span><span style="color:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">     print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"2 is"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">     yield</span><span style="color:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">     print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"3 is"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">     yield</span><span style="color:#79B8FF"> 3</span></span>
+<span class="line"><span style="color:#79B8FF">...</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> z </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> g()</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> z</span></span>
+<span class="line"><span style="color:#F97583">&lt;</span><span style="color:#E1E4E8">generator </span><span style="color:#79B8FF">object</span><span style="color:#E1E4E8"> g at </span><span style="color:#F97583">0x</span><span style="color:#79B8FF">7f0d2387c8b8</span><span style="color:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(z)</span></span>
+<span class="line"><span style="color:#79B8FF">1</span><span style="color:#F97583"> is</span></span>
+<span class="line"><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(z)</span></span>
+<span class="line"><span style="color:#79B8FF">2</span><span style="color:#F97583"> is</span></span>
+<span class="line"><span style="color:#79B8FF">2</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(z)</span></span>
+<span class="line"><span style="color:#79B8FF">3</span><span style="color:#F97583"> is</span></span>
+<span class="line"><span style="color:#79B8FF">3</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(z)</span></span>
+<span class="line"><span style="color:#E1E4E8">Traceback (most recent call last):</span></span>
+<span class="line"><span style="color:#E1E4E8">  File </span><span style="color:#9ECBFF">"&lt;stdin&gt;"</span><span style="color:#E1E4E8">, line </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">in</span><span style="color:#F97583"> &lt;</span><span style="color:#E1E4E8">module</span><span style="color:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#79B8FF">StopIteration</span></span></code></pre>
+<p>第一次调用<code>next()</code>方法时,函数似乎执行到<code>yield 1</code>,就暂停了.然后再次调用<code>next()</code>时,函数从<code>yield 1</code>之后开始执行的,并再次暂停.第三次调用<code>next()</code>,从第二次暂停的地方开始执行.第四次,抛出<code>StopIteration</code>异常.</p>
+<p>事实上,<code>generator</code>确实在遇到<code>yield</code>之后暂停了,确切点说,是先返回了<code>yield</code>表达式的值,再暂停的.当再次调用<code>next()</code>时,从先前暂停的地方开始执行,直到遇到下一个<code>yield</code>.这与上文介绍的对<code>iterator</code>调用<code>next()</code>方法,执行原理一般无二.</p>
+<p>有些教程里说<code>generator</code>保存的是算法,而我觉得用<code>中断服务子程序</code>来描述<code>generator</code>或许能更好理解,这样你就能将<code>yield</code>理解成一个中断服务子程序的<code>断点</code>,没错,是中断服务子程序的断点.我们每次对一个<code>generator</code>对象调用<code>next()</code>时,函数内部代码执行到“断点”<code>yield</code>,然后返回这一部分的结果,并保存上下文环境,“中断”返回.</p>
+<p>怎么样,是不是瞬间就明白了<code>yield</code>的用法?</p>
+<p>我们再来看另一段代码.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> def</span><span style="color:#B392F0"> gen</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">     while</span><span style="color:#79B8FF"> True</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#E1E4E8">         s </span><span style="color:#F97583">=</span><span style="color:#F97583"> yield</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">         print</span><span style="color:#E1E4E8">(s)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> g </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> gen()</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> g.send(</span><span style="color:#9ECBFF">"kissg"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">Traceback (most recent call last):</span></span>
+<span class="line"><span style="color:#E1E4E8">  File </span><span style="color:#9ECBFF">"&lt;stdin&gt;"</span><span style="color:#E1E4E8">, line </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">in</span><span style="color:#F97583"> &lt;</span><span style="color:#E1E4E8">module</span><span style="color:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#79B8FF">TypeError</span><span style="color:#E1E4E8">: can</span><span style="color:#9ECBFF">'t send non-None value to a just-started generator</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(g)</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> g.send(</span><span style="color:#9ECBFF">"kissg"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">kissg</span></span></code></pre>
+<p>我正是看到这个形式的<code>generator</code>,懵了,才想要深入学习<code>generator</code>与<code>yield</code>的.结合以上的知识,我再告诉你,<code>generator</code>其实有第2种调用方法(恢复执行),即通过<code>send(value)</code>方法将<code>value</code>作为<code>yield</code>表达式的当前值,你可以用该值再对其他变量进行赋值,这一段代码就很好理解了.当我们调用<code>send(value)</code>方法时,<code>generator</code>正由于<code>yield</code>的缘故被暂停了.此时,<code>send(value)</code>方法传入的值作为<code>yield</code>表达式的值,函数中又将该值赋给了变量<code>s</code>,然后print函数打印<code>s</code>,循环再遇到<code>yield</code>,暂停返回.</p>
+<p>调用<code>send(value)</code>时要注意,要确保,<code>generator</code>是在<code>yield</code>处被暂停了,如此才能向<code>yield</code>表达式传值,否则将会报错(如上所示),可通过<code>next()</code>方法或<code>send(None)</code>使<code>generator</code>执行到<code>yield</code>.</p>
+<p>再来看一段<code>yield</code>更复杂的用法,或许能加深你对<code>generator</code>的<code>next()</code>与<code>send(value)</code>的理解.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#F97583"> def</span><span style="color:#B392F0"> echo</span><span style="color:#E1E4E8">(value</span><span style="color:#F97583">=</span><span style="color:#79B8FF">None</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">   while</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#E1E4E8">     value </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> (</span><span style="color:#F97583">yield</span><span style="color:#E1E4E8"> value)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#79B8FF">     print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"The value is"</span><span style="color:#E1E4E8">, value)</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#F97583">     if</span><span style="color:#E1E4E8"> value:</span></span>
+<span class="line"><span style="color:#79B8FF">...</span><span style="color:#E1E4E8">       value </span><span style="color:#F97583">+=</span><span style="color:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#79B8FF">...</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> g </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> echo(</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(g)</span></span>
+<span class="line"><span style="color:#79B8FF">1</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> g.send(</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">The value </span><span style="color:#F97583">is</span><span style="color:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#79B8FF">3</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#E1E4E8"> g.send(</span><span style="color:#79B8FF">5</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">The value </span><span style="color:#F97583">is</span><span style="color:#79B8FF"> 5</span></span>
+<span class="line"><span style="color:#79B8FF">6</span></span>
+<span class="line"><span style="color:#F97583">&gt;&gt;&gt;</span><span style="color:#79B8FF"> next</span><span style="color:#E1E4E8">(g)</span></span>
+<span class="line"><span style="color:#E1E4E8">The value </span><span style="color:#F97583">is</span><span style="color:#79B8FF"> None</span></span></code></pre>
+<p>上述代码既有<code>yield value</code>的形式,又有<code>value = yield</code>形式,看起来有点复杂.但以<code>yield</code>分离代码进行解读,就不太难了.第一次调用<code>next()</code>方法,执行到<code>yield value</code>表达式,保存上下文环境暂停返回<code>1</code>.第二次调用<code>send(value)</code>方法,从<code>value = yield</code>开始,打印,再次遇到<code>yield value</code>暂停返回.后续的调用<code>send(value)</code>或<code>next()</code>都不外如是.</p>
+<p>但是,这里就引出了另一个问题,<code>yield</code>作为一个暂停恢复的点,代码从<code>yield</code>处恢复,又在下一个<code>yield</code>处暂停.可见,在一次<code>next()</code>(非首次)或<code>send(value)</code>调用过程中,实际上存在<strong>2</strong>个<code>yield</code>,一个作为恢复点的<code>yield</code>与一个作为暂停点的<code>yield</code>.因此,也就有2个<code>yield</code>表达式.<code>send(value)</code>方法是将值传给<em>恢复点</em><code>yield</code>;调用<code>next()</code>表达式的值时,其<strong>恢复点</strong><code>yield</code>的值总是为<code>None</code>,而将<strong>暂停点</strong>的<code>yield</code>表达式的值返回.为方便记忆,你可以将此处的<strong>恢复点</strong>记作当前的(current),而将<strong>暂停点</strong>记作下一次的(next),这样就与<code>next()</code>方法匹配起来啦.</p>
+<p><code>generator</code>还实现了另外两个方法<code>throw(type[, value[, traceback]])</code>与<code>close()</code>.前者用于抛出异常,后者用于关闭<code>generator</code>.不过这2个方法似乎很少被直接用到,本文就不再多说了,有兴趣的同学请看<a href="https://docs.python.org/3/reference/expressions.html#generator.throw">这里</a></p>
+<h2 id="小结">小结</h2>
+<p><img src="/img/python-generator-yield/iterators-generators-iterables.png" alt="iterable-iterator-generator"></p>
+<ol>
+<li>
+<p>可迭代对象(Iterable)是实现了<code>__iter__()</code>方法的对象,通过调用<code>iter()</code>方法可以获得一个迭代器(Iterator)</p>
+</li>
+<li>
+<p>迭代器(Iterator)是实现了<code>__iter__()</code>和<code>__next__()</code>的对象</p>
+</li>
+<li>
+<p><code>for ... in ...</code>的迭代,实际是将可迭代对象转换成迭代器,再重复调用<code>next()</code>方法实现的</p>
+</li>
+<li>
+<p>生成器(generator)是一个特殊的迭代器,它的实现更简单优雅.</p>
+</li>
+<li>
+<p><code>yield</code>是生成器实现<code>__next__()</code>方法的关键.它作为生成器执行的暂停恢复点,可以对<code>yield</code>表达式进行赋值,也可以将<code>yield</code>表达式的值返回.</p>
+</li>
+</ol>
+<blockquote>
+<p>(本人刚开始写博客,本文写得狠辛苦,转载希望著明出处,不胜感谢.)</p>
+</blockquote>
+</div></article></main><footer>赵喧典 · 长期写作与公开学习</footer></body></html>

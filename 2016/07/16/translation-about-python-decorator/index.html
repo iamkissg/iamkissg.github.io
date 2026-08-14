@@ -1,0 +1,742 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><meta name="description" content="A translation of e-satis' answer about Python's decorator in stackoverflow"><link rel="canonical" href="https://iamkissg.github.io/2016/07/16/translation-about-python-decorator/"><link rel="alternate" type="application/rss+xml" href="/feed.xml"><title>[译]Python之装饰器知必会</title><style>:root{color-scheme:light;font-family:ui-serif,Georgia,Noto Serif SC,serif}body{color:#25211d;background:#fbf8f2;margin:0;line-height:1.75}header,main,footer{width:min(760px,100% - 2rem);margin-inline:auto}header{border-bottom:1px solid #ded7cc;padding-block:2rem 1rem}nav{gap:1rem;display:flex}main{padding-block:2rem 4rem}footer{color:#6b625a;border-top:1px solid #ded7cc;padding-block:1.5rem 3rem}a{color:#855a35;text-underline-offset:.2em}img,video{max-width:100%;height:auto}pre{background:#efe9df;padding:1rem;overflow-x:auto}blockquote{border-left:.2rem solid #b98a5f;margin-inline:0;padding-left:1rem}.entries{gap:1.25rem;padding:0;list-style:none;display:grid}.entries article{background:#fff;border:1px solid #e6ded3;border-radius:.5rem;padding:1rem 1.25rem}.meta{color:#766c63;font-size:.9rem}
+</style></head><body><header><nav aria-label="主导航"><a href="/">iamkissg</a><a href="/tavern-letters/">酒馆来信</a><a href="/archive/">文章归档</a><a href="/feed.xml">RSS</a></nav></header><main data-pagefind-body><article><header><h1>[译]Python之装饰器知必会</h1><p class="meta"><time datetime="2016-07-16T00:00:00.000Z">2016/7/16</time></p></header><div data-legacy-body><blockquote>
+<p>原文作者: e-satis(Kevin Samuel)\
+原文连接: <a href="http://stackoverflow.com/questions/739654/how-can-i-make-a-chain-of-function-decorators-in-python/1594484#1594484">stackoverflow - How can I make a chain of function decorators in Python</a>\
+译者: kissg(赵喧典)\
+本译文已征得原作者同意, 转载请同时注明原文. 如果能注明译文出处就更好啦~</p>
+</blockquote>
+<hr>
+<h2 id="装饰器基础">装饰器基础</h2>
+<h3 id="python的函数是对象">Python的函数是对象</h3>
+<p>为了理解装饰器, 你必须先理解: 在Python的世界, 函数是对象. 这一点很重要. 让我们通过一个简单的例子来看看为什么:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> shout</span><span style="color:#E1E4E8">(word</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"yes"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> word.capitalize()</span><span style="color:#F97583">+</span><span style="color:#9ECBFF">"!"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> shout()</span></span>
+<span class="line"><span style="color:#6A737D"># 输出 : 'Yes!'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 作为一个对象, 你可以像任何其他对象一样, 将函数赋值给一个变量</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">scream </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> shout</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 注意, 我们并没有使用括号:</span></span>
+<span class="line"><span style="color:#6A737D"># 我们没有调用函数, 我们是将"shout"函数装入到"scream"变量中</span></span>
+<span class="line"><span style="color:#6A737D"># 这意味着你可以像从"scream"调用"shout"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> scream()</span></span>
+<span class="line"><span style="color:#6A737D"># 输出 : 'Yes!'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 不仅如此, 它还意味着你可以删除旧的名字"shout",</span></span>
+<span class="line"><span style="color:#6A737D"># 而仍然可以通过"scream"访问函数</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">del</span><span style="color:#E1E4E8"> shout</span></span>
+<span class="line"><span style="color:#F97583">try</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> shout()</span></span>
+<span class="line"><span style="color:#F97583">except</span><span style="color:#79B8FF"> NameError</span><span style="color:#E1E4E8">, e:</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> e</span></span>
+<span class="line"><span style="color:#6A737D">    # 输出: "name 'shout' is not defined"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> scream()</span></span>
+<span class="line"><span style="color:#6A737D"># 输出: 'Yes!'</span></span></code></pre>
+<p>Okay! 在脑海中保留这个概念. 我们之后会用到它.</p>
+<p>Python函数的另一个有趣的属性是: 它们可以在另一个函数的内部被定义…</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> talk</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # 你可以在运行时, 在"talk"函数内部定义一个函数</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> whisper</span><span style="color:#E1E4E8">(word</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"yes"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> word.lower()</span><span style="color:#F97583">+</span><span style="color:#9ECBFF">"..."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # ... 然后立马使用它</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> whisper()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 当调用"talk"时, 你的每一次调用都会定义"whisper"一次,</span></span>
+<span class="line"><span style="color:#6A737D"># 再调用"whisper"</span></span>
+<span class="line"><span style="color:#E1E4E8">talk()</span></span>
+<span class="line"><span style="color:#6A737D"># 输出:</span></span>
+<span class="line"><span style="color:#6A737D"># "yes..."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 但是, "whisper"在"talk"函数之外实际是不存在的</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">try</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> whisper()</span></span>
+<span class="line"><span style="color:#F97583">    except</span><span style="color:#79B8FF"> NameError</span><span style="color:#E1E4E8">, e:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8"> e</span></span>
+<span class="line"><span style="color:#6A737D">        #输出 : "name 'whisper' is not defined"</span></span>
+<span class="line"><span style="color:#6A737D">        #Python的函数是对象</span></span></code></pre>
+<h3 id="函数引用">函数引用</h3>
+<p>还跟得上吗? 现在开始讲有趣的部分…</p>
+<p>你已经见识过了函数是对象. 因此,</p>
+<ul>
+<li>函数可以赋值给一个变量</li>
+<li>函数可以在另一个函数中被定义</li>
+</ul>
+<p>这意味着<strong>函数可以返回(<code>return</code>)另一个函数</strong>. 看仔细了!</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> getTalk</span><span style="color:#E1E4E8">(kind</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"shout"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # 我们在运行时定义函数</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> shout</span><span style="color:#E1E4E8">(word</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"yes"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> word.capitalize()</span><span style="color:#F97583">+</span><span style="color:#9ECBFF">"!"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> whisper</span><span style="color:#E1E4E8">(word</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"yes"</span><span style="color:#E1E4E8">) :</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> word.lower()</span><span style="color:#F97583">+</span><span style="color:#9ECBFF">"..."</span><span style="color:#FDAEB7;font-style:italic">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # 然后我们返回其中的一个</span></span>
+<span class="line"><span style="color:#F97583">        if</span><span style="color:#E1E4E8"> kind </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> "shout"</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D">            # 不适用括号, 我们并不是在调用函数</span></span>
+<span class="line"><span style="color:#6A737D">            # 我们是在返回一个函数对象</span></span>
+<span class="line"><span style="color:#F97583">            return</span><span style="color:#E1E4E8"> shout</span></span>
+<span class="line"><span style="color:#F97583">        else</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">            return</span><span style="color:#E1E4E8"> whisper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 你要如何使用这洪荒巨兽呢?</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 取得函数, 并将其赋给一个变量</span></span>
+<span class="line"><span style="color:#E1E4E8">talk </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> getTalk()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 此处, 你可以看见"talk"是一个函数对象</span></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> talk</span></span>
+<span class="line"><span style="color:#6A737D">#输出 : &lt;function shout at 0xb7ea817c&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 以下对象是函数"talk"的一项返回</span></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> talk()</span></span>
+<span class="line"><span style="color:#6A737D">#输出 : Yes!</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 你甚至可以直接使用</span></span>
+<span class="line"><span style="color:#6A737D"># And you can even use it directly if you feel wild:</span></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> getTalk(</span><span style="color:#9ECBFF">"whisper"</span><span style="color:#E1E4E8">)()</span></span>
+<span class="line"><span style="color:#6A737D">#输出 : yes...</span></span></code></pre>
+<p>等等…不止如此!</p>
+<p>如果你要<code>return</code>一个函数, 可以传入一个函数作为参数:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> doSomethingBefore</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I do something before then I call the function you gave me"</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> func()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">doSomethingBefore(scream)</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I do something before then I call the function you gave me</span></span>
+<span class="line"><span style="color:#6A737D">#Yes!</span></span></code></pre>
+<p>现在, 你已经具备了理解装饰器所需的一切知识. 如你所见, 装饰器就是“包装纸(wrapper)”, 也就是说, <strong>装饰器允许你在被装饰的函数前后执行代码</strong>, 而不对函数本身做任何修改.</p>
+<h3 id="动手写装饰器">动手写装饰器</h3>
+<p>你最好动手写一写(装饰器):</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># 装饰器是函数, 它以另一个函数作为参数</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> my_shiny_new_decorator</span><span style="color:#E1E4E8">(a_function_to_decorate):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # 在装饰器的内部, 定义一个"wrapper"函数</span></span>
+<span class="line"><span style="color:#6A737D">    # wrapper函数用于包装原函数, 以在原函数前后执行代码</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> the_wrapper_around_the_original_function</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">        # 在此处输入你想在调用原函数之前执行的代码</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "Before the function runs"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">        # 调用被装饰的函数(是函数调用, 需要括号)</span></span>
+<span class="line"><span style="color:#E1E4E8">        a_function_to_decorate()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">        # 在此处输入你想在调用原函数之后执行的代码</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "After the function runs"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # 此处, 被装饰的函数并没有被执行</span></span>
+<span class="line"><span style="color:#6A737D">    # 返回刚刚创建的包装函数</span></span>
+<span class="line"><span style="color:#6A737D">    # 包装函数包括被装饰的函数, 在函数前后执行的代码</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> the_wrapper_around_the_original_function</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 现在, 假设你创建了一个可能用不到的函数</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> a_stand_alone_function</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I am a stand alone function, don't you dare modify me"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">a_stand_alone_function()</span></span>
+<span class="line"><span style="color:#6A737D">#输出: I am a stand alone function, don't you dare modify me</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 然而, 你可以装饰它, 扩展它</span></span>
+<span class="line"><span style="color:#6A737D"># 只需要将它传递给一个装饰器, 装饰器将动态地将函数包装进任何你想要的代码中</span></span>
+<span class="line"><span style="color:#6A737D"># 并返回一个可用的新函数</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">a_stand_alone_function_decorated </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> my_shiny_new_decorator(a_stand_alone_function)</span></span>
+<span class="line"><span style="color:#E1E4E8">a_stand_alone_function_decorated()</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#Before the function runs</span></span>
+<span class="line"><span style="color:#6A737D">#I am a stand alone function, don't you dare modify me</span></span>
+<span class="line"><span style="color:#6A737D">#After the function runs</span></span></code></pre>
+<p>现在, 你可能想要在每次调用<code>a_stand_alone_function</code>时, 替代地调用<code>a_stand_alone_function_decorated</code>. 很简单, 用装饰器<code>my_shiny_new_decorator</code>返回的函数覆盖原函数<code>a_stand_alone_function</code>即可.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">a_stand_alone_function </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> my_shiny_new_decorator(a_stand_alone_function)</span></span>
+<span class="line"><span style="color:#E1E4E8">a_stand_alone_function()</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#Before the function runs</span></span>
+<span class="line"><span style="color:#6A737D">#I am a stand alone function, don't you dare modify me</span></span>
+<span class="line"><span style="color:#6A737D">#After the function runs</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 这就是装饰器的作用了</span></span></code></pre>
+<h3 id="装饰器揭秘">装饰器揭秘</h3>
+<p>用装饰器语法重现先前的例子, 是这样的:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#B392F0">@my_shiny_new_decorator</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> another_stand_alone_function</span><span style="color:#E1E4E8">(:</span></span>
+<span class="line"><span style="color:#E1E4E8">    print "Leave me alone"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">another_stand_alone_function(</span></span>
+<span class="line"><span style="color:#6A737D">#outputs:</span></span>
+<span class="line"><span style="color:#6A737D">#Before the function runs</span></span>
+<span class="line"><span style="color:#6A737D">#Leave me alone</span></span>
+<span class="line"><span style="color:#6A737D">#After the function runs</span></span></code></pre>
+<p>是的, 就是这样, 这么简单. <code>@decorator</code>是以下形式的缩写:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">another_stand_alone_function </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> my_shiny_new_decorator(another_stand_alone_function)</span></span></code></pre>
+<p>此处所讲的装饰器是<a href="https://en.wikipedia.org/wiki/Decorator_pattern">装饰器设计模式</a>的python变种. 在python中有一些经典的设计模式, 可使开发更加容易(比如迭代器(iterator)).</p>
+<p>当然, 你可以叠加装饰器:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> bread</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "&lt;/''''''\&gt;"</span></span>
+<span class="line"><span style="color:#E1E4E8">        func()</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "&lt;\______/&gt;"</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> ingredients</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "#tomatoes#"</span></span>
+<span class="line"><span style="color:#E1E4E8">        func()</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "~salad~"</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> sandwich</span><span style="color:#E1E4E8">(food</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"--ham--"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> food</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">sandwich()</span></span>
+<span class="line"><span style="color:#6A737D">#输出: --ham--</span></span>
+<span class="line"><span style="color:#E1E4E8">sandwich </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> bread(ingredients(sandwich))</span></span>
+<span class="line"><span style="color:#E1E4E8">sandwich()</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#&lt;/''''''\&gt;</span></span>
+<span class="line"><span style="color:#6A737D"># #tomatoes#</span></span>
+<span class="line"><span style="color:#6A737D"># --ham--</span></span>
+<span class="line"><span style="color:#6A737D"># ~salad~</span></span>
+<span class="line"><span style="color:#6A737D">#&lt;\______/&gt;</span></span></code></pre>
+<p>python装饰器的语法:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#B392F0">@bread</span></span>
+<span class="line"><span style="color:#B392F0">@ingredients</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> sandwich</span><span style="color:#E1E4E8">(food</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"--ham--"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> food</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">sandwich()</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#&lt;/''''''\&gt;</span></span>
+<span class="line"><span style="color:#6A737D"># #tomatoes#</span></span>
+<span class="line"><span style="color:#6A737D"># --ham--</span></span>
+<span class="line"><span style="color:#6A737D"># ~salad~</span></span>
+<span class="line"><span style="color:#6A737D">#&lt;\______/&gt;</span></span></code></pre>
+<p>你设置装饰器的顺序很重要:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#B392F0">@ingredients</span></span>
+<span class="line"><span style="color:#B392F0">@bread</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> strange_sandwich</span><span style="color:#E1E4E8">(food</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"--ham--"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> food</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">strange_sandwich()</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">##tomatoes#</span></span>
+<span class="line"><span style="color:#6A737D">#&lt;/''''''\&gt;</span></span>
+<span class="line"><span style="color:#6A737D"># --ham--</span></span>
+<span class="line"><span style="color:#6A737D">#&lt;\______/&gt;</span></span>
+<span class="line"><span style="color:#6A737D"># ~salad~</span></span></code></pre>
+<hr>
+<h3 id="现在-针对你的问题在python中-如何实现串级装饰器">现在: 针对你的问题(在python中, 如何实现串级装饰器)…</h3>
+<p>(译者注: 本文是stackoverflow上一个回答)</p>
+<p>结论是, 如你所见, 很容易就可以实现串级装饰器:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># 加粗装饰器</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> makebold</span><span style="color:#E1E4E8">(fn):</span></span>
+<span class="line"><span style="color:#6A737D">    # 装饰器返回的新的函数</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#6A737D">        # 在前后插入一些代码</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#9ECBFF"> "&lt;b&gt;"</span><span style="color:#F97583"> +</span><span style="color:#E1E4E8"> fn() </span><span style="color:#F97583">+</span><span style="color:#9ECBFF"> "&lt;/b&gt;"</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 斜体装饰器</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> makeitalic</span><span style="color:#E1E4E8">(fn):</span></span>
+<span class="line"><span style="color:#6A737D">    # 装饰器返回的新的函数</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#6A737D">        # 在前后插入一些代码</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#9ECBFF"> "&lt;i&gt;"</span><span style="color:#F97583"> +</span><span style="color:#E1E4E8"> fn() </span><span style="color:#F97583">+</span><span style="color:#9ECBFF"> "&lt;/i&gt;"</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@makebold</span></span>
+<span class="line"><span style="color:#B392F0">@makeitalic</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> say</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#9ECBFF"> "hello"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> say()</span></span>
+<span class="line"><span style="color:#6A737D">#输出: &lt;b&gt;&lt;i&gt;hello&lt;/i&gt;&lt;/b&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 等价于</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> say</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#9ECBFF"> "hello"</span></span>
+<span class="line"><span style="color:#E1E4E8">say </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> makebold(makeitalic(say))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> say()</span></span>
+<span class="line"><span style="color:#6A737D">#输出: &lt;b&gt;&lt;i&gt;hello&lt;/i&gt;&lt;/b&gt;</span></span></code></pre>
+<p>现在, 你可以愉快地离开了(译者注: 这是作者对提问者说的). 或者接着烧脑, 看看装饰器的一些高级用法.</p>
+<hr>
+<h2 id="装饰器进阶">装饰器进阶</h2>
+<h3 id="向被装饰函数传递参数">向被装饰函数传递参数</h3>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># 这并不是黑魔法, 你只需要在包装过程中传入参数</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> a_decorator_passing_arguments</span><span style="color:#E1E4E8">(function_to_decorate):</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> a_wrapper_accepting_arguments</span><span style="color:#E1E4E8">(arg1, arg2):</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "I got args! Look:"</span><span style="color:#E1E4E8">, arg1, arg2</span></span>
+<span class="line"><span style="color:#E1E4E8">        function_to_decorate(arg1, arg2)</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> a_wrapper_accepting_arguments</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 当你调用装饰器返回的函数时, 你调用了包装纸(wrapper)</span></span>
+<span class="line"><span style="color:#6A737D"># 向包装纸传递的参数将可继续传递给被装饰函数</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@a_decorator_passing_arguments</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> print_full_name</span><span style="color:#E1E4E8">(first_name, last_name):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "My name is"</span><span style="color:#E1E4E8">, first_name, last_name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">print_full_name(</span><span style="color:#9ECBFF">"Peter"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"Venkman"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D"># 输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I got args! Look: Peter Venkman</span></span>
+<span class="line"><span style="color:#6A737D">#My name is Peter Venkman</span></span></code></pre>
+<h3 id="装饰方法">装饰方法</h3>
+<p>python好的一点是, 方法(method)和函数(function)实际是一样的. 唯一的区别在于, 方法的第一个参数需要是当前对象(<code>self</code>)的引用.</p>
+<p>这意味着, 你可以用同样的方式创建方法的装饰器! 不过, 别忘了<code>self</code>.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> method_friendly_decorator</span><span style="color:#E1E4E8">(method_to_decorate):</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">(self, lie):</span></span>
+<span class="line"><span style="color:#E1E4E8">        lie </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> lie </span><span style="color:#F97583">-</span><span style="color:#79B8FF"> 3</span><span style="color:#6A737D"> # 真好, 年龄更小了 :-)</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> method_to_decorate(</span><span style="color:#79B8FF">self</span><span style="color:#E1E4E8">, lie)</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> Lucy</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">object</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#79B8FF"> __init__</span><span style="color:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.age </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 32</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">    @method_friendly_decorator</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> sayYourAge</span><span style="color:#E1E4E8">(self, lie):</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "I am </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF">, what did you think?"</span><span style="color:#F97583"> %</span><span style="color:#E1E4E8"> (</span><span style="color:#79B8FF">self</span><span style="color:#E1E4E8">.age </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> lie)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">l </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> Lucy()</span></span>
+<span class="line"><span style="color:#E1E4E8">l.sayYourAge(</span><span style="color:#F97583">-</span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">#输出: I am 26, what did you think?</span></span></code></pre>
+<p>如果要写一个通用的装饰器–可用于任何函数或方法, 而不必考虑其参数–那么, 用<code>*args, **kwargs</code>就好了:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> a_decorator_passing_arbitrary_arguments</span><span style="color:#E1E4E8">(function_to_decorate):</span></span>
+<span class="line"><span style="color:#6A737D">    # 包装纸接收任意参数</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> a_wrapper_accepting_arbitrary_arguments</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs):</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "Do I have args?:"</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8"> args</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8"> kwargs</span></span>
+<span class="line"><span style="color:#6A737D">        # 将得到的参数解压(unpack), 此处为*args, **kwargs</span></span>
+<span class="line"><span style="color:#6A737D">        # 如果对解压不熟悉, 可参考</span></span>
+<span class="line"><span style="color:#6A737D">        # http://www.saltycrane.com/blog/2008/01/how-to-use-args-and-kwargs-in-python/</span></span>
+<span class="line"><span style="color:#E1E4E8">        function_to_decorate(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs)</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> a_wrapper_accepting_arbitrary_arguments</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@a_decorator_passing_arbitrary_arguments</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> function_with_no_argument</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "Python is cool, no argument here."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">function_with_no_argument()</span></span>
+<span class="line"><span style="color:#6A737D">#输出</span></span>
+<span class="line"><span style="color:#6A737D">#Do I have args?:</span></span>
+<span class="line"><span style="color:#6A737D">#()</span></span>
+<span class="line"><span style="color:#6A737D">#{}</span></span>
+<span class="line"><span style="color:#6A737D">#python就是这么酷, 此地无参.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@a_decorator_passing_arbitrary_arguments</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> function_with_arguments</span><span style="color:#E1E4E8">(a, b, c):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> a, b, c</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">function_with_arguments(</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">,</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">,</span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">#输出</span></span>
+<span class="line"><span style="color:#6A737D">#Do I have args?:</span></span>
+<span class="line"><span style="color:#6A737D">#(1, 2, 3)</span></span>
+<span class="line"><span style="color:#6A737D">#{}</span></span>
+<span class="line"><span style="color:#6A737D">#1 2 3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@a_decorator_passing_arbitrary_arguments</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> function_with_named_arguments</span><span style="color:#E1E4E8">(a, b, c, platypus</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"Why not ?"</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "Do </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF">, </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF"> and </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF"> like platypus? </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF">"</span><span style="color:#F97583"> %</span><span style="color:#E1E4E8">\</span></span>
+<span class="line"><span style="color:#E1E4E8">    (a, b, c, platypus)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">function_with_named_arguments(</span><span style="color:#9ECBFF">"Bill"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"Linus"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"Steve"</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">platypus</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"Indeed!"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">#输出</span></span>
+<span class="line"><span style="color:#6A737D">#Do I have args ? :</span></span>
+<span class="line"><span style="color:#6A737D">#('Bill', 'Linus', 'Steve')</span></span>
+<span class="line"><span style="color:#6A737D">#{'platypus': 'Indeed!'}</span></span>
+<span class="line"><span style="color:#6A737D">#Bill, Linus and Steve喜欢鸭嘴兽吗? 千真万确!</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> Mary</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">object</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#79B8FF"> __init__</span><span style="color:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.age </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 31</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">    @a_decorator_passing_arbitrary_arguments</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> sayYourAge</span><span style="color:#E1E4E8">(self, lie</span><span style="color:#F97583">=-</span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">): </span><span style="color:#6A737D"># 现在你可以添加一个默认值</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "I am </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF">, what did you think ?"</span><span style="color:#F97583"> %</span><span style="color:#E1E4E8"> (</span><span style="color:#79B8FF">self</span><span style="color:#E1E4E8">.age </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> lie)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">m </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> Mary()</span></span>
+<span class="line"><span style="color:#E1E4E8">m.sayYourAge()</span></span>
+<span class="line"><span style="color:#6A737D">#输出</span></span>
+<span class="line"><span style="color:#6A737D"># Do I have args?:</span></span>
+<span class="line"><span style="color:#6A737D">#(&lt;__main__.Mary object at 0xb7d303ac&gt;,)</span></span>
+<span class="line"><span style="color:#6A737D">#{}</span></span>
+<span class="line"><span style="color:#6A737D">#I am 28, what did you think?</span></span></code></pre>
+<h3 id="向装饰器传递参数">向装饰器传递参数</h3>
+<p>好吧, 现在你觉得如何向装饰器本身传递参数呢?</p>
+<p>这有点绕, 因为装饰器必须接收一个函数作为参数. 因此, 你不能向装饰器直接传递被装饰的函数的参数.</p>
+<p>在讲解解决方法之前, 让我们先做一个小小的回顾:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># 装饰器是 普通 函数</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> my_decorator</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I am an ordinary function"</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "I am function returned by the decorator"</span></span>
+<span class="line"><span style="color:#E1E4E8">        func()</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 所以, 你可以不使用"@"调用它</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> lazy_function</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "zzzzzzzz"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> my_decorator(lazy_function)</span></span>
+<span class="line"><span style="color:#6A737D">#输出: I am an ordinary function</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 它将会输出 "I am an ordinary function", 因为这就是你所做的:</span></span>
+<span class="line"><span style="color:#6A737D"># 调用一个函. 没有一点魔法在里面</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@my_decorator</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> lazy_function</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "zzzzzzzz"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">#输出: I am an ordinary function</span></span></code></pre>
+<p>上述两者完全相同, 都是调用了<code>my_decorator</code>. 所以当你<code>@my_decorator</code>, 你是在告诉Python去调用被变量<code>my_decorator</code>标记的函数.</p>
+<p>这一点很重要! 你可以用标签直接指明装饰器, 或者不这样.</p>
+<p>让我们再深入一点.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorator_maker</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I make decorators! I am executed only once: "</span><span style="color:#F97583">+</span><span style="color:#E1E4E8">\</span></span>
+<span class="line"><span style="color:#9ECBFF">          "when you make me create a decorator."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> my_decorator</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "I am a decorator! I am executed only when you decorate a function."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        def</span><span style="color:#B392F0"> wrapped</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">            print</span><span style="color:#E1E4E8"> (</span><span style="color:#9ECBFF">"I am the wrapper around the decorated function. "</span></span>
+<span class="line"><span style="color:#9ECBFF">                  "I am called when you call the decorated function. "</span></span>
+<span class="line"><span style="color:#9ECBFF">                  "As the wrapper, I return the RESULT of the decorated function."</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">            return</span><span style="color:#E1E4E8"> func()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "As the decorator, I return the wrapped function."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> wrapped</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "As a decorator maker, I return a decorator"</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> my_decorator</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 让我们创建一个装饰器</span></span>
+<span class="line"><span style="color:#E1E4E8">new_decorator </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> decorator_maker()</span></span>
+<span class="line"><span style="color:#6A737D"># 输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I make decorators! I am executed only once: when you make me create a decorator.</span></span>
+<span class="line"><span style="color:#6A737D">#As a decorator maker, I return a decorator</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 接下来, 我们来装饰函数</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorated_function</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I am the decorated function."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> new_decorator(decorated_function)</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I am a decorator! I am executed only when you decorate a function.</span></span>
+<span class="line"><span style="color:#6A737D">#As the decorator, I return the wrapped function</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 调用函数:</span></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function()</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I am the wrapper around the decorated function. I am called when you call the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#As the wrapper, I return the RESULT of the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#I am the decorated function.</span></span></code></pre>
+<p>这里没有什么可惊奇的.</p>
+<p>跳过所有繁琐的中间变量, 以下与上述方法完全一样.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorated_function</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I am the decorated function."</span></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> decorator_maker()(decorated_function)</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I make decorators! I am executed only once: when you make me create a decorator.</span></span>
+<span class="line"><span style="color:#6A737D">#As a decorator maker, I return a decorator</span></span>
+<span class="line"><span style="color:#6A737D">#I am a decorator! I am executed only when you decorate a function.</span></span>
+<span class="line"><span style="color:#6A737D">#As the decorator, I return the wrapped function.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 最后:</span></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function()</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I am the wrapper around the decorated function. I am called when you call the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#As the wrapper, I return the RESULT of the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#I am the decorated function.</span></span></code></pre>
+<p>还可以更精简一些:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#B392F0">@decorator_maker</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorated_function</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I am the decorated function."</span></span>
+<span class="line"><span style="color:#6A737D">#outputs:</span></span>
+<span class="line"><span style="color:#6A737D">#I make decorators! I am executed only once: when you make me create a decorator.</span></span>
+<span class="line"><span style="color:#6A737D">#As a decorator maker, I return a decorator</span></span>
+<span class="line"><span style="color:#6A737D">#I am a decorator! I am executed only when you decorate a function.</span></span>
+<span class="line"><span style="color:#6A737D">#As the decorator, I return the wrapped function.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">#Eventually:</span></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function()</span></span>
+<span class="line"><span style="color:#6A737D">#outputs:</span></span>
+<span class="line"><span style="color:#6A737D">#I am the wrapper around the decorated function. I am called when you call the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#As the wrapper, I return the RESULT of the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#I am the decorated function.</span></span></code></pre>
+<p>嘿, 你看到了吗? 我们通过“<code>@</code>“语法使用了函数.</p>
+<p>所以, 回到带参的装饰器. 如果我们可以用函数在运行时生成装饰器, 我们就能够向那个函数传递参数了, 对吧?</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorator_maker_with_arguments</span><span style="color:#E1E4E8">(decorator_arg1, decorator_arg2):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "I make decorators! And I accept arguments:"</span><span style="color:#E1E4E8">, decorator_arg1, decorator_arg2</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> my_decorator</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#6A737D">        # 此处传递参数的能力, 得益于闭包的性质</span></span>
+<span class="line"><span style="color:#6A737D">        # 如果你不习惯闭包, 你可以假设它是ok的, 或者看一下这篇文章:</span></span>
+<span class="line"><span style="color:#6A737D">        # http://stackoverflow.com/questions/13857/can-you-explain-closures-as-they-relate-to-python</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "I am the decorator. Somehow you passed me arguments:"</span><span style="color:#E1E4E8">, decorator_arg1, decorator_arg2</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">        # 不要混淆了装饰器参数和函数参数!</span></span>
+<span class="line"><span style="color:#F97583">        def</span><span style="color:#B392F0"> wrapped</span><span style="color:#E1E4E8">(function_arg1, function_arg2) :</span></span>
+<span class="line"><span style="color:#79B8FF">            print</span><span style="color:#E1E4E8"> (</span><span style="color:#9ECBFF">"I am the wrapper around the decorated function.</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">                  "I can access all the variables</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">                  "</span><span style="color:#79B8FF">\t</span><span style="color:#9ECBFF">- from the decorator: </span><span style="color:#79B8FF">{0}</span><span style="color:#79B8FF"> {1}\n</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">                  "</span><span style="color:#79B8FF">\t</span><span style="color:#9ECBFF">- from the function call: </span><span style="color:#79B8FF">{2}</span><span style="color:#79B8FF"> {3}\n</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">                  "Then I can pass them to the decorated function"</span></span>
+<span class="line"><span style="color:#E1E4E8">                  .format(decorator_arg1, decorator_arg2,</span></span>
+<span class="line"><span style="color:#E1E4E8">                          function_arg1, function_arg2))</span></span>
+<span class="line"><span style="color:#F97583">            return</span><span style="color:#E1E4E8"> func(function_arg1, function_arg2)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> wrapped</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> my_decorator</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@decorator_maker_with_arguments</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"Leonard"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"Sheldon"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorated_function_with_arguments</span><span style="color:#E1E4E8">(function_arg1, function_arg2):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> (</span><span style="color:#9ECBFF">"I am the decorated function and only knows about my arguments: </span><span style="color:#79B8FF">{0}</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#9ECBFF">           " </span><span style="color:#79B8FF">{1}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">.format(function_arg1, function_arg2))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function_with_arguments(</span><span style="color:#9ECBFF">"Rajesh"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"Howard"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I make decorators! And I accept arguments: Leonard Sheldon</span></span>
+<span class="line"><span style="color:#6A737D">#I am the decorator. Somehow you passed me arguments: Leonard Sheldon</span></span>
+<span class="line"><span style="color:#6A737D">#I am the wrapper around the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#I can access all the variables</span></span>
+<span class="line"><span style="color:#6A737D">#   - from the decorator: Leonard Sheldon</span></span>
+<span class="line"><span style="color:#6A737D">#   - from the function call: Rajesh Howard</span></span>
+<span class="line"><span style="color:#6A737D">#Then I can pass them to the decorated function</span></span>
+<span class="line"><span style="color:#6A737D">#I am the decorated function and only knows about my arguments: Rajesh Howard</span></span></code></pre>
+<p>这就是带参的装饰器了.参数也可以设置成变量:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">c1 </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "Penny"</span></span>
+<span class="line"><span style="color:#E1E4E8">c2 </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "Leslie"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@decorator_maker_with_arguments</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"Leonard"</span><span style="color:#E1E4E8">, c1)</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorated_function_with_arguments</span><span style="color:#E1E4E8">(function_arg1, function_arg2):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8"> (</span><span style="color:#9ECBFF">"I am the decorated function and only knows about my arguments:"</span></span>
+<span class="line"><span style="color:#9ECBFF">           " </span><span style="color:#79B8FF">{0}</span><span style="color:#79B8FF"> {1}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">.format(function_arg1, function_arg2))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function_with_arguments(c2, </span><span style="color:#9ECBFF">"Howard"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#I make decorators! And I accept arguments: Leonard Penny</span></span>
+<span class="line"><span style="color:#6A737D">#I am the decorator. Somehow you passed me arguments: Leonard Penny</span></span>
+<span class="line"><span style="color:#6A737D">#I am the wrapper around the decorated function.</span></span>
+<span class="line"><span style="color:#6A737D">#I can access all the variables</span></span>
+<span class="line"><span style="color:#6A737D">#   - from the decorator: Leonard Penny</span></span>
+<span class="line"><span style="color:#6A737D">#   - from the function call: Leslie Howard</span></span>
+<span class="line"><span style="color:#6A737D">#Then I can pass them to the decorated function</span></span>
+<span class="line"><span style="color:#6A737D">#I am the decorated function and only knows about my arguments: Leslie Howard</span></span></code></pre>
+<p>如你所见, 使用该技巧, 你可以像任何(普通)函数一样向装饰器传递参数. 如果你愿意, 你甚至可以使用<code>*args, **kwargs</code>. 但是, 请记住装饰器只能被调用<strong>1次</strong>, 即在导入脚本的时候. 之后你就不能动态地设置参数了. 当你“import x”时, <strong>函数已经被装饰了</strong>, 你不能再做任何修改.</p>
+<hr>
+<h3 id="练习-装饰装饰器">练习: 装饰装饰器</h3>
+<p>作为福利, 我将给你一个能接收任意参数的装饰器代码片段. 然后, 我们用另一个函数来创建我们的装饰器, 以接收参数.</p>
+<p>我们对装饰器进行了包装.</p>
+<p>如前所见, 我们是用什么包装了函数?</p>
+<p>是的, 就是装饰器!</p>
+<p>让我们愉快地写一个装饰器的装饰器吧:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorator_with_args</span><span style="color:#E1E4E8">(decorator_to_enhance):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#9ECBFF">    这个函数被用作一个装饰器.</span></span>
+<span class="line"><span style="color:#9ECBFF">    它必须装饰另一个函数, 那个函数也是一个装饰器</span></span>
+<span class="line"><span style="color:#9ECBFF">    它允许任何装饰器接收任意数量的参数, 这样就不用每次写(装饰器)的时候都回忆一遍.</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # 使用了与上述一样的技巧传递参数</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> decorator_maker</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">        # 我们在运行时创建了一个装饰器, 它接收一个函数作为参数</span></span>
+<span class="line"><span style="color:#6A737D">        # 但它可以持有maker传来的参数</span></span>
+<span class="line"><span style="color:#F97583">        def</span><span style="color:#B392F0"> decorator_wrapper</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">            # 我们返回原始装饰器的结果, 一个普通函数</span></span>
+<span class="line"><span style="color:#6A737D">            # 唯一的异错的地方在于: 装饰器必须这样才能正常工作</span></span>
+<span class="line"><span style="color:#F97583">            return</span><span style="color:#E1E4E8"> decorator_to_enhance(func, </span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> decorator_wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> decorator_maker</span></span></code></pre>
+<p>它可以像下述一样使用:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># 你可以创建一个用作装饰器的函数. 再用一个装饰器来装饰它</span></span>
+<span class="line"><span style="color:#6A737D"># 不要忘了, 用法是"decorator(func, *args, **kwargs)"</span></span>
+<span class="line"><span style="color:#B392F0">@decorator_with_args</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorated_decorator</span><span style="color:#E1E4E8">(func, </span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs):</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">(function_arg1, function_arg2):</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "Decorated with"</span><span style="color:#E1E4E8">, args, kwargs</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> func(function_arg1, function_arg2)</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 现在, 你可以用刚刚创建的被装饰的装饰器来装饰函数了</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@decorated_decorator</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">42</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">404</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">1024</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> decorated_function</span><span style="color:#E1E4E8">(function_arg1, function_arg2):</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "Hello"</span><span style="color:#E1E4E8">, function_arg1, function_arg2</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">decorated_function(</span><span style="color:#9ECBFF">"Universe and"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"everything"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#Decorated with (42, 404, 1024) {}</span></span>
+<span class="line"><span style="color:#6A737D">#Hello Universe and everything</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 哇!</span></span></code></pre>
+<p>我知道, 你最近一次有这种感觉, 是听某人说了: “要理解递归, 你必须先理解递归”. 现在, 对于学会了(装饰器), 你不感觉很棒码?</p>
+<hr>
+<h3 id="最佳实践-装饰器">最佳实践: 装饰器</h3>
+<ul>
+<li>装饰器最早出现于Python2.4, 所以请确保你的代码能在2.4之后的版本上运行</li>
+<li>装饰器减慢了函数调用的速度. 谨记.</li>
+<li><strong>你无法对函数去装饰</strong>. (确实有技巧可以创建可移除的装饰器, 但没有人会使用它们.) 因此, 一旦函数被装饰了, 在整个代码中, 它都是被装饰的.</li>
+<li>装饰器包装了函数, 这使得调试变得困难. (这一点在Pyhton2.5之后的版本得到缓解; 请看下面的内容)</li>
+</ul>
+<p>Python2.5引入了<code>functools</code>模块, 该模块包含的<code>funtools.wraps()</code>函数, 可以将被装饰函数名称, 模块, 文档字符串(docstring)拷贝到它的包装纸中.</p>
+<p>(有趣的事实是: <code>funtools.wraps()</code>还是一个装饰器!)</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># 为了调试方便, 栈回溯(stacktrace)打印函数的__name__属性</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> foo</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "foo"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> foo.</span><span style="color:#79B8FF">__name__</span></span>
+<span class="line"><span style="color:#6A737D">#输出: foo</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># 当使用装饰器时, 就显得混乱了</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> bar</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "bar"</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> func()</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@bar</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> foo</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "foo"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> foo.</span><span style="color:#79B8FF">__name__</span></span>
+<span class="line"><span style="color:#6A737D">#输出: wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># "functools"`模块能解决这个问题</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> functools</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> bar</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#6A737D">    # 我们说"wrapper"包装了"func", 然后魔法就发生了</span></span>
+<span class="line"><span style="color:#B392F0">    @functools.wraps</span><span style="color:#E1E4E8">(func)</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "bar"</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> func()</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@bar</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> foo</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#9ECBFF"> "foo"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> foo.</span><span style="color:#79B8FF">__name__</span></span>
+<span class="line"><span style="color:#6A737D">#输出: foo</span></span></code></pre>
+<hr>
+<h3 id="如何使用装饰器">如何使用装饰器</h3>
+<p><strong>一个大问题</strong>: 我能用装饰器做什么?</p>
+<p>(装饰器)看上去很酷很强大, 但是用一个实际例子来说明可能会更好. 装饰器的用法很多. 经典的用法是, 拓展一个外部库函数(你无法修改它)的功能, 或者用于调试(因为它是临时的, 你并不想进行修改).</p>
+<p>你可以用装饰器不重复地拓展多个函数, 像这样:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> benchmark</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#9ECBFF">    打印函数被执行的时间的装饰器</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#F97583">    import</span><span style="color:#E1E4E8"> time</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs):</span></span>
+<span class="line"><span style="color:#E1E4E8">        t </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> time.clock()</span></span>
+<span class="line"><span style="color:#E1E4E8">        res </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> func(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs)</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8"> func.</span><span style="color:#79B8FF">__name__</span><span style="color:#E1E4E8">, time.clock()</span><span style="color:#F97583">-</span><span style="color:#E1E4E8">t</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> res</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> logging</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#9ECBFF">    记录脚本活动的装饰器</span></span>
+<span class="line"><span style="color:#9ECBFF">    (事实上, 它只是进行了打印, 但可以进行日志打印)</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs):</span></span>
+<span class="line"><span style="color:#E1E4E8">        res </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> func(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs)</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8"> func.</span><span style="color:#79B8FF">__name__</span><span style="color:#E1E4E8">, args, kwargs</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> res</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> counter</span><span style="color:#E1E4E8">(func):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#9ECBFF">    统计并打印函数被执行次数的装饰器</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> wrapper</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs):</span></span>
+<span class="line"><span style="color:#E1E4E8">        wrapper.count </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> wrapper.count </span><span style="color:#F97583">+</span><span style="color:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#E1E4E8">        res </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> func(</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">args, </span><span style="color:#F97583">**</span><span style="color:#E1E4E8">kwargs)</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#9ECBFF"> "</span><span style="color:#79B8FF">{0}</span><span style="color:#9ECBFF"> has been used: </span><span style="color:#79B8FF">{1}</span><span style="color:#9ECBFF">x"</span><span style="color:#E1E4E8">.format(func.</span><span style="color:#79B8FF">__name__</span><span style="color:#E1E4E8">, wrapper.count)</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> res</span></span>
+<span class="line"><span style="color:#E1E4E8">    wrapper.count </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> wrapper</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">@counter</span></span>
+<span class="line"><span style="color:#B392F0">@benchmark</span></span>
+<span class="line"><span style="color:#B392F0">@logging</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> reverse_string</span><span style="color:#E1E4E8">(string):</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#79B8FF"> str</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">reversed</span><span style="color:#E1E4E8">(string))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> reverse_string(</span><span style="color:#9ECBFF">"Able was I ere I saw Elba"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> reverse_string(</span><span style="color:#9ECBFF">"A man, a plan, a canoe, pasta, heros, rajahs, a coloratura, maps, snipe, percale, macaroni, a gag, a banana bag, a tan, a tag, a banana bag again (or a camel), a crepe, pins, Spam, a rut, a Rolo, cash, a jar, sore hats, a peon, a canal: Panama!"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#reverse_string ('Able was I ere I saw Elba',) {}</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper 0.0</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper has been used: 1x</span></span>
+<span class="line"><span style="color:#6A737D">#ablE was I ere I saw elbA</span></span>
+<span class="line"><span style="color:#6A737D">#reverse_string ('A man, a plan, a canoe, pasta, heros, rajahs, a coloratura, maps, snipe, percale, macaroni, a gag, a banana bag, a tan, a tag, a banana bag again (or a camel), a crepe, pins, Spam, a rut, a Rolo, cash, a jar, sore hats, a peon, a canal: Panama!',) {}</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper 0.0</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper has been used: 2x</span></span>
+<span class="line"><span style="color:#6A737D">#!amanaP :lanac a ,noep a ,stah eros ,raj a ,hsac ,oloR a ,tur a ,mapS ,snip ,eperc a ,)lemac a ro( niaga gab ananab a ,gat a ,nat a ,gab ananab a ,gag a ,inoracam ,elacrep ,epins ,spam ,arutaroloc a ,shajar ,soreh ,atsap ,eonac a ,nalp a ,nam A</span></span></code></pre>
+<p>当然, 装饰器的好处是, 对于几乎所有东西, 在不重写的情况, 马上可用. 我说过, 不重复(D.R.Y, Don’t Repeat Yourself):</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#B392F0">@counter</span></span>
+<span class="line"><span style="color:#B392F0">@benchmark</span></span>
+<span class="line"><span style="color:#B392F0">@logging</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> get_random_futurama_quote</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#F97583">    from</span><span style="color:#E1E4E8"> urllib </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> urlopen</span></span>
+<span class="line"><span style="color:#E1E4E8">    result </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> urlopen(</span><span style="color:#9ECBFF">"http://subfusion.net/cgi-bin/quote.pl?quote=futurama"</span><span style="color:#E1E4E8">).read()</span></span>
+<span class="line"><span style="color:#F97583">    try</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">        value </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> result.split(</span><span style="color:#9ECBFF">"&lt;br&gt;&lt;b&gt;&lt;hr&gt;&lt;br&gt;"</span><span style="color:#E1E4E8">)[</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">].split(</span><span style="color:#9ECBFF">"&lt;br&gt;&lt;br&gt;&lt;hr&gt;"</span><span style="color:#E1E4E8">)[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> value.strip()</span></span>
+<span class="line"><span style="color:#F97583">    except</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#9ECBFF"> "No, I'm ... doesn't!"</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> get_random_futurama_quote()</span></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8"> get_random_futurama_quote()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">#输出:</span></span>
+<span class="line"><span style="color:#6A737D">#get_random_futurama_quote () {}</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper 0.02</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper has been used: 1x</span></span>
+<span class="line"><span style="color:#6A737D">#The laws of science be a harsh mistress.</span></span>
+<span class="line"><span style="color:#6A737D">#get_random_futurama_quote () {}</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper 0.01</span></span>
+<span class="line"><span style="color:#6A737D">#wrapper has been used: 2x</span></span>
+<span class="line"><span style="color:#6A737D">#Curse you, merciful Poseidon!</span></span></code></pre>
+<p>Python本身提供了多个装饰器: <code>property</code>, <code>staticmethod</code>等等.</p>
+<ul>
+<li>Django用装饰器管理缓存(caching)和视图权限(view permissions).</li>
+<li>内联异步函数调用的变向实现.</li>
+</ul>
+<p>装饰器确实大有用途.</p>
+</div></article></main><footer>赵喧典 · 长期写作与公开学习</footer></body></html>

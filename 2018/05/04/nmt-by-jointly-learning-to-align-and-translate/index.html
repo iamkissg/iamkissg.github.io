@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><meta name="description" content="Neural Machine Translation by Jointly Learning to Align and Translate"><link rel="canonical" href="https://iamkissg.github.io/2018/05/04/nmt-by-jointly-learning-to-align-and-translate/"><link rel="alternate" type="application/rss+xml" href="/feed.xml"><title>papernotes</title><style>:root{color-scheme:light;font-family:ui-serif,Georgia,Noto Serif SC,serif}body{color:#25211d;background:#fbf8f2;margin:0;line-height:1.75}header,main,footer{width:min(760px,100% - 2rem);margin-inline:auto}header{border-bottom:1px solid #ded7cc;padding-block:2rem 1rem}nav{gap:1rem;display:flex}main{padding-block:2rem 4rem}footer{color:#6b625a;border-top:1px solid #ded7cc;padding-block:1.5rem 3rem}a{color:#855a35;text-underline-offset:.2em}img,video{max-width:100%;height:auto}pre{background:#efe9df;padding:1rem;overflow-x:auto}blockquote{border-left:.2rem solid #b98a5f;margin-inline:0;padding-left:1rem}.entries{gap:1.25rem;padding:0;list-style:none;display:grid}.entries article{background:#fff;border:1px solid #e6ded3;border-radius:.5rem;padding:1rem 1.25rem}.meta{color:#766c63;font-size:.9rem}
+</style></head><body><header><nav aria-label="主导航"><a href="/">iamkissg</a><a href="/tavern-letters/">酒馆来信</a><a href="/archive/">文章归档</a><a href="/feed.xml">RSS</a></nav></header><main data-pagefind-body><article><header><h1>papernotes</h1><p class="meta"><time datetime="2018-05-04T00:00:00.000Z">2018/5/4</time></p></header><div data-legacy-body><p>论文地址: <a href="https://arxiv.org/abs/1409.0473">https://arxiv.org/abs/1409.0473)
+</a></p>
+<p><strong>TL;DR</strong> 本文是将 <em>Attention Mechanism</em> 引入机器翻译的第一文, 文中称为<em>对齐 Alignment</em>. 在 encoder 与 decoder 之间增加了一个 <em>alignment model</em>, 使得翻译不再是将 source 编码成固定长度的向量再解码成 target, 而是维护一个可变的 context, 每翻译一个词, 都从 source 中找出最相关的部分 (即对齐) 着重翻译. 由于使用的 soft-alignment, 梯度可通过 alignment model 反向传播, 因此同时学习翻译与对齐.</p>
+<h4 id="key-points">Key Points</h4>
+<ul>
+<li>指出传统 encoder-decoder 框架的不足之处. 随着序列的增长, 将输入的所有信息压缩进一个固定长度的向量越来越困难, 模型性能将急剧下降.</li>
+<li>引入了 aligment model, decoder 每生成一个词的翻译, 都会对输入序列进行搜索, 找出与当前翻译最相关的部分; 结合之前的输出与查询结果, 进行更好的翻译.</li>
+<li>给出了 alignment model 的一个范式:
+<ul>
+<li>根据之前的输出和对齐结果生成下一个词: $p(y_i|y_1, \dots, y_{i-1}, x)=g(y_{i-1}, s_i, c_i)$; $s_i$, $c_i$ 分别是 decoder RNN 第 i 时刻的 state 与查询得的 context.</li>
+<li>根据之前的输出和 context 计算当前状态: $s_i=f(s_{i-1}, y_{i-1}, c_i)$;</li>
+<li>context vector 是加权求和的结果: $c_i=\Sigma_{j=1}^{T_x} \alpha_{ij}h_j$; $h_j$ 是 endoder 在第 i 时刻的状态, $\alpha_{ij}$ 是对应的权值.</li>
+<li>使用 decoder 的上一个状态计算和 encoder 某时刻状态的相似度, 即对齐程度: $e_{ij}=a(s_{i-1}, h_j)$; (按照原文的表示, 此处为小写的 A)</li>
+<li>概率和必为 1, 因此使用 softmax, soft-alignment 由此得名: $\alpha_{ij}=\frac{exp(e_{ij})}{\Sigma_{k=1}^{T_x} exp(e_{ik})}$. (此处为希腊字母 alpha, 表征概率)</li>
+</ul>
+</li>
+<li>对齐时, 在整个输入序列上搜索相关部分, 每个词都以一定概率和翻译结果对齐, 好处是可以考虑更多的上下文信息, 并很自然地解决了词组的翻译问题, 带来的问题是, 对于 $T_x$ 长度的 source 和 $T_y$ 长度的 target, 要进行 $T_x \times T_y$ 运算.</li>
+<li>具体地, 文中使用感知机来计算相似度, 即 $a(s_{i-1}, h_j)=v_a^T tanh(W_a s_{i-1}+U_a h_j)$</li>
+</ul>
+<p><img src="/img/2018-05-04-nmt-by-jointly-learning-to-align-and-translate/origin_nmt_alignment.png" alt="Alignment Illustration"></p>
+<h4 id="notesquestions">Notes/Questions</h4>
+<ul>
+<li>从概率的角度看, translation 可以理解为 conditional language modeling. 即找出最优的翻译, 最大化 $p(target|source)$ 的概率.</li>
+<li>将 $s_i＄ 和 $y_i$ 分离开, 视觉上和数学上似乎都不太美.</li>
+<li>给出了 Attention 的一个范式, 但计算方法上还比较粗糙, 这也为后面的各种论文提供了发挥空间.</li>
+</ul>
+</div></article></main><footer>赵喧典 · 长期写作与公开学习</footer></body></html>
