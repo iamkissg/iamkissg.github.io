@@ -1,0 +1,519 @@
+<!DOCTYPE html><html lang="zh-CN" data-site-theme="default"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="机器学习初学者的梯度下降算法"><meta property="og:locale" content="zh_CN"><meta property="og:site_name" content="iamkissg | 赵喧典"><meta property="og:type" content="article"><meta property="og:title" content="ML之梯度下降算法 · iamkissg"><meta property="og:description" content="机器学习初学者的梯度下降算法"><meta property="og:url" content="https://lifelonglove.cn/articles/gradient-descent/"><meta property="og:image" content="https://lifelonglove.cn/og/article/gradient-descent.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2017-07-23T00:00:00.000Z"><meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#11172a" media="(prefers-color-scheme: dark)"><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="https://lifelonglove.cn/articles/gradient-descent/"><link rel="alternate" type="application/rss+xml" title="iamkissg 全站订阅" href="/feed.xml"><style>@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/0eb9804d3b64a408.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/e1d714986df79163.woff2") format("woff2");font-display:swap;font-weight:700;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman";src:local("Times New Roman");font-display:swap;font-weight:400;font-style:normal;size-adjust:118.4%;ascent-override:78.3784%;descent-override:21.6216%;line-gap-override:0%;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold";src:local("Times New Roman Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:111.1837%;ascent-override:83.4654%;descent-override:23.0249%;line-gap-override:0%;}:root{--font-lxgw-wenkai:"LXGW WenKai-20380bdfa2bfaa98","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold",serif;}</style><link rel="preload" href="/_astro/fonts/0eb9804d3b64a408.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/_astro/fonts/e1d714986df79163.woff2" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:400;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:500;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:600;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:700;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:400;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:500;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:600;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold";src:local("Arial Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:89.1703%;ascent-override:118.2008%;descent-override:32.4099%;line-gap-override:0%;}:root{--font-ysabeau-office:"Ysabeau Office-21f4cd69c7bfb7ce","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold",sans-serif;}</style><style>@font-face{font-family:"Maple Mono CN-bcb1a43a405a7837";src:url("/_astro/fonts/284f517f4cd904d3.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"Maple Mono CN-bcb1a43a405a7837 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:400;font-style:normal;size-adjust:99.9837%;ascent-override:102.0166%;descent-override:30.0049%;}:root{--font-maple-mono-cn:"Maple Mono CN-bcb1a43a405a7837","Maple Mono CN-bcb1a43a405a7837 fallback: Courier New",monospace;}</style><title>ML之梯度下降算法 · iamkissg</title><script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("iamkissg-theme");
+          if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+        } catch {}
+      })();
+    </script><style>.quaily-subscription[data-astro-cid-hc5keh3e]{max-width:var(--measure);margin:var(--space-7) auto 0;padding:var(--space-5);background:color-mix(in srgb, var(--color-amber) 10%, var(--color-paper));border:1px solid color-mix(in srgb, var(--color-amber) 50%, var(--color-line))}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e],.quaily-subscription--compact[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e]{margin-top:0}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] p[data-astro-cid-hc5keh3e]:last-child{color:var(--color-ink-muted)}.quaily-subscription[data-astro-cid-hc5keh3e] iframe[data-astro-cid-hc5keh3e]{border:0;width:100%;min-height:21rem;display:block}.quaily-subscription__fallback[data-astro-cid-hc5keh3e]{margin:var(--space-2) 0 0;text-align:center}@media (width<=34rem){.quaily-subscription[data-astro-cid-hc5keh3e]{padding:var(--space-3)}}
+</style><link rel="stylesheet" href="/_astro/SiteLayout.BstC_56N.css"><link rel="stylesheet" href="/_astro/ReadingLayout.BDKO8nUo.css"></head><body class="reading-page reading-page--longform"><a class="skip-link" href="#main-content" data-astro-cid-fzpbxy5g>跳到正文</a><header class="site-header" data-astro-cid-fzpbxy5g><div class="site-header__inner shell" data-astro-cid-fzpbxy5g><a class="site-header__brand" href="/" aria-label="iamkissg 首页" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span></a><nav class="desktop-nav" aria-label="主导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g>归档</a><a href="/about/" data-astro-cid-fzpbxy5g>关于</a><a href="/search/" data-astro-cid-fzpbxy5g>搜索</a></nav><div class="site-header__actions" data-astro-cid-fzpbxy5g><a class="icon-action desktop-search" href="/search/" aria-label="搜索" data-search-open data-astro-cid-fzpbxy5g>⌕</a><button class="icon-action" type="button" data-theme-toggle aria-label="切换明暗主题" title="切换明暗主题" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-theme-icon data-astro-cid-fzpbxy5g>◐</span></button><a class="seal-link" href="/about/" aria-label="关于赵喧典" data-astro-cid-fzpbxy5g><span class="seal-mark" aria-hidden="true" data-astro-cid-v3e57phd>趙</span></a><details class="mobile-menu" data-mobile-menu data-astro-cid-fzpbxy5g><summary aria-label="打开导航" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-astro-cid-fzpbxy5g>菜单</span></summary><div class="mobile-menu__panel" data-astro-cid-fzpbxy5g><div class="mobile-menu__top" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><button class="mobile-menu__close" type="button" data-mobile-menu-close data-astro-cid-fzpbxy5g>关闭 ×</button></div><nav aria-label="移动端导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>01</span>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>02</span>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>03</span>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>04</span>归档</a><a href="/about/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>05</span>关于</a><a href="/search/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>06</span>搜索</a></nav><div class="mobile-menu__meta" data-astro-cid-fzpbxy5g><a href="/feed.xml" data-astro-cid-fzpbxy5g>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-fzpbxy5g>GitHub</a><a href="/colophon/" data-astro-cid-fzpbxy5g>版本说明</a><button type="button" data-theme-toggle data-astro-cid-fzpbxy5g>切换明暗主题</button></div></div></details></div></div></header><main id="main-content" data-pagefind-body><article class="reading" data-reading-layout="longform" data-astro-cid-veasemt3><header class="reading-hero" data-print-url="https://lifelonglove.cn/articles/gradient-descent/" data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>文章</p><h1 data-astro-cid-veasemt3>ML之梯度下降算法</h1><p class="reading-deck" data-astro-cid-veasemt3>机器学习初学者的梯度下降算法</p><div class="reading-meta meta" data-astro-cid-veasemt3><span data-astro-cid-veasemt3>发布于 <time datetime="2017-07-23T00:00:00.000Z" data-astro-cid-veasemt3>2017年7月23日</time></span><span data-reading-time data-astro-cid-veasemt3>22 分钟阅读</span></div><details class="mobile-toc" data-mobile-toc data-astro-cid-veasemt3><summary data-astro-cid-veasemt3>展开目录</summary><nav aria-label="文章目录" data-astro-cid-veasemt3><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#基本概念" data-astro-cid-veasemt3>基本概念</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#算法简介" data-astro-cid-veasemt3>算法简介</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#bgd" data-astro-cid-veasemt3>BGD</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#sgd" data-astro-cid-veasemt3>SGD</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#mbgd" data-astro-cid-veasemt3>MBGD</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#tips" data-astro-cid-veasemt3>Tips</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#进阶" data-astro-cid-veasemt3>进阶</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#题外话" data-astro-cid-veasemt3>题外话</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#样例代码" data-astro-cid-veasemt3>样例代码</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#参考资料" data-astro-cid-veasemt3>参考资料</a></li></ol></nav></details></header><div class="reading-grid" data-astro-cid-veasemt3><aside class="desktop-toc" data-desktop-toc aria-label="文章目录" data-astro-cid-veasemt3><nav data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>目录</p><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#基本概念" data-astro-cid-veasemt3>基本概念</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#算法简介" data-astro-cid-veasemt3>算法简介</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#bgd" data-astro-cid-veasemt3>BGD</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#sgd" data-astro-cid-veasemt3>SGD</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#mbgd" data-astro-cid-veasemt3>MBGD</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#tips" data-astro-cid-veasemt3>Tips</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#进阶" data-astro-cid-veasemt3>进阶</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#题外话" data-astro-cid-veasemt3>题外话</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#样例代码" data-astro-cid-veasemt3>样例代码</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#参考资料" data-astro-cid-veasemt3>参考资料</a></li></ol></nav></aside><div class="prose" data-prose data-astro-cid-veasemt3><blockquote>
+<p>新的征程</p>
+</blockquote>
+<blockquote>
+<ul>
+<li><a href="#base">基本概念</a></li>
+</ul>
+</blockquote>
+<ul>
+<li><a href="#introduction-to-algorithm">算法简介</a>
+<ul>
+<li><a href="#bgd">BGD</a></li>
+<li><a href="#sgd">SGD</a></li>
+<li><a href="#mbgd">MBGD</a></li>
+<li><a href="#tips">Tips</a></li>
+</ul>
+</li>
+<li><a href="#advance">进阶</a></li>
+<li><a href="#digression">题外话</a></li>
+<li><a href="#code-sample">样例代码</a></li>
+<li><a href="#reference">参考资料</a></li>
+</ul>
+<h2 id="基本概念">基本概念</h2>
+<p id="base"></p>
+<p>本节尝试独立于机器学习算法, 单纯地来讲<code>梯度下降算法 [Gradient Descent, GD]</code>, 以使梯度下降更具一般性.</p>
+<p>开始之前, 先放 2 个基本概念, 带着这 2 个认识, 在几乎不具备机器学习知识的前提下, 应该也能很好地读懂本节内容:</p>
+<ul>
+<li>机器学习的主要任务之一, 就是通过训练, 习得一组最优的参数. 常以<code>成本函数 [Cost Function]</code> 作为参数估计的函数, 因此, 机器学习的任务就转变为了最小化成本函数.</li>
+<li>优化是机器学习算法非常重要的组成部分, 几乎每个机器学习算法都有一个优化算法.</li>
+</ul>
+<p>梯度下降算法就是一个被广泛使用的优化算法, 它可以用于寻找最小化成本函数的参数值. 用中学数学的语言来描述梯度下降, 是这样的: <em>当函数 <em>$$J(\omega)$$</em> 取得最小值时, 求所对应的自变量 <em>$$\omega$$</em> 的过程</em> 此处, $$\omega$$ 就是机器要学习的参数, $$J(\omega)$$ 就是用于参数估计的成本函数, 是关于 $$\omega$$ 的函数. 因此, 基本上具备中学数学知识的, 都能理解梯度下降算法.</p>
+<p>梯度下降的基本步骤是:</p>
+<ol>
+<li>对成本函数进行微分, 得到其在给定点的梯度. 梯度的正负指示了成本函数值的上升或下降: $$\Delta(\omega)=\frac{\partial J(\omega)}{\partial \omega}$$</li>
+<li>选择使成本函数值减小的方向, 即梯度负方向, 乘以以学习率 $$\alpha$$ 计算得参数的更新量, 并更新参数:$$\omega=\omega-\alpha\Delta(\omega)$$</li>
+<li>重复以上步骤, 直到取得最小的成本</li>
+</ol>
+<p>以上就是梯度下降算法最基础也是最核心的概念, 很简单吧.</p>
+<p>下面讲讲梯度下降算法的几个变种, 包括: <code>批量梯度下降 [Batch Gradient Descent, BGD]</code>, <code>随机梯度下降 [Stochastic Gradient Descent, SGD]</code>, <code>小批量梯度下降 [Mini-Batch Gradient Descent, MBGD]</code></p>
+<h2 id="算法简介">算法简介</h2>
+<p id="introduction-to-algorithm"></p>
+<h3 id="bgd">BGD</h3>
+<p id="bgd"></p>
+<p>BGD 是梯度下降算法最原始的形式, 其特点是每次更新参数 $$\omega$$ 时, 都使用整个训练集的数据.</p>
+<p>BGD 的具体实现是这样的:</p>
+<ol>
+<li>设假设函数为: $$h_{\omega}=\Sigma_{j=0}^{n} \omega_{j} x_{j}$$
+<ul>
+<li>所谓假设函数, 就是用于将输入映射为输出的工具, 其返回值也称为估计值</li>
+</ul>
+</li>
+<li>设成本函数为: $$J(\omega)=\frac{1}{2m}\Sigma_{i=1}^{m} (h_{\omega}(x^{(i)})-y^{(i)})^{2}$$
+<ul>
+<li>注意, $$\omega$$ 才是函数自变量, $$x$$ 是模型输入, $$y$$ 是输入对应的真实值</li>
+<li>该成本函数中, 真正有效的部分是 $$\Sigma_{i=1}^{m} (h_{\omega}(x^{(i)})-y^{(i)})^{2}$$, 前面的 $$\frac{1}{2m}$$ 是为后续计算方便添加的</li>
+</ul>
+</li>
+<li>对成本函数求导, 需要对每一个参数 $$w_{j}$$ 分别求偏导, 得到它们各自的梯度: $$\frac{\partial J(\omega)}{\partial \omega_{j}}=-\frac{1}{m}\Sigma_{i=1}^{m}(y^{i}-h_{\omega}(x^{i}))x_{j}^{i}$$
+<ul>
+<li>机器学习模型通常不止一个参数. 成本函数作为参数估计的工具, 要估计每个参数的最优值, 因此需要对每一个参数分别求偏导数</li>
+</ul>
+</li>
+<li>每个参数都按梯度负方向进行更新: $$\omega_{j}=\omega_{j} + \frac{\alpha}{m}\Sigma_{i=1}^{m}(y^{i}-h_{\omega}(x^{i}))x_{j}^{i}$$</li>
+</ol>
+<p>因此, BGD 的伪代码形式可以简单地写成:</p>
+<p>repeat {<br/>
+    $$\omega_{j}=\omega_{j} + \frac{\alpha}{m}\Sigma_{i=1}^{m}(y^{i}-h_{\omega}(x^{i}))x_{j}^{i}$$<br/>
+    (for every j = 0, 1, .. n)<br/>
+}</p>
+<p>上式中的求和部分 $$\Sigma$$ 就体现了每一次迭代, 都以整个训练集为对象进行梯度计算.</p>
+<p>BGD 得到的是全局最优解, 因为它总是以整个训练集来计算梯度, 这是 BGD 的优点. 但也因此带来了巨大的计算量, 计算迭代速度很很慢.</p>
+<h3 id="sgd">SGD</h3>
+<p id="sgd"></p>
+<p>SGD 每次以一个样本, 而不是整个数据集来计算梯度. 因此, SGD 从成本函数开始, 就不必再求和了, 针对单个样例的成本函数可以写成: $$J(\omega)=\frac{1}{2}(h_{\omega}(x^{(i)})-y^{(i)})^{2}$$ (此处的 $$\frac{1}{2}$$ 同样是为了后续计算方便设置的)</p>
+<p>于是, SGD 的参数更新规则就可以写成: $$\omega_{j}=\omega_{j}+\alpha(y^{i}-h_{\omega}(x^{i}))x_{j}^{i}$$</p>
+<p>SGD 的伪代码形式如下:</p>
+<p>repeat {<br/>
+    for i = 1, .., m {<br/>
+        $$\omega_{j}=\omega_{j}+(y^{i}-h_{\omega}(x^{i}))x_{j}^{i}$$<br/>
+        (for every j = 0, 1, .. n)<br/>
+    }<br/>
+}</p>
+<p>SGD 的关键点在于以随机顺序选取样本. 因为 SGD 存在局部最优困境, 若每次都以相同的顺序选取样本, 其有很大的可能会在相同的地方陷入局部困境, 或者收敛减缓. 因此, 欲使 SGD 发挥更好的效果, 应充分利用<code>随机化 [Randomise]</code> 带来的优势: 可以在每次迭代之前 (伪代码中最外围循环), 对训练集进行随机排列.</p>
+<p>因为每次只取一个样本来进行梯度下降, SGD 的训练速度很快, 但会引入噪声, 使准确度下降. 这意味着并不是每次迭代都向着全局最优而去, 即并不是每次迭代都能使成本函数值降低. 不过换个思路的话, 噪声在一定程度上以使算法避免了局部最优.</p>
+<p>SGD 的另一个好处是, 可以使用<code>在线学习 [online learning]</code>. 也就是说, 在模型训练好之后, 只要有新的数据到来, 模型都可以利用新的数据进行再学习, 更新参数,以适应新的变化.</p>
+<h3 id="mbgd">MBGD</h3>
+<p id="mbgd"></p>
+<p>MBGD 是为解决 BGD 与 SGD 各自缺点而发明的折中算法, 或者说它利用了 BGD 和 SGD 各自优点. 其基本思想是: <em>每次更新参数时, 使用 n 个样本, 既不是全部, 也不是 1.</em> (SGD 可以看成是 n=1 的 MBGD 的一个特例)</p>
+<p>此处就不再给出 MBGD 的成本函数或其求导公式或参数更新规则公式了, 基本同 BGD, 见上.</p>
+<p>MBGD 的伪代码如下:</p>
+<p>say b=10, m=1000,<br/>
+repeat {<br/>
+    for i = 1, 11, 21, .., 991 {<br/>
+        $$\omega_{j}=\omega_{j} + \alpha \frac{1}{10}\Sigma_{k=i}^{i+9}(y^{k}-h_{\omega}(x^{k}))x_{j}^{k}$$<br/>
+        (for every j = 0, 1, .. n)<br/>
+    }<br/>
+}</p>
+<hr>
+<p>总结一下以上 3 个梯度下降算法的优缺点:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left">梯度下降算法</th>
+<th style="text-align: left">优点</th>
+<th style="text-align: left">缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left">BGD</td>
+<td style="text-align: left">全局最优解</td>
+<td style="text-align: left">计算量大, 迭代速度慢, 训练速度慢</td>
+</tr>
+<tr>
+<td style="text-align: left">SGD</td>
+<td style="text-align: left">1.训练速度快 <br/> 2. 支持在线学习</td>
+<td style="text-align: left">准确度下降, 有噪声, 非全局最优解</td>
+</tr>
+<tr>
+<td style="text-align: left">MBGD</td>
+<td style="text-align: left">1. 训练速度较快, 取决于小批量的数目 <br/> 2. 支持在线学习</td>
+<td style="text-align: left">准确度不如 BGD, 仍然有噪声, 非全局最优解</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tips">Tips</h3>
+<p id="tips"></p>
+<p>下面将介绍一些梯度下降算法的使用技巧:</p>
+<ul>
+<li>挑选合适的学习率 $$\alpha$$. 最好的选择方法就是监测目标函数值 (本文中就是成本函数值) 随时间的学习曲线.</li>
+<li>绘制成本-时间的曲线, 观察成本随迭代的变化情况, 即梯度的变化情况. 若成本没有随着迭代而下降, 说明学习率过大了 (发散了).</li>
+<li>学习率通常是一个很小的实值, 比如 0.1, 0.001, 0.0001. 学习率如果过大, 成本函数可能无法收敛, 一直处于发散状态.</li>
+<li>学习算法之前, 进行特征缩放能够改善梯度下降. (亲测! 原来使用较大学习率, 成本函数无法收敛; 使用特征缩放之后, 收敛了)</li>
+<li>使用 MBGD 时, 在学习过程中, 可以逐渐增大小批量的大小, 更好地综合发挥 BGD 与 SGD 的优势.</li>
+</ul>
+<h2 id="进阶">进阶</h2>
+<p id="advance"></p>
+<blockquote>
+<p>以下内容有点深奥, 笔者对一些概念也不甚熟悉, 仅仅是做个记录</p>
+</blockquote>
+<p>我注意到 Keras 实现的 SGD 提供了 3 个关键字参数: <code>decay</code>, <code>momentum</code>, <code>nestrov</code>:</p>
+<ol>
+<li>decay - 衰减的意思, 表示每一次迭代, 学习率 $$\alpha$$ 的衰减量.</li>
+<li>momentum - 动量的意思, 旨在加速学习, 稍后介绍.</li>
+<li>nesterov - 算法名, 表示是否使用 Nesterov 动量算法.</li>
+</ol>
+<p>使用 BGD 达到极小值时, 整个成本函数的真实梯度会变得很小, 最终减小为 0, 因此 BGD 可以使用固定的学习率; 然而, SGD 中梯度估计引入的噪声源不会在极小点处消失, 因此有必要随着时间的推移逐渐降低学习率, 以保证 SGD 收敛.</p>
+<p>实践中, 一般让学习率线性衰减, 直到第 $$\tau$$ 次迭代:</p>
+<p>$$\epsilon_{k}=(1-\alpha)\epsilon_{0}+\alpha \epsilon_{\tau}$$</p>
+<p>其中, $$k$$ 表示第 k 次迭代, $$\tau$$ 表示第 $$\tau$$ 次迭代, $$\alpha=\frac{k}{\tau}$$.</p>
+<p>上式中, 需要设置的量包括: 初始学习率 $$epsilon_0$$, 最终学习率 $$\epsilon_{\tau}$$ 以及 终止迭代次数 $$\tau$$. $$\tau$$ 通常取几百的大小, $$\epsilon_{\tau}$$ 则设为 $$\epsilon_{0}$$的 $$1 %$$. 因此, 剩下的主要问题就是选择一个合适的 $$\epsilon_{0}$$: 取值太大, 学习曲线会剧烈抖动, 成本会明显增加; 取值太小, 学习过程会变得很缓慢.</p>
+<p>上面提到, 在梯度下降中引入动量的概念, 是为了加速学习, 特别是对于处理高曲率 (曲率: 曲线偏离直线的程度), 小但一致的梯度, 或者带噪声的梯度, 有明显的加速效果. 因为动量算法积累了之前梯度指数级衰减的移动平均 (移动平均: 分析时间序列数据的有效工具), 能够继续沿该方向移动, 从而使成本持续减小.</p>
+<p>从形式上看, 动量算法引入了 $$v$$ 充当速度的角色, 代表参数在参数空间移动的方向和速率. $$v$$ 被设为负梯度的指数衰减平均, 其更新规则如下:</p>
+<p>$$
+v \gets \alpha v - \epsilon \nabla_{\omega} (\frac{1}{m}\Sigma_{i=1}^{m}L(f(x^{(i)};\theta),y^{(i)}))
+\omega \gets \omega + v
+$$</p>
+<p>从上式可以得出的一个结论是: <strong>相对于 $$\epsilon$$, $$\alpha$$ 越大, 之前梯度对现在方向的影响就越大</strong>.</p>
+<p>在引入动量的概念之前, $$\omega$$ 的更新步长只是梯度范数乘以学习率, 引入动量之后则取决于梯度序列的大小和排列. 当许多连续的梯度指向相同时, 步长最大</p>
+<p>Nesterov 动量算法是标准动量算法的变种, 其更新规则如下:</p>
+<p>$$
+v \gets \alpha v - \epsilon \nabla_{\omega} (\frac{1}{m}\Sigma_{i=1}^{m}L(f(x^{(i)};\theta + \alpha v),y^{(i)}))
+\omega \gets \omega + v
+$$</p>
+<p>Nesterov 动量算法与标准动量算法的区别在于梯度的计算, 其梯度计算是在施加了当前速度之后, 可以解释为向标准动量方法中添加了一个校正因子.</p>
+<h2 id="题外话">题外话</h2>
+<p id="digression"></p>
+<p>研究优化算法的收敛率时, 一般会衡量<code>额外误差</code>: $$J(\theta)-min_{\theta} J(\theta)$$, 即当前成本超出最低可能成本的量. SGD 应用于<a href="https://zh.wikipedia.org/wiki/%E5%87%B8%E5%84%AA%E5%8C%96">凸问题</a> (研究定义于凸集中的凸函数最小化的问题)时, k 步迭代的额外误差量级是 $$O(1 / \sqrt{k})$$, 在强凸情况下是 $$O(1 / k)$$. 除非假定额外条件, 否则不能进一步改进.</p>
+<p><code>Cramer-Rao 界限</code>指出, 泛化误差的下降速度不会快于 $$O(1 / k)$$. Bottou and Bousquet 因此认为机器学习任务, 不值得探寻收敛快于$$O(1 / k)$$ 的优化算法, 因为:</p>
+<blockquote>
+<p>更快的收敛可能对应过拟合</p>
+</blockquote>
+<h2 id="样例代码">样例代码</h2>
+<p id="code-sample"></p>
+<p>以下是 BGD, SGD, MBGD 的 Python 代码实现, 暂时不包括<a href="#advance">进阶</a>部分提到的高级内容.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> numpy </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> np</span></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> pylab</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> sklearn.datasets.samples_generator </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> make_regression</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> bgd</span><span style="color:#E1E4E8">(alpha, x, y, numIterations):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """Copied from Internet"""</span></span>
+<span class="line"><span style="color:#E1E4E8">    m </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> x.shape[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]  </span><span style="color:#6A737D"># number of samples</span></span>
+<span class="line"><span style="color:#E1E4E8">    theta </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.ones(</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    J_list </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> []</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    x_transpose </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> x.transpose()</span></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#79B8FF"> iter</span><span style="color:#F97583"> in</span><span style="color:#79B8FF"> range</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">, numIterations):</span></span>
+<span class="line"><span style="color:#E1E4E8">        hypothesis </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x, theta)</span></span>
+<span class="line"><span style="color:#E1E4E8">        loss </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> y </span><span style="color:#F97583">-</span><span style="color:#E1E4E8"> hypothesis</span></span>
+<span class="line"><span style="color:#E1E4E8">        J </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.sum(loss </span><span style="color:#F97583">**</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> (</span><span style="color:#79B8FF">2</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8"> m)  </span><span style="color:#6A737D"># cost</span></span>
+<span class="line"><span style="color:#E1E4E8">        J_list.append(J)</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"iter </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF"> | J: </span><span style="color:#79B8FF">%.3f</span><span style="color:#9ECBFF">"</span><span style="color:#F97583"> %</span><span style="color:#E1E4E8"> (</span><span style="color:#79B8FF">iter</span><span style="color:#E1E4E8">, J))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">        gradient </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x_transpose, loss) </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> m</span></span>
+<span class="line"><span style="color:#E1E4E8">        theta </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> alpha </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> gradient  </span><span style="color:#6A737D"># update</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.plot(</span><span style="color:#79B8FF">range</span><span style="color:#E1E4E8">(numIterations), J_list, </span><span style="color:#9ECBFF">"k-"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> theta</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> sgd</span><span style="color:#E1E4E8">(alpha, x, y, num_iter):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """Writtern by kissg"""</span></span>
+<span class="line"><span style="color:#E1E4E8">    m </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> x.shape[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]  </span><span style="color:#6A737D"># number of samples</span></span>
+<span class="line"><span style="color:#E1E4E8">    theta </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.ones(</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    J_list </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> []</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # 随机化序列</span></span>
+<span class="line"><span style="color:#E1E4E8">    idx </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.random.permutation(y.shape[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#E1E4E8">    x, y </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> x[idx], y[idx]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> j </span><span style="color:#F97583">in</span><span style="color:#79B8FF"> range</span><span style="color:#E1E4E8">(num_iter):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        for</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> idx:</span></span>
+<span class="line"><span style="color:#E1E4E8">            single_hypothesis </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x[i], theta)</span></span>
+<span class="line"><span style="color:#E1E4E8">            single_loss </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> y[i] </span><span style="color:#F97583">-</span><span style="color:#E1E4E8"> single_hypothesis</span></span>
+<span class="line"><span style="color:#E1E4E8">            gradient </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x[i].transpose(), single_loss)</span></span>
+<span class="line"><span style="color:#E1E4E8">            theta </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> alpha </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> gradient  </span><span style="color:#6A737D"># update</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">        hypothesis </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x, theta)</span></span>
+<span class="line"><span style="color:#E1E4E8">        loss </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> y </span><span style="color:#F97583">-</span><span style="color:#E1E4E8"> hypothesis</span></span>
+<span class="line"><span style="color:#E1E4E8">        J </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.sum(loss </span><span style="color:#F97583">**</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> (</span><span style="color:#79B8FF">2</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8"> m)  </span><span style="color:#6A737D"># cost</span></span>
+<span class="line"><span style="color:#E1E4E8">        J_list.append(J)</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"iter </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF"> | J: </span><span style="color:#79B8FF">%.3f</span><span style="color:#9ECBFF">"</span><span style="color:#F97583"> %</span><span style="color:#E1E4E8"> (j, J))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.plot(</span><span style="color:#79B8FF">range</span><span style="color:#E1E4E8">(num_iter), J_list, </span><span style="color:#9ECBFF">"r-"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> theta</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> mbgd</span><span style="color:#E1E4E8">(alpha, x, y, num_iter, minibatches):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """Writtern by kissg"""</span></span>
+<span class="line"><span style="color:#E1E4E8">    m </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> x.shape[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]  </span><span style="color:#6A737D"># number of samples</span></span>
+<span class="line"><span style="color:#E1E4E8">    theta </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.ones(</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    J_list </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> []</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> j </span><span style="color:#F97583">in</span><span style="color:#79B8FF"> range</span><span style="color:#E1E4E8">(num_iter):</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">        idx </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.random.permutation(y.shape[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#E1E4E8">        x, y </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> x[idx], y[idx]</span></span>
+<span class="line"><span style="color:#E1E4E8">        mini </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.array_split(</span><span style="color:#79B8FF">range</span><span style="color:#E1E4E8">(y.shape[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]), minibatches)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">        for</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> mini:</span></span>
+<span class="line"><span style="color:#E1E4E8">            mb_hypothesis </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x[i], theta)</span></span>
+<span class="line"><span style="color:#E1E4E8">            mb_loss </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> y[i] </span><span style="color:#F97583">-</span><span style="color:#E1E4E8"> mb_hypothesis</span></span>
+<span class="line"><span style="color:#E1E4E8">            gradient </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x[i].transpose(), mb_loss) </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> minibatches</span></span>
+<span class="line"><span style="color:#E1E4E8">            theta </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> alpha </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> gradient  </span><span style="color:#6A737D"># update</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">        hypothesis </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.dot(x, theta)</span></span>
+<span class="line"><span style="color:#E1E4E8">        loss </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> y </span><span style="color:#F97583">-</span><span style="color:#E1E4E8"> hypothesis</span></span>
+<span class="line"><span style="color:#E1E4E8">        J </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.sum(loss </span><span style="color:#F97583">**</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> (</span><span style="color:#79B8FF">2</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8"> m)  </span><span style="color:#6A737D"># cost</span></span>
+<span class="line"><span style="color:#E1E4E8">        J_list.append(J)</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"iter </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF"> | J: </span><span style="color:#79B8FF">%.3f</span><span style="color:#9ECBFF">"</span><span style="color:#F97583"> %</span><span style="color:#E1E4E8"> (j, J))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.plot(</span><span style="color:#79B8FF">range</span><span style="color:#E1E4E8">(num_iter), J_list, </span><span style="color:#9ECBFF">"y-"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> theta</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">if</span><span style="color:#79B8FF"> __name__</span><span style="color:#F97583"> ==</span><span style="color:#9ECBFF"> '__main__'</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    x, y </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> make_regression(</span><span style="color:#FFAB70">n_samples</span><span style="color:#F97583">=</span><span style="color:#79B8FF">100</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">n_features</span><span style="color:#F97583">=</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">n_informative</span><span style="color:#F97583">=</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#FFAB70">                           random_state</span><span style="color:#F97583">=</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">noise</span><span style="color:#F97583">=</span><span style="color:#79B8FF">35</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    m, n </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.shape(x)</span></span>
+<span class="line"><span style="color:#E1E4E8">    x </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> np.c_[np.ones(m), x]  </span><span style="color:#6A737D"># insert column, bias</span></span>
+<span class="line"><span style="color:#E1E4E8">    alpha </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0.01</span><span style="color:#6A737D">  # learning rate</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.plot(x[:, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">], y, </span><span style="color:#9ECBFF">'o'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">#***BGD***#</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    theta_bgd </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> bgd(alpha, x, y, </span><span style="color:#79B8FF">800</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">in</span><span style="color:#79B8FF"> range</span><span style="color:#E1E4E8">(x.shape[</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">]):</span></span>
+<span class="line"><span style="color:#E1E4E8">        y_bgd_predict </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> theta_bgd </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> x</span></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.plot(x, y_bgd_predict, </span><span style="color:#9ECBFF">'k--'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">#***SGD***#</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    theta_sgd </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> sgd(alpha, x, y, </span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">in</span><span style="color:#79B8FF"> range</span><span style="color:#E1E4E8">(x.shape[</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">]):</span></span>
+<span class="line"><span style="color:#E1E4E8">        y_sgd_predict </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> theta_sgd </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> x</span></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.plot(x, y_sgd_predict, </span><span style="color:#9ECBFF">'r--'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">#***MBGD***#</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    theta_mbgd </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> mbgd(alpha, x, y, </span><span style="color:#79B8FF">50</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">in</span><span style="color:#79B8FF"> range</span><span style="color:#E1E4E8">(x.shape[</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">]):</span></span>
+<span class="line"><span style="color:#E1E4E8">        y_mbgd_predict </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> theta_mbgd </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> x</span></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.plot(x, y_mbgd_predict, </span><span style="color:#9ECBFF">'y--'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    pylab.show()</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"Done!"</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<p>执行以上代码, 得到 3 类梯度下降算法的函数图像如下图所示.</p>
+<p><img src="/img/2017-07-23-gradient-descent/gradient_descent_cost-iteration.png" alt="梯度下降, 成本-时间曲线"></p>
+<ul>
+<li>黑色是 BGD 的图像, 是一条光滑的曲线, 因为 BGD 每一次迭代求得的都是全局最优解;</li>
+<li>红色是 SGD 的图像, 可见抖动很剧烈, 有不少局部最优解;</li>
+<li>黄色是 MBGD 的图像, 相对 SGD 的成本-时间曲线平滑许多, 但仔细看, 仍然有抖动.</li>
+</ul>
+<h2 id="参考资料">参考资料</h2>
+<p id="reference"></p>
+<ul>
+<li><a href="https://www.cnblogs.com/maybe2030/p/5089753.html">博客院园 - [Machine Learning] 梯度下降法的三种形式BGD、SGD以及MBGD</a></li>
+<li><a href="http://www.bogotobogo.com/python/python_numpy_batch_gradient_descent_algorithm.php">(Batch) gradient descent algorithm</a></li>
+<li><a href="http://machinelearningmastery.com/gradient-descent-for-machine-learning/">Gradient Descent For Machine Learning</a></li>
+<li><a href="https://www.amazon.com/Python-Machine-Learning-Sebastian-Raschka/dp/1783555130/ref=sr_1_1?ie=UTF8&amp;qid=1470882464&amp;sr=8-1&amp;keywords=python+machine+learning">Python Machine Learning - Sebastian Raschka</a></li>
+<li><a href="http://www.deeplearningbook.org/">Deep Learning - Ian Goodfellow, Yoshua</a></li>
+<li><a href="https://www.coursera.org/learn/machine-learning/home/welcome">Machine Learning at Coursera - Andrew Ng</a></li>
+</ul>
+</div><aside class="sidenotes" data-sidenotes aria-label="侧注" data-astro-cid-veasemt3></aside></div><footer class="reading-end" data-astro-cid-veasemt3><section class="related" data-related-content aria-labelledby="related-title" data-astro-cid-veasemt3><h2 id="related-title" class="rule-heading" data-astro-cid-veasemt3>继续阅读</h2><ol data-astro-cid-veasemt3><li data-astro-cid-veasemt3><a href="/notes/andrew_ng_dl_course3_note/" data-astro-cid-veasemt3>吴恩达深度学习第三课笔记</a><span data-astro-cid-veasemt3>短笺</span></li><li data-astro-cid-veasemt3><a href="/notes/andrew_ng_dl_course2_note/" data-astro-cid-veasemt3>吴恩达深度学习第二课笔记</a><span data-astro-cid-veasemt3>短笺</span></li><li data-astro-cid-veasemt3><a href="/notes/andrew_ng_dl_course1_note/" data-astro-cid-veasemt3>吴恩达深度学习第一课笔记</a><span data-astro-cid-veasemt3>短笺</span></li></ol></section><section class="share-tools" data-share-region aria-labelledby="share-title" data-astro-cid-j62koywo><h2 id="share-title" class="rule-heading" data-astro-cid-j62koywo>分享本文</h2><div class="share-tools__actions" data-astro-cid-j62koywo><button type="button" data-web-share hidden data-astro-cid-j62koywo>分享</button><button type="button" data-copy-link data-copy-value="https://lifelonglove.cn/articles/gradient-descent/" data-astro-cid-j62koywo>复制链接</button><a href="mailto:?subject=ML%E4%B9%8B%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95&amp;body=%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%0A%0Ahttps%3A%2F%2Flifelonglove.cn%2Farticles%2Fgradient-descent%2F" data-astro-cid-j62koywo>邮件</a><a href="https://x.com/intent/tweet?text=ML%E4%B9%8B%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%0A%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%88%9D%E5%AD%A6%E8%80%85%E7%9A%84%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95&amp;url=https%3A%2F%2Flifelonglove.cn%2Farticles%2Fgradient-descent%2F" rel="external" data-astro-cid-j62koywo>X</a><button type="button" data-copy-share data-copy-value="ML之梯度下降算法
+机器学习初学者的梯度下降算法
+https://lifelonglove.cn/articles/gradient-descent/" data-astro-cid-j62koywo>复制后发布到小红书</button><button type="button" data-copy-share data-copy-value="ML之梯度下降算法
+机器学习初学者的梯度下降算法
+https://lifelonglove.cn/articles/gradient-descent/" data-astro-cid-j62koywo>复制后发布到知乎</button></div><p class="share-tools__status meta" data-share-status aria-live="polite" data-astro-cid-j62koywo></p><details class="share-tools__fallback" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>手动复制分享文字</summary><label data-astro-cid-j62koywo><span class="meta" data-astro-cid-j62koywo>标题、摘要与干净链接</span><textarea readonly rows="5" data-astro-cid-j62koywo>ML之梯度下降算法
+机器学习初学者的梯度下降算法
+https://lifelonglove.cn/articles/gradient-descent/</textarea></label></details><details class="share-tools__qr" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>桌面二维码</summary><div data-share-qr data-astro-cid-j62koywo><svg xmlns="http://www.w3.org/2000/svg" width="184" height="184" viewBox="0 0 35 35" shape-rendering="crispEdges"><path fill="#f4efe4" d="M0 0h35v35H0z"/><path stroke="#17213e" d="M1 1.5h7m1 0h2m4 0h5m4 0h1m2 0h7M1 2.5h1m5 0h1m2 0h1m1 0h2m3 0h2m1 0h3m2 0h1m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m2 0h2m2 0h1m2 0h1m2 0h3m1 0h2m1 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h2m1 0h4m3 0h1m1 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h1m1 0h2m2 0h1m3 0h4m1 0h1m2 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h1m3 0h2m2 0h4m1 0h2m3 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h1m3 0h1m2 0h4m2 0h1m1 0h2M1 9.5h1m3 0h1m1 0h5m6 0h1m1 0h4m1 0h6m2 0h1M1 10.5h2m1 0h1m1 0h1m2 0h2m1 0h6m1 0h1m1 0h1m2 0h1m1 0h1m3 0h3M2 11.5h3m2 0h1m3 0h1m4 0h1m1 0h1m2 0h1m1 0h4m3 0h1m1 0h1M1 12.5h2m1 0h1m1 0h1m5 0h2m1 0h5m1 0h2m1 0h3m5 0h2M2 13.5h1m1 0h6m1 0h6m2 0h5m1 0h1m1 0h1m1 0h2M4 14.5h1m1 0h1m6 0h1m3 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2M3 15.5h2m2 0h3m1 0h2m4 0h1m1 0h2m3 0h1m1 0h2m1 0h1m1 0h2M1 16.5h1m1 0h1m1 0h1m3 0h2m1 0h2m1 0h1m2 0h1m1 0h9M1 17.5h1m2 0h2m1 0h4m1 0h1m3 0h1m1 0h2m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1M1 18.5h2m3 0h1m2 0h5m2 0h4m4 0h1m1 0h1m3 0h3M3 19.5h1m1 0h1m1 0h1m1 0h2m3 0h1m1 0h2m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1M2 20.5h5m3 0h4m1 0h2m3 0h3m2 0h1m1 0h2m3 0h2M7 21.5h3m2 0h2m1 0h1m1 0h1m2 0h4m1 0h1m1 0h1m1 0h2m1 0h2M1 22.5h3m1 0h2m2 0h1m1 0h1m1 0h1m1 0h1m2 0h4m2 0h1m3 0h1m2 0h2M4 23.5h1m2 0h1m3 0h1m1 0h4m2 0h1m1 0h1m2 0h9M3 24.5h1m1 0h1m4 0h4m2 0h7m1 0h2m3 0h1m3 0h1M1 25.5h2m2 0h6m1 0h1m1 0h1m2 0h2m3 0h8m2 0h2M9 26.5h1m2 0h3m1 0h2m1 0h1m2 0h1m2 0h1m3 0h1m1 0h1M1 27.5h7m1 0h1m3 0h1m2 0h3m2 0h1m3 0h1m1 0h1m1 0h2m1 0h1M1 28.5h1m5 0h1m4 0h3m2 0h7m1 0h1m3 0h1m2 0h1M1 29.5h1m1 0h3m1 0h1m1 0h2m2 0h3m3 0h1m1 0h3m1 0h6m2 0h1M1 30.5h1m1 0h3m1 0h1m2 0h1m2 0h3m1 0h1m3 0h5m1 0h3m1 0h1M1 31.5h1m1 0h3m1 0h1m2 0h1m1 0h1m4 0h2m3 0h1m1 0h2m1 0h3M1 32.5h1m5 0h1m5 0h3m2 0h2m1 0h6M1 33.5h7m1 0h1m1 0h1m1 0h1m1 0h4m1 0h4m1 0h3m5 0h1"/></svg>
+</div><p class="meta" data-astro-cid-j62koywo>用手机打开本文；二维码由本站在构建时生成。</p></details><p class="meta" data-astro-cid-j62koywo>链接始终可直接打开：<a href="https://lifelonglove.cn/articles/gradient-descent/" data-astro-cid-j62koywo>https://lifelonglove.cn/articles/gradient-descent/</a></p></section><script>
+  (() => {
+    const root = document.currentScript?.previousElementSibling;
+    if (!(root instanceof HTMLElement) || !root.matches("[data-share-region]")) return;
+    const status = root.querySelector("[data-share-status]");
+    const fallback = root.querySelector("textarea");
+    const report = (message) => { if (status) status.textContent = message; };
+    const copy = async (value) => {
+      try {
+        if (!navigator.clipboard) throw new Error("clipboard unavailable");
+        await navigator.clipboard.writeText(value);
+        report("已复制");
+      } catch {
+        if (fallback instanceof HTMLTextAreaElement) {
+          fallback.value = value;
+          fallback.closest("details").open = true;
+          fallback.focus();
+          fallback.select();
+        }
+        report("请手动复制已选中的文字");
+      }
+    };
+    const webShare = root.querySelector("[data-web-share]");
+    if (webShare instanceof HTMLButtonElement && navigator.share) {
+      webShare.hidden = false;
+      webShare.addEventListener("click", async () => {
+        try {
+          await navigator.share({ title: document.title, url: location.href });
+        } catch (error) {
+          if (error?.name !== "AbortError") report("系统分享不可用，请复制链接");
+        }
+      });
+    }
+    for (const button of root.querySelectorAll("[data-copy-link], [data-copy-share]")) {
+      button.addEventListener("click", () => copy(button.dataset.copyValue || location.href));
+    }
+  })();
+</script><section class="comments" data-comments-mount aria-label="评论" data-astro-cid-veasemt3><span data-giscus-unconfigured hidden data-astro-cid-clnq4c4i>评论参数尚未配置</span></section></footer></article><dialog class="lightbox" data-lightbox aria-label="图片放大查看" data-astro-cid-veasemt3><button class="lightbox__close" type="button" data-lightbox-close aria-label="关闭图片" data-astro-cid-veasemt3>关闭 ×</button><figure data-astro-cid-veasemt3><img src="" alt="" data-astro-cid-veasemt3><figcaption data-astro-cid-veasemt3></figcaption></figure><div class="lightbox__nav" data-astro-cid-veasemt3><button type="button" data-lightbox-prev data-astro-cid-veasemt3>← 上一张</button><button type="button" data-lightbox-next data-astro-cid-veasemt3>下一张 →</button></div></dialog><template data-code-tools-template data-astro-cid-veasemt3><div class="code-tools" data-code-tools data-astro-cid-veasemt3><span data-code-filename data-astro-cid-veasemt3></span><button type="button" data-code-copy data-astro-cid-veasemt3>复制代码</button></div></template></main><footer class="site-footer" data-astro-cid-nns7i3if><div class="site-footer__inner shell" data-astro-cid-nns7i3if><div data-astro-cid-nns7i3if><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><p data-astro-cid-nns7i3if>长期写作，公开学习，也保存生活留下的纹理。</p></div><nav aria-label="页脚导航" data-astro-cid-nns7i3if><a href="/feed.xml" data-astro-cid-nns7i3if>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-nns7i3if>GitHub</a><a href="/colophon/" data-astro-cid-nns7i3if>版本说明</a></nav></div></footer><dialog class="search-overlay" data-search-overlay aria-modal="true" aria-labelledby="search-overlay-title" data-astro-cid-fdy5zvyj><div class="search-overlay__frame" data-astro-cid-fdy5zvyj><div class="search-overlay__top" data-astro-cid-fdy5zvyj><div data-astro-cid-fdy5zvyj><p class="eyebrow" data-astro-cid-fdy5zvyj>Search / 搜索</p><h2 id="search-overlay-title" data-astro-cid-fdy5zvyj>在站内找一段文字</h2></div><button type="button" data-search-close aria-label="关闭搜索" data-astro-cid-fdy5zvyj>关闭 ×</button></div><section class="pagefind-search" data-pagefind-search data-astro-cid-dm6ph42g><label data-astro-cid-dm6ph42g><span data-astro-cid-dm6ph42g>搜索标题、正文与主题</span><input type="search" name="q" placeholder="输入关键词…" autocomplete="off" data-astro-cid-dm6ph42g></label><p class="pagefind-search__status" role="status" aria-live="polite" data-astro-cid-dm6ph42g>输入关键词开始搜索。</p><ol class="pagefind-search__results" data-astro-cid-dm6ph42g></ol><noscript><p data-astro-cid-dm6ph42g>搜索需要 JavaScript；你仍可以前往<a href="/archive/" data-astro-cid-dm6ph42g>完整归档</a>浏览所有内容。</p></noscript></section><script>
+  (() => {
+    const modulePath = "/pagefind/pagefind.js";
+    const escapeHtml = (value) => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    for (const root of document.querySelectorAll("[data-pagefind-search]")) {
+      if (root.dataset.bound === "true") continue;
+      root.dataset.bound = "true";
+      const input = root.querySelector('input[type="search"]');
+      const status = root.querySelector('[role="status"]');
+      const results = root.querySelector("ol");
+      let timer;
+
+      const search = async () => {
+        const query = input.value.trim();
+        if (!query) {
+          status.textContent = "输入关键词开始搜索。";
+          results.replaceChildren();
+          return;
+        }
+        status.textContent = "正在翻阅…";
+        try {
+          const pagefind = await import(/* @vite-ignore */ modulePath);
+          await pagefind.init();
+          const response = await pagefind.search(query);
+          const items = await Promise.all(response.results.slice(0, 12).map((item) => item.data()));
+          status.textContent = items.length ? `找到 ${items.length} 条结果。` : "没有找到，换个词试试。";
+          results.innerHTML = items.map((item) => `
+            <li>
+              <a href="${escapeHtml(item.url)}">${escapeHtml(item.meta?.title || item.url)}</a>
+              <p>${item.excerpt || ""}</p>
+            </li>`).join("");
+        } catch {
+          status.innerHTML = '搜索暂时不可用，请前往<a href="/archive/">完整归档</a>。';
+          results.replaceChildren();
+        }
+      };
+
+      input.addEventListener("input", () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(search, 180);
+      });
+    }
+  })();
+</script><p class="search-overlay__hint" data-astro-cid-fdy5zvyj><kbd data-astro-cid-fdy5zvyj>/</kbd> 打开 · <kbd data-astro-cid-fdy5zvyj>Esc</kbd> 关闭 · <a href="/search/" data-astro-cid-fdy5zvyj>独立搜索页</a></p></div></dialog><script>
+  (() => {
+    const dialog = document.querySelector("[data-search-overlay]");
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    let trigger;
+    const open = (source) => {
+      trigger = source;
+      dialog.showModal();
+      window.setTimeout(() => dialog.querySelector('input[type="search"]')?.focus(), 0);
+    };
+    for (const opener of document.querySelectorAll("[data-search-open]")) {
+      opener.addEventListener("click", (event) => {
+        event.preventDefault();
+        open(opener);
+      });
+    }
+    dialog.querySelector("[data-search-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => trigger?.focus());
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isEditing = target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+      if (event.key === "/" && !isEditing && !dialog.open) {
+        event.preventDefault();
+        open(document.querySelector("[data-search-open]"));
+      }
+    });
+  })();
+</script><script type="module">var e=document.documentElement,t=[...document.querySelectorAll(`[data-theme-toggle]`)],n=window.matchMedia(`(prefers-color-scheme: dark)`),r=()=>e.dataset.theme||(n.matches?`dark`:`light`),i=()=>{let e=r()===`dark`;for(let n of t){n.setAttribute(`aria-pressed`,String(e));let t=n.querySelector(`[data-theme-icon]`);t&&(t.textContent=e?`☀`:`◐`)}};for(let n of t)n.addEventListener(`click`,()=>{let t=r()===`dark`?`light`:`dark`;e.dataset.theme=t;try{localStorage.setItem(`iamkissg-theme`,t)}catch{}i()});n.addEventListener(`change`,i),document.addEventListener(`keydown`,e=>{if(e.key!==`Escape`)return;let t=document.querySelector(`details[data-mobile-menu][open]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});for(let e of document.querySelectorAll(`[data-mobile-menu-close]`))e.addEventListener(`click`,()=>{let t=e.closest(`details[data-mobile-menu]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});i();</script></body></html><script>
+  (() => {
+    const prose = document.querySelector("[data-prose]");
+    if (!prose) return;
+
+    const footnotes = prose.querySelector(".footnotes");
+    const sidenotes = document.querySelector("[data-sidenotes]");
+    const originalFootnoteParent = footnotes?.parentElement;
+    const placeFootnotes = () => {
+      if (!footnotes || !sidenotes || !originalFootnoteParent) return;
+      const desktop = window.matchMedia("(min-width: 68.01rem)").matches;
+      (desktop ? sidenotes : originalFootnoteParent).append(footnotes);
+    };
+    placeFootnotes();
+    window.addEventListener("resize", placeFootnotes, { passive: true });
+
+    const template = document.querySelector("[data-code-tools-template]");
+    for (const pre of prose.querySelectorAll("pre")) {
+      if (!(template instanceof HTMLTemplateElement) || pre.parentElement?.classList.contains("code-frame")) continue;
+      const frame = document.createElement("div");
+      frame.className = "code-frame";
+      pre.before(frame);
+      frame.append(pre);
+      const tools = template.content.firstElementChild.cloneNode(true);
+      const filename = pre.dataset.filename || pre.querySelector("code")?.dataset.title || "";
+      const filenameNode = tools.querySelector("[data-code-filename]");
+      filenameNode.textContent = filename;
+      if (!filename) filenameNode.hidden = true;
+      tools.querySelector("[data-code-copy]").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        try {
+          await navigator.clipboard.writeText(pre.querySelector("code")?.textContent || pre.textContent || "");
+          button.textContent = "已复制";
+        } catch {
+          button.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { button.textContent = "复制代码"; }, 1800);
+      });
+      frame.prepend(tools);
+    }
+
+    const dialog = document.querySelector("[data-lightbox]");
+    const images = [...prose.querySelectorAll("img")].filter((image) => !image.closest("a"));
+    if (!(dialog instanceof HTMLDialogElement) || images.length === 0) return;
+    const dialogImage = dialog.querySelector("img");
+    const caption = dialog.querySelector("figcaption");
+    const previous = dialog.querySelector("[data-lightbox-prev]");
+    const next = dialog.querySelector("[data-lightbox-next]");
+    let activeIndex = 0;
+    let trigger;
+
+    const show = (index) => {
+      activeIndex = (index + images.length) % images.length;
+      const image = images[activeIndex];
+      dialogImage.src = image.currentSrc || image.src;
+      dialogImage.alt = image.alt;
+      caption.textContent = image.alt;
+    };
+    const open = (image) => {
+      trigger = image;
+      show(images.indexOf(image));
+      dialog.showModal();
+      dialog.querySelector("[data-lightbox-close]")?.focus();
+    };
+    for (const image of images) {
+      image.tabIndex = 0;
+      image.setAttribute("role", "button");
+      image.setAttribute("aria-label", `${image.alt || "正文图片"}，点击放大`);
+      image.addEventListener("click", () => open(image));
+      image.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(image);
+        }
+      });
+    }
+    previous.hidden = images.length < 2;
+    next.hidden = images.length < 2;
+    previous.addEventListener("click", () => show(activeIndex - 1));
+    next.addEventListener("click", () => show(activeIndex + 1));
+    dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener("close", () => trigger?.focus());
+  })();
+</script>

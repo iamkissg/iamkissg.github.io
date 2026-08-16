@@ -1,0 +1,367 @@
+<!DOCTYPE html><html lang="zh-CN" data-site-theme="default"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Structuring Machine Learning Projects"><meta property="og:locale" content="zh_CN"><meta property="og:site_name" content="iamkissg | 赵喧典"><meta property="og:type" content="article"><meta property="og:title" content="吴恩达深度学习第三课笔记 · iamkissg"><meta property="og:description" content="Structuring Machine Learning Projects"><meta property="og:url" content="https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/"><meta property="og:image" content="https://lifelonglove.cn/og/note/andrew_ng_dl_course3_note.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2017-08-23T00:00:00.000Z"><meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#11172a" media="(prefers-color-scheme: dark)"><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/"><link rel="alternate" type="application/rss+xml" title="iamkissg 全站订阅" href="/feed.xml"><style>@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/0eb9804d3b64a408.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/e1d714986df79163.woff2") format("woff2");font-display:swap;font-weight:700;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman";src:local("Times New Roman");font-display:swap;font-weight:400;font-style:normal;size-adjust:118.4%;ascent-override:78.3784%;descent-override:21.6216%;line-gap-override:0%;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold";src:local("Times New Roman Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:111.1837%;ascent-override:83.4654%;descent-override:23.0249%;line-gap-override:0%;}:root{--font-lxgw-wenkai:"LXGW WenKai-20380bdfa2bfaa98","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold",serif;}</style><link rel="preload" href="/_astro/fonts/0eb9804d3b64a408.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/_astro/fonts/e1d714986df79163.woff2" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:400;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:500;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:600;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:700;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:400;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:500;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:600;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold";src:local("Arial Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:89.1703%;ascent-override:118.2008%;descent-override:32.4099%;line-gap-override:0%;}:root{--font-ysabeau-office:"Ysabeau Office-21f4cd69c7bfb7ce","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold",sans-serif;}</style><title>吴恩达深度学习第三课笔记 · iamkissg</title><script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("iamkissg-theme");
+          if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+        } catch {}
+      })();
+    </script><style>.quaily-subscription[data-astro-cid-hc5keh3e]{max-width:var(--measure);margin:var(--space-7) auto 0;padding:var(--space-5);background:color-mix(in srgb, var(--color-amber) 10%, var(--color-paper));border:1px solid color-mix(in srgb, var(--color-amber) 50%, var(--color-line))}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e],.quaily-subscription--compact[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e]{margin-top:0}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] p[data-astro-cid-hc5keh3e]:last-child{color:var(--color-ink-muted)}.quaily-subscription[data-astro-cid-hc5keh3e] iframe[data-astro-cid-hc5keh3e]{border:0;width:100%;min-height:21rem;display:block}.quaily-subscription__fallback[data-astro-cid-hc5keh3e]{margin:var(--space-2) 0 0;text-align:center}@media (width<=34rem){.quaily-subscription[data-astro-cid-hc5keh3e]{padding:var(--space-3)}}
+</style><link rel="stylesheet" href="/_astro/SiteLayout.BstC_56N.css"><link rel="stylesheet" href="/_astro/ReadingLayout.BDKO8nUo.css"></head><body class="reading-page reading-page--compact"><a class="skip-link" href="#main-content" data-astro-cid-fzpbxy5g>跳到正文</a><header class="site-header" data-astro-cid-fzpbxy5g><div class="site-header__inner shell" data-astro-cid-fzpbxy5g><a class="site-header__brand" href="/" aria-label="iamkissg 首页" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span></a><nav class="desktop-nav" aria-label="主导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g>归档</a><a href="/about/" data-astro-cid-fzpbxy5g>关于</a><a href="/search/" data-astro-cid-fzpbxy5g>搜索</a></nav><div class="site-header__actions" data-astro-cid-fzpbxy5g><a class="icon-action desktop-search" href="/search/" aria-label="搜索" data-search-open data-astro-cid-fzpbxy5g>⌕</a><button class="icon-action" type="button" data-theme-toggle aria-label="切换明暗主题" title="切换明暗主题" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-theme-icon data-astro-cid-fzpbxy5g>◐</span></button><a class="seal-link" href="/about/" aria-label="关于赵喧典" data-astro-cid-fzpbxy5g><span class="seal-mark" aria-hidden="true" data-astro-cid-v3e57phd>趙</span></a><details class="mobile-menu" data-mobile-menu data-astro-cid-fzpbxy5g><summary aria-label="打开导航" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-astro-cid-fzpbxy5g>菜单</span></summary><div class="mobile-menu__panel" data-astro-cid-fzpbxy5g><div class="mobile-menu__top" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><button class="mobile-menu__close" type="button" data-mobile-menu-close data-astro-cid-fzpbxy5g>关闭 ×</button></div><nav aria-label="移动端导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>01</span>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>02</span>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>03</span>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>04</span>归档</a><a href="/about/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>05</span>关于</a><a href="/search/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>06</span>搜索</a></nav><div class="mobile-menu__meta" data-astro-cid-fzpbxy5g><a href="/feed.xml" data-astro-cid-fzpbxy5g>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-fzpbxy5g>GitHub</a><a href="/colophon/" data-astro-cid-fzpbxy5g>版本说明</a><button type="button" data-theme-toggle data-astro-cid-fzpbxy5g>切换明暗主题</button></div></div></details></div></div></header><main id="main-content" data-pagefind-body><article class="reading" data-reading-layout="compact" data-astro-cid-veasemt3><header class="reading-hero" data-print-url="https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/" data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>短笺</p><h1 data-astro-cid-veasemt3>吴恩达深度学习第三课笔记</h1><p class="reading-deck" data-astro-cid-veasemt3>Structuring Machine Learning Projects</p><div class="reading-meta meta" data-astro-cid-veasemt3><span data-astro-cid-veasemt3>发布于 <time datetime="2017-08-23T00:00:00.000Z" data-astro-cid-veasemt3>2017年8月23日</time></span><span data-reading-time data-astro-cid-veasemt3>14 分钟阅读</span></div><details class="mobile-toc" data-mobile-toc data-astro-cid-veasemt3><summary data-astro-cid-veasemt3>展开目录</summary><nav aria-label="文章目录" data-astro-cid-veasemt3><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#course-3" data-astro-cid-veasemt3>Course 3</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#week1-machine-learning-strategy-1" data-astro-cid-veasemt3>week1: Machine Learning Strategy 1</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#week2-machine-learning-strategy-2" data-astro-cid-veasemt3>week2: Machine Learning Strategy 2</a></li></ol></nav></details></header><div class="reading-grid" data-astro-cid-veasemt3><aside class="desktop-toc" data-desktop-toc aria-label="文章目录" data-astro-cid-veasemt3><nav data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>目录</p><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#course-3" data-astro-cid-veasemt3>Course 3</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#week1-machine-learning-strategy-1" data-astro-cid-veasemt3>week1: Machine Learning Strategy 1</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#week2-machine-learning-strategy-2" data-astro-cid-veasemt3>week2: Machine Learning Strategy 2</a></li></ol></nav></aside><div class="prose" data-prose data-astro-cid-veasemt3><h2 id="course-3">Course 3</h2>
+<h3 id="week1-machine-learning-strategy-1">week1: Machine Learning Strategy 1</h3>
+<ul>
+<li>训练时可采取的一些机器学习策略罗列:
+<ul>
+<li>收集更多数据</li>
+<li>收集更多样的训练集</li>
+<li>使用梯度下降时, 训练更长时间</li>
+<li>尝试用 Adam 代替梯度下降</li>
+<li>尝试更大/更小的神经网络</li>
+<li>尝试 Dropout regularization</li>
+<li>增加 L2 regularization</li>
+<li>调整神经网络架构
+<ul>
+<li>替换激活函数</li>
+<li>增减隐层单元数</li>
+<li>…</li>
+</ul>
+</li>
+<li>…</li>
+</ul>
+</li>
+<li><code>正交 Orthogonalization</code> 的重要性, 以机器学习中的链式假设为例进行说明: 当我们训练一个模型时, 首先希望它在训练集上有一个好的表现, 有一些技术手段能做到这一点, 比如更大的神经网络, 使用 Adam 算法等; 前一点得到保障之后, 我们希望 dev set 也能表现得足够好, 也有一些技术手段, 比如正则化; 然后, 希望模型在测试集上也能有好的表现, 也有一些技术手段, 比如使用更大的 dev set; 最后希望模型在现实世界表现得足够好. 每一步, 都有一些技术手段可以使用, 我们最好使用<code>相互正交的技术手段</code>, 即在一个阶段使用的技术手段, 不会影响另一个阶段. 这样, 我们就能独立地改进模型在不停阶段的性能, 而不必担心对其他阶段造成太大影响. (更直观的例子: 开车的时候, 方向盘控制方向, 油门控制加速, 刹车控制减速; 但如果将加减速也加入方向盘的功能, 结果很可能会事与愿违)</li>
+<li><code>早停 Early Stopping</code> 既会影响模型在训练集的表现, 也会影响其在 Dev set 上的表现, 根据正交性原则, 是一个不太可取的技术手段</li>
+<li>设置一个<code>评估指标 Evaluation Metric</code> 来挑选模型, 一般都是一个数值型的量, 方便量化比较模型
+<ul>
+<li><code>准确率 Accuracy</code>, <code>错误率 Error</code> 是最简单的评估指标. 提供了样本被误分类的信息. Error 可以理解成是错误预测的总和除以预测的总数; Accuracy 则是正确预测的总数除以预测的总数, 或者说 1-ERR</li>
+<li><code>真正率 (true positive rate, TPR)</code> 和<code>假正率 (false positive rate, FPR)</code> 是对于类别不平衡问题特别有用的评估指标. _假正率_是假正例 (实际标签为假, 被误判为真) 的总数除以真实反例的总数; _真正率_是真正例的总数除以真实正例的总数</li>
+<li><code>查准率 Precision (有时也翻译作精确率)</code>: 几乎是真正率的同义词. 计算是: 真正例的总数除以预测正例的总数</li>
+<li><code>查全率 Recall (有时也翻译作召回率)</code>: 计算公式是: 真正例的总数除以正例的总数 (真正例数 + 假反例数).</li>
+<li><code>F1 Score</code>: 一项综合考虑 Precision 和 Recall 的评估指标, 定义为 Precision 和 Recall 的<code>调和平均数 Harmonic Mean</code></li>
+<li>…</li>
+</ul>
+</li>
+<li>不同的应用场景, 优先考虑的评估指标有所不同. 比如疾病检查, 患者关心的是得病的几率, 他在乎的是查准率 (这也是为什么, 此处优先如此翻译); 但比如疾病预防, 医院希望将某疾病的病患都找出来进行隔离治疗, 这时医院可能优先考虑查全率, 宁抓错, 不放过, 如是也.</li>
+<li>Dev set 搭配上单个实值评估指标, 能够加速迭代</li>
+<li><code>满足与优化指标 Satisficing and optimizing metrics</code> 说的是, 当考虑多个评估指标时, 选择一个作为<code>优化指标</code>, 其他的作为<code>满足指标</code>. 顾名思义, 优化指标就是训练模型要不断提升/降低的量, 比如错误率; 而满足指标就是, 只要模型的性能在设定的容忍范围内即可, 而不在此范围内的, 均不予考虑, 比如内存消耗在 10 MB 以内.</li>
+<li>重要的事情说第二遍: 训练集与 (验证集, 测试集) 的数据分布可以不同, 但验证集与测试集的数据分布必须相同.</li>
+<li>验证集的目的, 是为了从多个训练好的模型中, 选择一个最优的. 因此, 只要能够区分不同算法/模型的性能就够了, 不必太大</li>
+<li>测试集的目的, 是为了检验最终模型的泛化能力, 也不必太大.</li>
+<li>有些情况下, 指标+验证 (metric+dev) 选出的最优模型在实际应用中不一定是最好的, 比如涉及情色内容的分类器. 此时, 就要对评估指标进行调整, 一种方法是使用<code>权值 weights</code>. 仍然以涉及情色内容的分类器为例, 原来, 我们使用的错误率计算是这样的: $$\frac{1}{m}\Sigma I(y_pred==y)$$ (其中 I 是指示函数, m 是样本容量); 现在我们要坚决反情色内容, 可以这样 $$\frac{\Sigma w*I(y_pred==y)}{\Sigma w}$$ 计算错误率, 为非情色图片设置很小的权值, 情色内容设置很大的权值, 那么误判情色图片就会造成一个极大的误差, 使最终的误差变大, 降低该分类器的指标.</li>
+<li>我们通过指标来评估模型的性能. 但根据正交的原则, 更恰当的做法是, 先根据要实现的目标, 定义好指标 (英文的描述比较通畅: figure out how to define a metric that captures what you want), 简而言之就是, 先设定好目标; 然后, 训练模型向目标看齐, 不断提升性能, 提升指标. 这样分两步的方式看似与之前没差别, 但实际上差别就在于一个是先定目标, 然后训练; 一个是不管怎样, 先训练, 然后选一个指标来评估其性能. 差别还是很大的</li>
+<li>一种评估机器学习性能的方式是和人比, 这里就引入了 <code>human-level</code> 的概念. 机器学习的准确度 Accuracy 提升有两道坎, 一道是 human-level, 人类非常擅长一些工作, 比如判断是猫与否, 因此将其设为第一道坎, 表达了对人类的尊重; 另一道坎是 <code>贝叶斯可能误差 Bayes Possible Error</code>, 这是学习任务的理论最优值, 可以说是, 看得到摸不着的天花板.</li>
+<li>当机器的水平逊于人类时, 要提升其性能, 可以参考以下几点:
+<ul>
+<li>获得人类标记的数据</li>
+<li>手动分析错误, 思考人是如何判断的</li>
+<li>分析 bias/ variance</li>
+</ul>
+</li>
+<li>Course 2 的笔记中提到过: 训练误差与人类水平 (误差) 之间的差距, 吴恩达老师称为<code>可避免偏差 avoidable bias</code>, 训练误差与验证误差之间差距, 称为<code>方差 variance</code>. 根据此二者, 有四种情形: 低/高偏差, 低/高方差. 当偏差较大时, 应首先降低偏差, 提高模型在训练集上的性能; 方差较大时, 应关注降低方差.</li>
+<li>Human-level error is  a proxy for Bayes error.</li>
+<li>不同人, 对于相同任务的水平是不一样的: 专业的和业余的, 水平就明显不一样; 一群专业的, 水平一般也会比一个人高. 根据上面那句准则, 人类的最高水平就代表了 Human-level. 当然, 具体情况还得具体分析.</li>
+<li>在一些任务方面, 机器已经吊打人类了, 比如 TI7 上, AI 就击败了 Dendi. 当机器不如人类的时候, 学习任务/训练模型, 有一条比较清晰的脉络; 当机器超过人类之后, 一些情况下, 训练就会像陷入泥泞一样, 难于提高, 因为没有清晰的目标了.</li>
+<li>机器胜过人类的场景:
+<ul>
+<li>在线广告</li>
+<li>产品推荐. 所有有时候找人推荐, 不如上亚马逊咯</li>
+<li>对率回归</li>
+<li>语音识别</li>
+<li>一些图片识别</li>
+<li>借贷分析</li>
+<li>医药</li>
+<li>…</li>
+</ul>
+</li>
+<li>监督学习的两个基本假设:
+<ol>
+<li>训练能得到很好的性能</li>
+<li>训练集的性能能够很好地泛化</li>
+</ol>
+</li>
+<li>减小 avoidable bias 的一些手段:
+<ul>
+<li>训练更大的模型</li>
+<li>训练更长时间/使用更优的优化算法</li>
+<li>调整神经网络架构/超参数搜索</li>
+</ul>
+</li>
+<li>减小方差的一些手段:
+<ul>
+<li>更多的数据</li>
+<li>正则化 (L2, dropout, 数据增强)</li>
+<li>调整神经网络架构/超参数搜索</li>
+</ul>
+</li>
+</ul>
+<h3 id="week2-machine-learning-strategy-2">week2: Machine Learning Strategy 2</h3>
+<ul>
+<li>深度学习对于训练集的随机误差有相当强的鲁棒性</li>
+<li><code>误差分析 Error Analysis</code> 就是分析错误, 找出原因. 一种方法是表格分析法: 比如分类任务, 选择一定数量的误分类样本, 列出一系列误分类的原因, 然后统计分析, 找出主要原因, 或定位易解决的原因. 下图是表格分析的一个例子</li>
+</ul>
+<p><img src="/img/2017-08-23-andrew_ng_dl_course3_note/chart_error_analysis.png" alt="chart_error_analysis.png"></p>
+<ul>
+<li>要处理误标记的问题, 应同时处理验证集与测试集的误标记样本, 确保同分布. 不仅误标记处理, 任何对验证集的处理, 都应以相同的方式再处理测试集.</li>
+<li>必要时候, 可以对正确分类的数据也进行分析 (也许存在错错得对的情况也说不定)</li>
+<li>观察验证样本, 思考如何改进. 比如猫的分类器, 当考虑是否有必要更好地处理狗以获得更好的性能时, 就可以取一定数量的误分类的验证集样本, 统计狗的数量, 然后决定是否要实现对狗的强化识别.</li>
+<li>上述的表格分析法, 实际上就能让我们同时考虑多个方法.</li>
+<li>要进行深度学习, 要做的第一件事情是: <code>快速构建第一个系统, 然后迭代</code>, 验证想法, 早发现早治疗.</li>
+<li>当训练集与 (验证集, 测试集) 具有不同的数据分布时, 混合所有样本随机洗牌划分数据集是错误的处理方式. 正确的处理方式是, 从同分步的验证集, 测试集中取出部分样本加入训练集. 很多时候, 海量的训练数据是容易获得的, 而验证测试数据是稀缺的.</li>
+<li>还有一种数据划分方式是, 从训练集中划出少量样本作为 training-dev set, 其与训练集同分布, 但不用于训练. 此时, train set error 与 training-dev set error 之间的差距称为方差, training-dev set error 与 dev error 之间称为 <code>数据不匹配 data mismatch</code>, dev error 与 test error 称为<code>验证集的过拟合程度 degree of overfitting to dev set</code></li>
+<li>解决数据不匹配问题的几种方法:
+<ul>
+<li>手动分析误差, 理解训练集与验证/测试集的差异</li>
+<li>使训练数据更接近验证/测试数据; 或者收集更多与验证/测试数据相似的数据加入训练集. 一种可用的技术手段是: <code>人工数据合成 artificial data synthesis</code>. 比如对于语音识别, 将人声与噪声进行合成, 得到较真实的现实场景的声音数据. 这时会带来的一个问题是, 如果使用同一份噪音, 可能会造成过拟合, 因为噪声也被当作了有价值的特征.</li>
+</ul>
+</li>
+<li><code>迁移学习 transfer learning</code>, 简而言之就是将从某一学习过程得到的知识应用到新的领域. 目前这要求, 任务是相近的. 比如放射诊断只有不多的数据, 对于训练一个高准确率的深度神经网络远远不够, 这时就可以借用一个训练好的图片识别深度神经网络的大部分层次, 只替换掉接近输出层的部分层次, 之后通过简单训练, 就得到了放射诊断的深度神经网络. 这就是迁移学习, 它将图片识别的知识迁移到了放射诊断, 理论依据是, 图片识别与放射诊断的低层特征是相似的, 比如线条的特征, 这就是两个学习任务共同的知识. 如下图所示:</li>
+</ul>
+<p><img src="/img/2017-08-23-andrew_ng_dl_course3_note/illustration_of_transfer_learning.png" alt="illustration_of_transfer_learning.png"></p>
+<ul>
+<li>上面提到, 迁移学习目前的要求是, 学习任务是相近的, 知识是相通的. 可以把图片识别的知识迁移到放射诊断, 但不能迁移到语音识别.</li>
+<li>迁移学习另一个比较硬性的要求是, 大训练集训练得的知识可以迁移到小训练集的学习任务. 但反之被认为是不可取的, 一来这样的知识不可靠, 二来没有太大意义.</li>
+<li>总结一下迁移学习的一些前提条件:
+<ul>
+<li>任务 A, B 具有相同的输入</li>
+<li>要将任务 A 习得的知识迁移到任务 B, 要求任务 A 的数据量大于 B</li>
+<li>A 的低层特征对学习任务 B 有帮助</li>
+</ul>
+</li>
+<li><code>多任务学习 Multi-task learning</code>, 简而言之就是在一个训练任务中, 同时学习多种经验. 以自动驾驶为例, 车辆需要识别行人, 其他车辆, 交通标志, 信号灯等, 从包含以上多个目标的图片中进行识别训练, 那么同一个训练过程, 就需要识别出多个物体. 每个物体的识别, 都是一项学习任务, 因此, 同时识别多个物体就属于 <code>多任务学习</code> 了.</li>
+<li>多任务学习的样本输出值是一个 (n, 1) 维向量, 其中 n 是学习任务数. 假设以 0-1 标记图片中各物体出现与否, 多任务学习的输出有点类似 one-hot 向量. 但不同于 one-hot 向量有且仅有且必须有一个元素被标记为 1, 多任务学习的输出向量可以认为就是单任务学习的输出的组合, 每个位置上的输出值都表示图片中是否存在对应物体. 这就要求图片的标签, 即 y 也是一个 (n, 1) 维向量. 相应地, 多任务学习的<code>损失函数 Loss</code> 也是一个向量</li>
+<li>有时候, 多任务学习的样本标签带有一些问题标记, 通常用 ? 表示. 只要不是全是问题标记的情况, 该样本依旧可以用于训练, 只是最后处理的时候忽略该项, 或采用其他技术手段即可. 而如果直接丢弃该样本, 那对于现实生活中存在的大量信息缺失情形, 可用于训练的数据将大大减少, 因此要不抛弃不放弃.</li>
+<li>总结一下多任务学习的一些前提条件:
+<ul>
+<li>学习的一系列任务, 都能从共享的低层特征中收益. 比如图片中多物体的识别, 低层特征如线条就是共享的, 所有的物体识别都能从中获益. 此处有一个推论, 就是得益于特征共享, 多任务学习的性能会比独立训练多个单任务神经网络更好.</li>
+<li>通常, 各学习任务的数据量是相近的. 以自动驾驶为例, 要学习识别行人, 车辆, 交通标志, 信号灯, 那么, 能够识别出行人, 车辆, 交通标志, 信号灯的样本数量应该是相近的. 一个直观的感觉是, 有 1000000 个样本, 其中 999000 能识别出车辆, 只有 1000 样本能识别出行人, 那么行人不是更像噪声吗</li>
+<li>多任务学习的一个假设是: 只要训练一个足够大的神经网络, 就能在各项任务上都有足够好的性能</li>
+</ul>
+</li>
+<li><code>端到端学习 end to end learning</code>, 简而言之就是没有中间过程, 从输入直接到输出. 以语音识别为例, 传统的做法是, 1) 从音频中提取特征; 2) 从特征中提炼音素; 3) 构词; 4) 转录成文本. 而端到端学习, 就是简单粗暴的从音频到转录文本. 如下所示:</li>
+</ul>
+<p><img src="/img/2017-08-23-andrew_ng_dl_course3_note/illustration_of_end-to-end-learning.png" alt="illustration_of_end-to-end-learning.png"></p>
+<ul>
+<li>端到端学习的优缺点:
+<ul>
+<li>优点:
+<ul>
+<li>让数据发声</li>
+<li>只需要更少的人工参与</li>
+</ul>
+</li>
+<li>缺点:
+<ul>
+<li>可能需要大量的数据, 大到足以让数据发声</li>
+<li>剔除了潜在的有帮助的人工参与</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>人工参与到机器学习/深度学习的各环节, 可以将人的经验, 知识等注入系统, 也许能帮助系统更好更快的学习. 此外, 将端到端学习拆分成多个相对独立的学习过程, 有点分治的味道, 易于实现, 性能也可能比设计不佳的端到端学习更好.</li>
+</ul>
+</div><aside class="sidenotes" data-sidenotes aria-label="侧注" data-astro-cid-veasemt3></aside></div><footer class="reading-end" data-astro-cid-veasemt3><section class="related" data-related-content aria-labelledby="related-title" data-astro-cid-veasemt3><h2 id="related-title" class="rule-heading" data-astro-cid-veasemt3>继续阅读</h2><ol data-astro-cid-veasemt3><li data-astro-cid-veasemt3><a href="/notes/andrew_ng_dl_course2_note/" data-astro-cid-veasemt3>吴恩达深度学习第二课笔记</a><span data-astro-cid-veasemt3>短笺</span></li><li data-astro-cid-veasemt3><a href="/notes/andrew_ng_dl_course1_note/" data-astro-cid-veasemt3>吴恩达深度学习第一课笔记</a><span data-astro-cid-veasemt3>短笺</span></li><li data-astro-cid-veasemt3><a href="/notes/papernotes_applying_deep_learning_to_airbnb_search/" data-astro-cid-veasemt3>【Papernotes】Applying Deep Learning to Airbnb Search</a><span data-astro-cid-veasemt3>短笺</span></li></ol></section><section class="share-tools" data-share-region aria-labelledby="share-title" data-astro-cid-j62koywo><h2 id="share-title" class="rule-heading" data-astro-cid-j62koywo>分享本文</h2><div class="share-tools__actions" data-astro-cid-j62koywo><button type="button" data-web-share hidden data-astro-cid-j62koywo>分享</button><button type="button" data-copy-link data-copy-value="https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/" data-astro-cid-j62koywo>复制链接</button><a href="mailto:?subject=%E5%90%B4%E6%81%A9%E8%BE%BE%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%AC%AC%E4%B8%89%E8%AF%BE%E7%AC%94%E8%AE%B0&amp;body=Structuring%20Machine%20Learning%20Projects%0A%0Ahttps%3A%2F%2Flifelonglove.cn%2Fnotes%2Fandrew_ng_dl_course3_note%2F" data-astro-cid-j62koywo>邮件</a><a href="https://x.com/intent/tweet?text=%E5%90%B4%E6%81%A9%E8%BE%BE%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%AC%AC%E4%B8%89%E8%AF%BE%E7%AC%94%E8%AE%B0%0AStructuring%20Machine%20Learning%20Projects&amp;url=https%3A%2F%2Flifelonglove.cn%2Fnotes%2Fandrew_ng_dl_course3_note%2F" rel="external" data-astro-cid-j62koywo>X</a><button type="button" data-copy-share data-copy-value="吴恩达深度学习第三课笔记
+Structuring Machine Learning Projects
+https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/" data-astro-cid-j62koywo>复制后发布到小红书</button><button type="button" data-copy-share data-copy-value="吴恩达深度学习第三课笔记
+Structuring Machine Learning Projects
+https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/" data-astro-cid-j62koywo>复制后发布到知乎</button></div><p class="share-tools__status meta" data-share-status aria-live="polite" data-astro-cid-j62koywo></p><details class="share-tools__fallback" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>手动复制分享文字</summary><label data-astro-cid-j62koywo><span class="meta" data-astro-cid-j62koywo>标题、摘要与干净链接</span><textarea readonly rows="5" data-astro-cid-j62koywo>吴恩达深度学习第三课笔记
+Structuring Machine Learning Projects
+https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/</textarea></label></details><details class="share-tools__qr" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>桌面二维码</summary><div data-share-qr data-astro-cid-j62koywo><svg xmlns="http://www.w3.org/2000/svg" width="184" height="184" viewBox="0 0 35 35" shape-rendering="crispEdges"><path fill="#f4efe4" d="M0 0h35v35H0z"/><path stroke="#17213e" d="M1 1.5h7m2 0h1m1 0h3m3 0h4m2 0h1m2 0h7M1 2.5h1m5 0h1m5 0h6m4 0h1m1 0h1m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h2m2 0h2m5 0h4m3 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h2m4 0h4m1 0h1m2 0h3m1 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m3 0h2m1 0h2m2 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h1m2 0h1m1 0h6m3 0h1m3 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h1m1 0h1m3 0h2m3 0h6M1 9.5h1m1 0h5m2 0h9m1 0h1m2 0h1m1 0h1m1 0h5M10 10.5h1m2 0h1m3 0h1m1 0h2m1 0h1m1 0h1m2 0h2m1 0h4M1 11.5h7m1 0h1m1 0h2m3 0h2m3 0h3m2 0h1m2 0h1m1 0h2M1 12.5h1m1 0h1m4 0h2m1 0h1m1 0h1m1 0h3m1 0h1m1 0h3m2 0h2m1 0h3M2 13.5h3m1 0h2m3 0h1m1 0h1m2 0h1m1 0h1m4 0h1m1 0h2m1 0h3m1 0h1M4 14.5h2m2 0h1m1 0h2m1 0h1m1 0h7m1 0h2m1 0h1m4 0h3M2 15.5h1m4 0h2m4 0h3m2 0h1m2 0h1m1 0h1m2 0h4m2 0h1M4 16.5h1m1 0h1m1 0h2m1 0h3m3 0h1m1 0h4m1 0h1m1 0h2m1 0h3M2 17.5h4m1 0h2m1 0h3m1 0h2m2 0h3m2 0h4m1 0h2m3 0h1M5 18.5h2m1 0h2m2 0h2m3 0h1m1 0h4m1 0h1m2 0h2m1 0h2m1 0h1M2 19.5h1m1 0h2m1 0h1m1 0h1m2 0h1m1 0h3m8 0h5m1 0h2M2 20.5h2m7 0h2m3 0h2m2 0h3m1 0h1m1 0h6m1 0h1M1 21.5h2m2 0h6m3 0h1m1 0h4m1 0h1m1 0h1m2 0h1m1 0h3m1 0h2M1 22.5h1m1 0h1m4 0h1m1 0h2m1 0h4m1 0h2m1 0h3m3 0h1m2 0h2m1 0h1M1 23.5h1m2 0h1m2 0h6m1 0h5m2 0h1m1 0h1m1 0h3m1 0h4M1 24.5h1m1 0h1m1 0h1m10 0h1m3 0h1m1 0h2m5 0h3M1 25.5h1m5 0h1m1 0h2m1 0h7m2 0h1m1 0h8m2 0h1M9 26.5h2m2 0h1m1 0h1m1 0h6m2 0h1m3 0h1m1 0h1m1 0h1M1 27.5h7m3 0h2m1 0h1m1 0h3m2 0h1m2 0h2m1 0h1m1 0h1m1 0h2M1 28.5h1m5 0h1m1 0h1m1 0h1m5 0h1m2 0h6m3 0h4M1 29.5h1m1 0h3m1 0h1m1 0h1m5 0h1m3 0h3m1 0h1m1 0h6M1 30.5h1m1 0h3m1 0h1m1 0h1m3 0h8m3 0h3m2 0h5M1 31.5h1m1 0h3m1 0h1m1 0h2m1 0h4m2 0h1m2 0h3m3 0h2m1 0h1M1 32.5h1m5 0h1m2 0h1m3 0h2m1 0h1m1 0h1m1 0h2m3 0h1m2 0h3M1 33.5h7m1 0h6m3 0h1m4 0h3m2 0h1m1 0h3"/></svg>
+</div><p class="meta" data-astro-cid-j62koywo>用手机打开本文；二维码由本站在构建时生成。</p></details><p class="meta" data-astro-cid-j62koywo>链接始终可直接打开：<a href="https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/" data-astro-cid-j62koywo>https://lifelonglove.cn/notes/andrew_ng_dl_course3_note/</a></p></section><script>
+  (() => {
+    const root = document.currentScript?.previousElementSibling;
+    if (!(root instanceof HTMLElement) || !root.matches("[data-share-region]")) return;
+    const status = root.querySelector("[data-share-status]");
+    const fallback = root.querySelector("textarea");
+    const report = (message) => { if (status) status.textContent = message; };
+    const copy = async (value) => {
+      try {
+        if (!navigator.clipboard) throw new Error("clipboard unavailable");
+        await navigator.clipboard.writeText(value);
+        report("已复制");
+      } catch {
+        if (fallback instanceof HTMLTextAreaElement) {
+          fallback.value = value;
+          fallback.closest("details").open = true;
+          fallback.focus();
+          fallback.select();
+        }
+        report("请手动复制已选中的文字");
+      }
+    };
+    const webShare = root.querySelector("[data-web-share]");
+    if (webShare instanceof HTMLButtonElement && navigator.share) {
+      webShare.hidden = false;
+      webShare.addEventListener("click", async () => {
+        try {
+          await navigator.share({ title: document.title, url: location.href });
+        } catch (error) {
+          if (error?.name !== "AbortError") report("系统分享不可用，请复制链接");
+        }
+      });
+    }
+    for (const button of root.querySelectorAll("[data-copy-link], [data-copy-share]")) {
+      button.addEventListener("click", () => copy(button.dataset.copyValue || location.href));
+    }
+  })();
+</script></footer></article><dialog class="lightbox" data-lightbox aria-label="图片放大查看" data-astro-cid-veasemt3><button class="lightbox__close" type="button" data-lightbox-close aria-label="关闭图片" data-astro-cid-veasemt3>关闭 ×</button><figure data-astro-cid-veasemt3><img src="" alt="" data-astro-cid-veasemt3><figcaption data-astro-cid-veasemt3></figcaption></figure><div class="lightbox__nav" data-astro-cid-veasemt3><button type="button" data-lightbox-prev data-astro-cid-veasemt3>← 上一张</button><button type="button" data-lightbox-next data-astro-cid-veasemt3>下一张 →</button></div></dialog><template data-code-tools-template data-astro-cid-veasemt3><div class="code-tools" data-code-tools data-astro-cid-veasemt3><span data-code-filename data-astro-cid-veasemt3></span><button type="button" data-code-copy data-astro-cid-veasemt3>复制代码</button></div></template></main><footer class="site-footer" data-astro-cid-nns7i3if><div class="site-footer__inner shell" data-astro-cid-nns7i3if><div data-astro-cid-nns7i3if><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><p data-astro-cid-nns7i3if>长期写作，公开学习，也保存生活留下的纹理。</p></div><nav aria-label="页脚导航" data-astro-cid-nns7i3if><a href="/feed.xml" data-astro-cid-nns7i3if>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-nns7i3if>GitHub</a><a href="/colophon/" data-astro-cid-nns7i3if>版本说明</a></nav></div></footer><dialog class="search-overlay" data-search-overlay aria-modal="true" aria-labelledby="search-overlay-title" data-astro-cid-fdy5zvyj><div class="search-overlay__frame" data-astro-cid-fdy5zvyj><div class="search-overlay__top" data-astro-cid-fdy5zvyj><div data-astro-cid-fdy5zvyj><p class="eyebrow" data-astro-cid-fdy5zvyj>Search / 搜索</p><h2 id="search-overlay-title" data-astro-cid-fdy5zvyj>在站内找一段文字</h2></div><button type="button" data-search-close aria-label="关闭搜索" data-astro-cid-fdy5zvyj>关闭 ×</button></div><section class="pagefind-search" data-pagefind-search data-astro-cid-dm6ph42g><label data-astro-cid-dm6ph42g><span data-astro-cid-dm6ph42g>搜索标题、正文与主题</span><input type="search" name="q" placeholder="输入关键词…" autocomplete="off" data-astro-cid-dm6ph42g></label><p class="pagefind-search__status" role="status" aria-live="polite" data-astro-cid-dm6ph42g>输入关键词开始搜索。</p><ol class="pagefind-search__results" data-astro-cid-dm6ph42g></ol><noscript><p data-astro-cid-dm6ph42g>搜索需要 JavaScript；你仍可以前往<a href="/archive/" data-astro-cid-dm6ph42g>完整归档</a>浏览所有内容。</p></noscript></section><script>
+  (() => {
+    const modulePath = "/pagefind/pagefind.js";
+    const escapeHtml = (value) => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    for (const root of document.querySelectorAll("[data-pagefind-search]")) {
+      if (root.dataset.bound === "true") continue;
+      root.dataset.bound = "true";
+      const input = root.querySelector('input[type="search"]');
+      const status = root.querySelector('[role="status"]');
+      const results = root.querySelector("ol");
+      let timer;
+
+      const search = async () => {
+        const query = input.value.trim();
+        if (!query) {
+          status.textContent = "输入关键词开始搜索。";
+          results.replaceChildren();
+          return;
+        }
+        status.textContent = "正在翻阅…";
+        try {
+          const pagefind = await import(/* @vite-ignore */ modulePath);
+          await pagefind.init();
+          const response = await pagefind.search(query);
+          const items = await Promise.all(response.results.slice(0, 12).map((item) => item.data()));
+          status.textContent = items.length ? `找到 ${items.length} 条结果。` : "没有找到，换个词试试。";
+          results.innerHTML = items.map((item) => `
+            <li>
+              <a href="${escapeHtml(item.url)}">${escapeHtml(item.meta?.title || item.url)}</a>
+              <p>${item.excerpt || ""}</p>
+            </li>`).join("");
+        } catch {
+          status.innerHTML = '搜索暂时不可用，请前往<a href="/archive/">完整归档</a>。';
+          results.replaceChildren();
+        }
+      };
+
+      input.addEventListener("input", () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(search, 180);
+      });
+    }
+  })();
+</script><p class="search-overlay__hint" data-astro-cid-fdy5zvyj><kbd data-astro-cid-fdy5zvyj>/</kbd> 打开 · <kbd data-astro-cid-fdy5zvyj>Esc</kbd> 关闭 · <a href="/search/" data-astro-cid-fdy5zvyj>独立搜索页</a></p></div></dialog><script>
+  (() => {
+    const dialog = document.querySelector("[data-search-overlay]");
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    let trigger;
+    const open = (source) => {
+      trigger = source;
+      dialog.showModal();
+      window.setTimeout(() => dialog.querySelector('input[type="search"]')?.focus(), 0);
+    };
+    for (const opener of document.querySelectorAll("[data-search-open]")) {
+      opener.addEventListener("click", (event) => {
+        event.preventDefault();
+        open(opener);
+      });
+    }
+    dialog.querySelector("[data-search-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => trigger?.focus());
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isEditing = target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+      if (event.key === "/" && !isEditing && !dialog.open) {
+        event.preventDefault();
+        open(document.querySelector("[data-search-open]"));
+      }
+    });
+  })();
+</script><script type="module">var e=document.documentElement,t=[...document.querySelectorAll(`[data-theme-toggle]`)],n=window.matchMedia(`(prefers-color-scheme: dark)`),r=()=>e.dataset.theme||(n.matches?`dark`:`light`),i=()=>{let e=r()===`dark`;for(let n of t){n.setAttribute(`aria-pressed`,String(e));let t=n.querySelector(`[data-theme-icon]`);t&&(t.textContent=e?`☀`:`◐`)}};for(let n of t)n.addEventListener(`click`,()=>{let t=r()===`dark`?`light`:`dark`;e.dataset.theme=t;try{localStorage.setItem(`iamkissg-theme`,t)}catch{}i()});n.addEventListener(`change`,i),document.addEventListener(`keydown`,e=>{if(e.key!==`Escape`)return;let t=document.querySelector(`details[data-mobile-menu][open]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});for(let e of document.querySelectorAll(`[data-mobile-menu-close]`))e.addEventListener(`click`,()=>{let t=e.closest(`details[data-mobile-menu]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});i();</script></body></html><script>
+  (() => {
+    const prose = document.querySelector("[data-prose]");
+    if (!prose) return;
+
+    const footnotes = prose.querySelector(".footnotes");
+    const sidenotes = document.querySelector("[data-sidenotes]");
+    const originalFootnoteParent = footnotes?.parentElement;
+    const placeFootnotes = () => {
+      if (!footnotes || !sidenotes || !originalFootnoteParent) return;
+      const desktop = window.matchMedia("(min-width: 68.01rem)").matches;
+      (desktop ? sidenotes : originalFootnoteParent).append(footnotes);
+    };
+    placeFootnotes();
+    window.addEventListener("resize", placeFootnotes, { passive: true });
+
+    const template = document.querySelector("[data-code-tools-template]");
+    for (const pre of prose.querySelectorAll("pre")) {
+      if (!(template instanceof HTMLTemplateElement) || pre.parentElement?.classList.contains("code-frame")) continue;
+      const frame = document.createElement("div");
+      frame.className = "code-frame";
+      pre.before(frame);
+      frame.append(pre);
+      const tools = template.content.firstElementChild.cloneNode(true);
+      const filename = pre.dataset.filename || pre.querySelector("code")?.dataset.title || "";
+      const filenameNode = tools.querySelector("[data-code-filename]");
+      filenameNode.textContent = filename;
+      if (!filename) filenameNode.hidden = true;
+      tools.querySelector("[data-code-copy]").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        try {
+          await navigator.clipboard.writeText(pre.querySelector("code")?.textContent || pre.textContent || "");
+          button.textContent = "已复制";
+        } catch {
+          button.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { button.textContent = "复制代码"; }, 1800);
+      });
+      frame.prepend(tools);
+    }
+
+    const dialog = document.querySelector("[data-lightbox]");
+    const images = [...prose.querySelectorAll("img")].filter((image) => !image.closest("a"));
+    if (!(dialog instanceof HTMLDialogElement) || images.length === 0) return;
+    const dialogImage = dialog.querySelector("img");
+    const caption = dialog.querySelector("figcaption");
+    const previous = dialog.querySelector("[data-lightbox-prev]");
+    const next = dialog.querySelector("[data-lightbox-next]");
+    let activeIndex = 0;
+    let trigger;
+
+    const show = (index) => {
+      activeIndex = (index + images.length) % images.length;
+      const image = images[activeIndex];
+      dialogImage.src = image.currentSrc || image.src;
+      dialogImage.alt = image.alt;
+      caption.textContent = image.alt;
+    };
+    const open = (image) => {
+      trigger = image;
+      show(images.indexOf(image));
+      dialog.showModal();
+      dialog.querySelector("[data-lightbox-close]")?.focus();
+    };
+    for (const image of images) {
+      image.tabIndex = 0;
+      image.setAttribute("role", "button");
+      image.setAttribute("aria-label", `${image.alt || "正文图片"}，点击放大`);
+      image.addEventListener("click", () => open(image));
+      image.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(image);
+        }
+      });
+    }
+    previous.hidden = images.length < 2;
+    next.hidden = images.length < 2;
+    previous.addEventListener("click", () => show(activeIndex - 1));
+    next.addEventListener("click", () => show(activeIndex + 1));
+    dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener("close", () => trigger?.focus());
+  })();
+</script>

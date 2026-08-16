@@ -1,0 +1,843 @@
+<!DOCTYPE html><html lang="zh-CN" data-site-theme="default"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Notes on &quot;The C programming language&quot;"><meta property="og:locale" content="zh_CN"><meta property="og:site_name" content="iamkissg | 赵喧典"><meta property="og:type" content="article"><meta property="og:title" content="[笔记]C程序设计语言 · iamkissg"><meta property="og:description" content="Notes on &quot;The C programming language&quot;"><meta property="og:url" content="https://lifelonglove.cn/notes/notes-on-the-c-programming-language/"><meta property="og:image" content="https://lifelonglove.cn/og/note/notes-on-the-c-programming-language.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2016-07-10T00:00:00.000Z"><meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#11172a" media="(prefers-color-scheme: dark)"><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="https://lifelonglove.cn/notes/notes-on-the-c-programming-language/"><link rel="alternate" type="application/rss+xml" title="iamkissg 全站订阅" href="/feed.xml"><style>@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/0eb9804d3b64a408.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/e1d714986df79163.woff2") format("woff2");font-display:swap;font-weight:700;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman";src:local("Times New Roman");font-display:swap;font-weight:400;font-style:normal;size-adjust:118.4%;ascent-override:78.3784%;descent-override:21.6216%;line-gap-override:0%;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold";src:local("Times New Roman Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:111.1837%;ascent-override:83.4654%;descent-override:23.0249%;line-gap-override:0%;}:root{--font-lxgw-wenkai:"LXGW WenKai-20380bdfa2bfaa98","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold",serif;}</style><link rel="preload" href="/_astro/fonts/0eb9804d3b64a408.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/_astro/fonts/e1d714986df79163.woff2" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:400;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:500;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:600;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:700;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:400;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:500;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:600;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold";src:local("Arial Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:89.1703%;ascent-override:118.2008%;descent-override:32.4099%;line-gap-override:0%;}:root{--font-ysabeau-office:"Ysabeau Office-21f4cd69c7bfb7ce","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold",sans-serif;}</style><style>@font-face{font-family:"Maple Mono CN-bcb1a43a405a7837";src:url("/_astro/fonts/284f517f4cd904d3.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"Maple Mono CN-bcb1a43a405a7837 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:400;font-style:normal;size-adjust:99.9837%;ascent-override:102.0166%;descent-override:30.0049%;}:root{--font-maple-mono-cn:"Maple Mono CN-bcb1a43a405a7837","Maple Mono CN-bcb1a43a405a7837 fallback: Courier New",monospace;}</style><title>[笔记]C程序设计语言 · iamkissg</title><script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("iamkissg-theme");
+          if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+        } catch {}
+      })();
+    </script><style>.quaily-subscription[data-astro-cid-hc5keh3e]{max-width:var(--measure);margin:var(--space-7) auto 0;padding:var(--space-5);background:color-mix(in srgb, var(--color-amber) 10%, var(--color-paper));border:1px solid color-mix(in srgb, var(--color-amber) 50%, var(--color-line))}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e],.quaily-subscription--compact[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e]{margin-top:0}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] p[data-astro-cid-hc5keh3e]:last-child{color:var(--color-ink-muted)}.quaily-subscription[data-astro-cid-hc5keh3e] iframe[data-astro-cid-hc5keh3e]{border:0;width:100%;min-height:21rem;display:block}.quaily-subscription__fallback[data-astro-cid-hc5keh3e]{margin:var(--space-2) 0 0;text-align:center}@media (width<=34rem){.quaily-subscription[data-astro-cid-hc5keh3e]{padding:var(--space-3)}}
+</style><link rel="stylesheet" href="/_astro/SiteLayout.BstC_56N.css"><link rel="stylesheet" href="/_astro/ReadingLayout.BDKO8nUo.css"></head><body class="reading-page reading-page--compact"><a class="skip-link" href="#main-content" data-astro-cid-fzpbxy5g>跳到正文</a><header class="site-header" data-astro-cid-fzpbxy5g><div class="site-header__inner shell" data-astro-cid-fzpbxy5g><a class="site-header__brand" href="/" aria-label="iamkissg 首页" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span></a><nav class="desktop-nav" aria-label="主导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g>归档</a><a href="/about/" data-astro-cid-fzpbxy5g>关于</a><a href="/search/" data-astro-cid-fzpbxy5g>搜索</a></nav><div class="site-header__actions" data-astro-cid-fzpbxy5g><a class="icon-action desktop-search" href="/search/" aria-label="搜索" data-search-open data-astro-cid-fzpbxy5g>⌕</a><button class="icon-action" type="button" data-theme-toggle aria-label="切换明暗主题" title="切换明暗主题" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-theme-icon data-astro-cid-fzpbxy5g>◐</span></button><a class="seal-link" href="/about/" aria-label="关于赵喧典" data-astro-cid-fzpbxy5g><span class="seal-mark" aria-hidden="true" data-astro-cid-v3e57phd>趙</span></a><details class="mobile-menu" data-mobile-menu data-astro-cid-fzpbxy5g><summary aria-label="打开导航" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-astro-cid-fzpbxy5g>菜单</span></summary><div class="mobile-menu__panel" data-astro-cid-fzpbxy5g><div class="mobile-menu__top" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><button class="mobile-menu__close" type="button" data-mobile-menu-close data-astro-cid-fzpbxy5g>关闭 ×</button></div><nav aria-label="移动端导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>01</span>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>02</span>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>03</span>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>04</span>归档</a><a href="/about/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>05</span>关于</a><a href="/search/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>06</span>搜索</a></nav><div class="mobile-menu__meta" data-astro-cid-fzpbxy5g><a href="/feed.xml" data-astro-cid-fzpbxy5g>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-fzpbxy5g>GitHub</a><a href="/colophon/" data-astro-cid-fzpbxy5g>版本说明</a><button type="button" data-theme-toggle data-astro-cid-fzpbxy5g>切换明暗主题</button></div></div></details></div></div></header><main id="main-content" data-pagefind-body><article class="reading" data-reading-layout="compact" data-astro-cid-veasemt3><header class="reading-hero" data-print-url="https://lifelonglove.cn/notes/notes-on-the-c-programming-language/" data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>短笺</p><h1 data-astro-cid-veasemt3>[笔记]C程序设计语言</h1><p class="reading-deck" data-astro-cid-veasemt3>Notes on &quot;The C programming language&quot;</p><div class="reading-meta meta" data-astro-cid-veasemt3><span data-astro-cid-veasemt3>发布于 <time datetime="2016-07-10T00:00:00.000Z" data-astro-cid-veasemt3>2016年7月10日</time></span><span data-reading-time data-astro-cid-veasemt3>57 分钟阅读</span></div><details class="mobile-toc" data-mobile-toc data-astro-cid-veasemt3><summary data-astro-cid-veasemt3>展开目录</summary><nav aria-label="文章目录" data-astro-cid-veasemt3><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#前言" data-astro-cid-veasemt3>前言</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-1-导言" data-astro-cid-veasemt3>Chapter 1 导言</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-2-类型-运算符与表达式" data-astro-cid-veasemt3>Chapter 2 类型, 运算符与表达式</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-3-控制流" data-astro-cid-veasemt3>Chapter 3 控制流</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-4-函数与程序结构" data-astro-cid-veasemt3>Chapter 4 函数与程序结构</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-5-指针与数组" data-astro-cid-veasemt3>Chapter 5 指针与数组</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-6-结构" data-astro-cid-veasemt3>Chapter 6 结构</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-7-输入与输出" data-astro-cid-veasemt3>Chapter 7 输入与输出</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-8-unix系统接口" data-astro-cid-veasemt3>Chapter 8 UNIX系统接口</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#the-end" data-astro-cid-veasemt3>The End</a></li></ol></nav></details></header><div class="reading-grid" data-astro-cid-veasemt3><aside class="desktop-toc" data-desktop-toc aria-label="文章目录" data-astro-cid-veasemt3><nav data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>目录</p><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#前言" data-astro-cid-veasemt3>前言</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-1-导言" data-astro-cid-veasemt3>Chapter 1 导言</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-2-类型-运算符与表达式" data-astro-cid-veasemt3>Chapter 2 类型, 运算符与表达式</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-3-控制流" data-astro-cid-veasemt3>Chapter 3 控制流</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-4-函数与程序结构" data-astro-cid-veasemt3>Chapter 4 函数与程序结构</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-5-指针与数组" data-astro-cid-veasemt3>Chapter 5 指针与数组</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-6-结构" data-astro-cid-veasemt3>Chapter 6 结构</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-7-输入与输出" data-astro-cid-veasemt3>Chapter 7 输入与输出</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#chapter-8-unix系统接口" data-astro-cid-veasemt3>Chapter 8 UNIX系统接口</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#the-end" data-astro-cid-veasemt3>The End</a></li></ol></nav></aside><div class="prose" data-prose data-astro-cid-veasemt3><h2 id="前言">前言</h2>
+<p>失踪了一个多月, 我赵喧典kissg又回来啦!\
+想参加下学期的秋招, 补了C语言的知识. 以下是著名的“C程序设计语言”的一些记录, 字字珠玑, 恨不得把整本书都给敲一遍.</p>
+<hr>
+<h2 id="chapter-1-导言">Chapter 1 导言</h2>
+<ul>
+<li>一个c语言程序, 无论大小, 都是由<code>函数</code>和<code>变量</code>组成的. 函数中含有一些<code>语句</code>, 以指定要执行的计算操作; 变量则用于存储计算过程中使用的值.</li>
+<li>每个程序都从<code>main</code>函数开始, 这意味着每个程序都必须在某个位置包含一个main函数</li>
+<li>函数之间进行数据交换的一种方式是调用函数向被调用函数提供一个值(成为<code>参数</code>)列表, 函数名后的一对圆括号()将参数列表括起来. 函数的语句用一对花括号{}括起来.</li>
+<li><code>/* ... */</code> - (多行)注释, 程序中允许出现空格, 制表符, 换行符的地方, 都允许使用注释</li>
+<li>在c语言中, 所有变量都必须先声明后使用</li>
+<li>缩进, 是为了凸显程序的逻辑结构; 每行只写一条语句, 并在运算符两边各加一个空格字符, 使运算的结合关系更清楚明了</li>
+<li>c语言的整数除法操作将进行<em><strong>舍位</strong></em>\
+(python中, <code>//</code>才是整除)</li>
+<li>格式化字符串, <code>%</code>用于占位, %之后是描述, 表示之后会用何种类型的数据补位, 还可以添加具体的格式, 比如数字宽. 因此叫<code>格式化字符串</code></li>
+<li>c语言本身并没有定义IO功能, <code>printf</code>是标准库函数中的一个函数</li>
+<li>如果某个算术运算符的所有操作数均为整型, 则执行整型运算; 如果至少有一个操作数是浮点数, 则运算开始之前, 整型数将被转换为浮点数</li>
+<li>即使浮点常量可以用整数的形式表示, 在书写时最好为其显式地加上小数点</li>
+<li>举例说明: <code>%6.1f</code> - 表示待打印的浮点数至少占6个字符宽, 且小数点后有1位数字</li>
+<li><code>%d</code> - d是<strong>decimal</strong>的缩写, 表示十进制整型数; <code>%ld</code> - 表示long; <code>%o</code> - 表示八进制数; <code>%x</code> - 表示十六进制数; <code>%c</code> - 表示字符; <code>%s</code> - 表示字符串; <code>%%</code> - 百分号本身</li>
+<li>在允许使用某种类型变量值的任何场合, 都可以使用该类型的更复杂的表达式</li>
+<li>for语句比较适合初始化和增长步长都是单条语句并且逻辑相关的情形, 它将循环控制语句集中放在一起, 比while更紧凑</li>
+<li><code>#define 符号常量 替换文本</code> - 将符号常量定义为一个特定的字符串, 之后所有程序中出现的符号常量都用替换文本替换. <strong>指明行末没有分号</strong></li>
+<li>无论文本从何处输入, 输出到何处, 其输入/输出都是按字符流的方式处理. <code>文本流</code>是由多行字符构成的字符序列, 而每行字符则由0个或多个字符组成, 行末是一个换行符</li>
+<li>字符在键盘, 屏幕或其他任何地方无论以什么形式表现, 在机器内部都以<code>位模式</code>存储</li>
+<li><code>EOF</code>定义在&lt;stdio.h&gt;中, 是一个整型数(-1)</li>
+<li><strong>赋值操作是一个表达式, 并且具有一个值, 即赋值后左边变量保存的值. 因此, 赋值可以作为更大的表达式的一部分出现</strong></li>
+<li>c语言的语法规则要求for语句必须有一个循环体, 可用单独的分号表示<code>空语句</code></li>
+<li>用单引号表示字符, 可以表示一个整型值, 如<code>'A'</code>表示65; 用双引号表示字符串, <code>"A"</code>是一个仅包含一个字符的字符串变量</li>
+<li>通常将函数定义中圆括号内列表中出现的变量成为<code>形式参数</code>, 而将函数调用中与形式参数对应的值称为<code>实际参数</code></li>
+<li>函数调用, 将<strong>控制权</strong>交给被调用的函数; 返回时, 将控制权返回给调用者, 返回值或不带返回值</li>
+<li>main函数本身也是函数, 也可以向其调用者返回一个值, 该调用者实际上就是<strong>程序的执行环境</strong>. 返回值为0, 表示程序正常终止, 返回值非0, 表示出现异常情况或出错结束条件.</li>
+<li>在c语言中, 所有函数参数都“通过值”传递, 也就是说, 传递给被调用函数的参数值存放在临时变量中, 而不是存放在原来的变量中. 这意味着, 在c语言中, 被调用函数不能直接修改主调函数中变量的值, 而只能修改其私有的临时副本的值</li>
+<li>传递值的一个优点是: 在被调用函数中, 参数可以看作便于初始化的局部变量(在函数内部可任意修改, 而不影响原来的变量), 从而使得额外使用的变量更少, 使程序更紧凑简洁.</li>
+<li><code>void</code>关键字, 显式地说明函数不返回任何值</li>
+<li>c语言中, 形如“hello\n”的字符串常量, 以字符数组的形式存储时, 数组的各元素分别存储字符串的各个字符, 并以’\0’标志字符串的结束</li>
+<li>初始化变量时, 不为其赋值, 其中存放的是无效值</li>
+<li>函数中的每个局部变量只在函数被调用时存在, 在函数执行完毕退出时销毁.</li>
+<li><code>外部变量</code>可以在全局范围内访问. 函数间可通过外部变量交换数据, 而不必使用参数表. 外部变量在程序执行期间一直存在.</li>
+<li>外部变量必须定义在所有函数之外, 且只能定义一次, 定义后编译程序时将为它分配存储单元. 在每个需要访问外部变量的函数中, 必须声明相应的外部变量, 声明时用<code>extern</code>显式声明, 也可以通过上下文隐式声明.</li>
+<li>通常的做法是, 所有外部变量的定义都放在源文件的开始处, 这样可以省略extern声明. 如果程序包含多个源文件, 需要使用别的源文件中的外部变量时, 要用extern声明来建立该变量与其定义之间的联系</li>
+<li>通常将变量和函数的extern声明放在一个单独的文件中, 这个文件就称为<code>头文件</code>, 并在每个源文件的开头使用#include语句将所要用的文件包含进来</li>
+<li>在ANSI C中, 如果要声明空参数列表, 必须使用关键字void进行显式声明. 空圆括号对是旧版c语言的做法</li>
+<li><strong>定义</strong>表示创建变量或分配存储单元, 而<strong>声明</strong>指的是说明变量的性质, 但不分配存储单元</li>
+<li>过分依赖外部变量会导致一定的风险, 因为它会使程序中的数据关系模糊</li>
+</ul>
+<h2 id="chapter-2-类型-运算符与表达式">Chapter 2 类型, 运算符与表达式</h2>
+<ul>
+<li>在传统c语言用法中, 变量名使用小写字母, 符号常量名全部使用大写字母</li>
+<li><code>不理解的一段话: </code>对于内部名而言, 至少前面31个字符是有效的. 函数名与外部变量名包含的字符数目可能小于31, 因为汇编程序和加载程序可能会使用这些外部名, 而语言本身无法控制加载和汇编程序. 对于外部名, ANSI标准仅保证前6个字符的唯一性, 且不区分大小写.</li>
+<li>选择的变量名要能够尽量从字面上表达变量的用途. 局部变量一般使用较短的变量名(尤其是循环控制变量), 外部变量使用较长的名字</li>
+<li>c语言仅提供了下列几种基本数据类型:</li>
+</ul>
+<ol>
+<li>char 字符型, 占用一个字节(8位), 可以存放本地字符集的一个字符</li>
+<li>int 整型, 通常反映了所用机器中整数的最自然长度</li>
+<li>float</li>
+<li>double</li>
+</ol>
+<ul>
+<li>类型限定符<code>signed</code>与<code>unsigned</code>用于限定char类型或任何整型. unsigned类型的数总是非负值, 并遵守算术模2^n定律. 举例说明, char对象占8位, 那么unsigned char类型变量的取值范围是0<del>255, 而signed char类型变量的取值范围是-128</del>127</li>
+<li>类似<em>1234</em>的整数常量属性int类型, long类型的常量以字母l或L结尾. 如果一个整数太大以致无法用int表示时, 将被当作long类型处理. 无符号常量以字母u或U结尾. ul或UL表明unsigned long类型</li>
+<li>没有后缀的浮点数常量为double类型, 用后缀f或F表示float类型, 后缀l或L表示long double</li>
+<li>用前缀0表示八进制整数, 0x或0X表示十六进制整数. 八进制与十六进制同样可以使用u或l后缀</li>
+<li>一个<code>字符常量</code>是一个整数, 书写时将一个字符括在单引号中表示, 如’0’, 字符在机器字符集中的数值就是字符常量的值, 如’0’的值就是48</li>
+<li>使用字符常量的方便之处在于无需关心字符对应的具体值, 且增加了程序可读性. 字符常量一般用来与其他字符进行比较, 比如将一个字符与’0’和’9’进行比较, 以判断其是否是数字字符</li>
+<li>某些字符可通过<code>转义字符序列</code>表示为字符和字符串常量.</li>
+<li>用<code>\ooo</code>表示任意字节大小(0~255)的位模式, 其中ooo代表3个八进制数字; 或用<code>\xhh</code>表示, hh是一个或多个十六进制数字. 举例说明, <code>#define BELL '\007'</code>, <code>#define BELL '\x7'</code></li>
+<li>ANSI C的全部转义字符:</li>
+<li><code>\a</code> - 响铃符</li>
+<li><code>\b</code> - 回退符</li>
+<li><code>\f</code> - 换页符</li>
+<li><code>\n</code> - 换行符</li>
+<li><code>\r</code> - 回车符</li>
+<li><code>\t</code> - 横向制表符</li>
+<li><code>\v</code> - 纵向制表符</li>
+<li><code>\\</code> - 反斜杆</li>
+<li><code>\?</code> - 问号</li>
+<li><code>\'</code> - 单引号</li>
+<li><code>\"</code> - 双引号</li>
+<li><code>\ooo</code> - 八进制数</li>
+<li><code>\xhh</code> - 十六进制数</li>
+<li>字符常量<code>'\0'</code>表示值为0的字符, 即空字符(null). 通常用<code>'\0'</code>的形式代表0, 以强调某些表达式的字符属性, 但其数字值为0</li>
+<li><code>常量表达式</code>是仅仅只包含常量的表达式, 在编译时求值, 而不是在运行时求值, 可以出现在常量可以出现的任何位置</li>
+<li><code>字符串常量</code>也叫<code>字符串字面值</code>, 是用双引号括起来的0或多个字符组成的字符序列.</li>
+<li>从技术角度看, 字符串常量就是字符数组, 字符串的内部表示使用一个空字符’\0’作为串的结尾, 因此, 存储字符串的物理存储单元数比括在双引号内的字符数多一个. 这种表示方法也说明, <strong>c语言对字符串长度没有限制</strong>, 但程序必须扫描完整个字符串后才能确定字符串的长度.</li>
+<li>字符常量与仅包含一个字符的字符串是有区别的, ‘x’与“x”是不同的: 前者是一个整数, 其值是字母x在机器字符集中对应的数值; 后者是一个包含一个字符以及一个结束符’\0’的字符数组</li>
+<li>枚举是一个常量整型值的列表, 例如<code>enum boolean {NO = 0, YES};</code></li>
+<li>没有显式说明的情况下, enum类型第一个枚举名的值为0, 第二个为1, 依此类推. 如果只指定了部分枚举名的值, 那么未指定值的枚举名的值将依着最后一个指定值向后递增</li>
+<li>枚举为建立常量值与名字值之间的关联提供了一种便利的方式. 相对于#define语句, 优势在于常量值可以自动生成</li>
+<li>如果变量不是局部变量, 则只能进行一次初始化操作, 从概念上讲, 应该在程序开始执行之前进行, 并且初始化表达式必须为常量表达式</li>
+<li>每次进入函数或程序块时, 显式初始化的局部变量都将被初始化一次, 其初始化表达式可以是任何表达式</li>
+<li>默认情况下, 全局变量与静态变量都将被初始化为0; 未经显式初始化的局部变量的值为无效值</li>
+<li>任何变量的声明都可以使用<code>const</code>限定符限定, 其指定变量的值不能被修改. 都与数组而言, const限定符指定数组的所有元素的值都不能被修改. const限定符也可配合参数使用, 表明函数不能修改参数的值</li>
+<li>在有负操作数的情况下, 整数除法截取的方向以及取模运算结果符号取决于具体机器的实现</li>
+<li><code>if (!valid)</code> vs. `if(valid == 0), 很难判断哪种形式更好, 前者读起来更直观(如果不是有效的话), 但对于以下更复杂的结构可能会难于理解</li>
+<li>一般来说, 自动转换是指将“比较窄的”操作数转换为“比较宽的”操作数, 并不丢失信息的转换</li>
+<li>char类型就是较小的整型, 无论是否进行符号扩展, char类型的变量都被转换为整型变量</li>
+<li>由于c语言没有指定char类型的变量是无符号数变量, 还是带符号数变量, 当将一个char类型的值转换为int类型的值时, 其结果会由于机器的不同而不同</li>
+<li>c语言的定义保证了机器的标准打印字符集中的字符不会是负值, 因此, 在表达式中这些字符总是正值. 但存储在字符变量中的位模式在某些机器中可能是负的, 而在另一些机器中可能是正的. 为了保证程序的可移植性, 如果要在char类型的变量中存储非字符数据, 最好指定signed或unsigned限定符</li>
+<li>c语言中, 很多情况下会进行隐式的算术类型转换, 将“较低”的类型转换为“较高”的类型, 运算结果为“较高”的类型</li>
+<li>表达式中float类型的操作数不会自动转换为double类型. 一般, 数学函数使用双精度类型的变量. 使用float类型主要是为了在使用较大的数组时节省存储空间, 有时也是为了节省机器执行时间</li>
+<li>赋值时也要进行类型转换, 赋值运算符右边的值需要转换为左边变量的类型, 左边变量的类型即赋值表达式结果的类型</li>
+<li>当较长的类型转换为较短的类型, 超出的高位部分将被丢弃: int转char, 丢失信息; float转int, 小数部分被截断; double转float, 四舍五入还是截断取决于具体实现</li>
+<li><strong>函数调用的参数是表达式</strong>, 因此在将参数传递给函数时也能进行类型转换. 在没有函数原型的情况下, char与short类型都被转换为int型, float被转换为double. 因此, 即使调用函数的参数为char或float类型, 也将函数参数声明为int或double类型</li>
+<li><code>(类型名) 表达式</code> - <code>强制类型转换</code>, 准确含义: 表达式首先被赋给类型名指定的类型的某个变量, 然后再用该变量替换原表达式</li>
+<li>直到看到源码, 我才明白为什么伪随机叫伪随机, 为什么需要初始化种子来提高伪随机的随机性:</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#F97583">unsigned</span><span style="color:#F97583"> long</span><span style="color:#F97583"> int</span><span style="color:#E1E4E8"> next </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#B392F0"> rand</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">void</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#E1E4E8">    next </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> next </span><span style="color:#F97583">*</span><span style="color:#79B8FF"> 1103515245</span><span style="color:#F97583"> +</span><span style="color:#79B8FF"> 12345</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> (</span><span style="color:#F97583">unsigned</span><span style="color:#F97583"> int</span><span style="color:#E1E4E8">)(next </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 65536</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">%</span><span style="color:#79B8FF"> 32768</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> srand</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">unsigned</span><span style="color:#F97583"> int</span><span style="color:#FFAB70"> seed</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#E1E4E8">    next </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> seed;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li><code>++n</code>, 先自增, 再使用变量n的值; <code>n++</code>, 先使用变量n的值, 再将n的值加1</li>
+<li>位操作符只能用于整型操作数, 包括<code>&amp;</code>, <code>|</code>, <code>^</code>(异或), <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>~</code>(按位取反)</li>
+<li>按位与运算经常用于屏蔽某些二进制位</li>
+<li>按位或运算常用于将某些二进制位置1</li>
+<li>对无符号数进行右移, 左边空出的部分用0填补; 对带符号数进行右移, 某些机器将对左边空出的部分用符号位填补(<code>算术移位</code>), 另一些机器则对左边空出的部分用0填补(<code>逻辑移位</code>)</li>
+<li>表达式<code>x &amp; ~077</code>比表达式<code>x &amp; 0177700</code>要好, 因为前者与机器字长无关, 而后者假定x是16位的数值. 前者可移植性更强, 并且没有增加额外的开销, ~077是常量表达式, 在编译时求值</li>
+<li><code>expr1 op= expr2</code>等价于<code>expr1 = (expr1) op (expr2)</code>. 前者<em>expr1</em>只计算一次, 后者<em>expr2</em>两边的圆括号必不可少</li>
+<li>赋值运算符的其他优点: 表示方式与人们的思维习惯更接近, 使代码更易读, 还有助于编译器产生高效代码</li>
+<li>赋值表达式的类型就是它左边操作数的类型, 其值是赋值操作完成后的值</li>
+<li>在使用条件表达式<code>expr1 ? expr2 : expr3</code>, 建议使用圆括号包裹expr1, 使表达式的条件部分更易读</li>
+<li>c语言没有指定同一运算符中多个操作数的计算顺序(即a+b等价于b+a), 也没有指定函数各参数的求值顺序. 因此<code>printf("%d %d\n", ++n, power(2, n));</code>在不同的编译器中可能产生不同的结果, 取决于++n与power函数的执行顺序</li>
+<li>函数调用, 嵌套赋值语句, 自增与自减运算符都可能产生“副作用”, 在对表达式求值的同时, 修改了某些变量的值. 表达式何时会产生副作用将由编译器决定, 最佳的求值顺序同机器结构有关</li>
+<li>ANSI C标准明确规定了所有对参数的副作用都必须在函数调用之前生效</li>
+<li>在任何一种编程语言中, 如果代码的执行结果与求值顺序相关, 则都不是好的程序设计风格.</li>
+</ul>
+<h2 id="chapter-3-控制流">Chapter 3 控制流</h2>
+<ul>
+<li>在c语言中, 分号是语句结束符; 用花括号将一组声明和语句括在一起构成了<code>复合语句</code>(或称<code>程序块</code>), 复合语句在语法上等价于单条语句</li>
+<li>程序的缩进结构明确地表明了设计意图, 但编译器无法获知. 因此在有if语句嵌套的情况下使用花括号, 使代码可读性更强</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D">/*二分搜索*/</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#B392F0"> binsearch</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#FFAB70"> x</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#FFAB70"> v</span><span style="color:#F97583">[]</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#FFAB70"> n</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    int</span><span style="color:#E1E4E8"> low, high, mid;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    low </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">    high </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> n </span><span style="color:#F97583">-</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8">(low </span><span style="color:#F97583">&lt;=</span><span style="color:#E1E4E8"> high){</span></span>
+<span class="line"><span style="color:#E1E4E8">        mid </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> (low </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> high) </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">        if</span><span style="color:#E1E4E8"> (x </span><span style="color:#F97583">&lt;</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[mid])</span></span>
+<span class="line"><span style="color:#E1E4E8">            high </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> mid </span><span style="color:#F97583">-</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">        else</span><span style="color:#F97583"> if</span><span style="color:#E1E4E8"> (x </span><span style="color:#F97583">&gt;</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[mid])</span></span>
+<span class="line"><span style="color:#E1E4E8">            low </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> mid </span><span style="color:#F97583">+</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">        else</span></span>
+<span class="line"><span style="color:#F97583">            return</span><span style="color:#E1E4E8"> mid;</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#F97583"> -</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>switch语句是一种多路判定语句, 它测试表达式是否与一些常量整数值中的某一个匹配, 并执行相应的分支操作. 若没有哪个分支能匹配表达式, 执行标记为default的分支, default分支是可选的</li>
+<li>switch语句中, <strong>case的作用只是一个标号</strong>. 某个分支中的代码执行完后, 程序将进入下一个分支继续执行, 付费在程序中显式地跳转, 常用的方法是使用break语句或return语句</li>
+<li>除了一个计算需要多个标号的情况下, 应尽量减少从一个分支直接进入下一个分支执行的用法, 在不得不使用的情况下应该加上适当的注释</li>
+<li>作为一种良好的程序设计风格, 在switch语句最后一个分支(default)后也加上一个break语句. 这样做在逻辑上没有必要, 但当需要向该switch语句后添加其他分支时, 这种防范措施会降低犯错的可能性</li>
+<li>如果省略for语句的测试条件, 则认为其值永远是真值. <code>for(;;){ ... }</code>是一个无限循环</li>
+<li><code>while</code> vs. <code>for</code></li>
+<li>如果没有初始化或重新初始化的操作, 使用while循环语句更自然</li>
+<li>如果语句中需要执行简单的初始化和变量递增, 使用for语句更适合, 它将循环控制语句集中放在循环的开头, 结构更紧凑, 更清晰</li>
+<li>将循环控制部分集中在一起, 对于多重嵌套循环, 优势更明显</li>
+<li>Shell(希尔)排序: 先比较距离远的元素, 从而快速减少大量的无序情况, 减轻后续的工作. 被比较的元素之间的距离逐步减少, 直到减少为1, 排序就变成了相邻元素的互换</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D">/*Shell*/</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">/*</span></span>
+<span class="line"><span style="color:#6A737D">最外层的for语句控制两个被比较元素之间的距离, 从n/2开始, 逐步进行对折, 直到距离为0</span></span>
+<span class="line"><span style="color:#6A737D">中间层的for循环语句用于在元素间移动位置</span></span>
+<span class="line"><span style="color:#6A737D">最内层的for语句用于比较各对相距gap个位置的元素, 当两个元素逆序时将它们互换</span></span>
+<span class="line"><span style="color:#6A737D">由于gap的值最终要递减到1, 因此所有元素最终都会位于正确的排序位置上</span></span>
+<span class="line"><span style="color:#6A737D">*/</span></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> shellsort</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#FFAB70"> v</span><span style="color:#F97583">[]</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#FFAB70"> n</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    int</span><span style="color:#E1E4E8"> gap, i , j, temp;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> (gap </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> n </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">; gap </span><span style="color:#F97583">&gt;</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">; gap </span><span style="color:#F97583">/=</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">        for</span><span style="color:#E1E4E8"> (i </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> gap; i </span><span style="color:#F97583">&lt;</span><span style="color:#E1E4E8"> n; i</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">            for</span><span style="color:#E1E4E8"> (j </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">-</span><span style="color:#E1E4E8"> gap; j </span><span style="color:#F97583">&gt;=</span><span style="color:#79B8FF"> 0</span><span style="color:#F97583"> &amp;&amp;</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[j] </span><span style="color:#F97583">&gt;</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[j</span><span style="color:#F97583">+</span><span style="color:#E1E4E8">gap]; j </span><span style="color:#F97583">-=</span><span style="color:#E1E4E8"> gap){</span></span>
+<span class="line"><span style="color:#E1E4E8">                temp </span><span style="color:#F97583">=</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[j];</span></span>
+<span class="line"><span style="color:#FFAB70">                v</span><span style="color:#E1E4E8">[j] </span><span style="color:#F97583">=</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[j </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> gap];</span></span>
+<span class="line"><span style="color:#FFAB70">                v</span><span style="color:#E1E4E8">[j </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> gap] </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> temp;</span></span>
+<span class="line"><span style="color:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>逗号运算符是c语言优先级最低的运算符, 被逗号分隔的一对表达式将按照从左到右的顺序进行求值, 各表达式右边的操作数的类型和值即为其结果的类型和值</li>
+<li>逗号运算符最适用于关系紧密的结构.</li>
+<li><code>do { ... } while (表达式)</code> - <code>do-while</code>循环体至少会被执行一次</li>
+<li>break - 从switch语句或循环中提前退出</li>
+<li>continue - 执行下一次循环. 在while或do-while语句中, 意味着立即执行测试部分; 在for循环中, 意味着将控制转移到递增循环变量环节</li>
+</ul>
+<h2 id="chapter-4-函数与程序结构">Chapter 4 函数与程序结构</h2>
+<ul>
+<li>一个设计得当的函数可以将程序中不需要了解的具体操作细节隐藏起来, 从而使整个程序结构更加清晰, 并降低修改程序的难度</li>
+<li>c语言在设计中考虑了函数的高效性和易用性两个因素, c语言一般由许多小的函数组成, 而不是由少量较大的函数组成</li>
+<li>分别处理几个小的部分, 比处理一个大的整体更容易. 这样可以将不相关的细节隐藏在函数中, 从而减少不必要的相互影响的机会, 并且函数也可以在其他函数中使用</li>
+<li>函数定义中的各构成部分都可以省略, 最简单的函数: <code>dummy() {}</code></li>
+<li>如果函数定义中省略了返回值类型, 默认为int类型</li>
+<li>程序可以看成变量定义和函数定义的集合. 函数之间通信可以通过参数, 函数返回值以及外部变量进行</li>
+<li>return语句的后面可以跟任何表达式, 在必要时, 表达式将被转换为函数的返回值类型. 表达式两边通常加一对圆括号</li>
+<li>如果某个函数从一个地方返回时有返回值, 而从另一个地方返回时没有返回值, 该函数<strong>并不非法</strong>, 但可能是一种问题的征兆</li>
+<li>在任何情况下, 如果函数没有成功返回一个值, 则它的“值”肯定是无用的</li>
+<li>cc命令用<code>.c</code>和<code>.o</code>两种扩展名区分源文件和目标文件</li>
+<li>如果没有函数原型, 则函数将在第一次出现的表达式中被隐式声明, 该函数的返回值被假定为int类型, 但上下文并不对其参数做任何假设.</li>
+<li>如果函数声明中不包含参数, 编译程序不会对函数的参数作任何假设, 并会关闭所有的参数检查. 如果函数带有参数, 要声明它们; 如果不带参数, 则使用void进行声明</li>
+<li>由于c语言不允许在一个函数中定义其他函数, 因此函数本身是“外部的”. 默认情况下, 外部变量与函数具有下列性质: 通过同一个名字对外部变量的所有引用实际上都是引用同一个对象</li>
+<li>外部变量可以在全局范围内访问, 这为函数之间的数据交换提供了一种可以代替函数参数与返回值的方式.</li>
+<li><strong>如果函数之间需要共享大量的变量, 使用外部变量要比使用一个长的参数表更方便, 有效</strong>, 但这种方式可能对程序结构产生不良影响, 而且可能会导致程序中各个函数之间具有太多的数据关系</li>
+<li><strong>如果两个函数必须共享某些数据, 而它们互不调用对方, 这种情况下, 最简单的方式是将这些共享数据定义为外部变量, 而不是作为函数参数传递</strong></li>
+<li>在函数中重复出现的代码段, 最好设计成独立的函数</li>
+<li>逆波兰表达式, <code>push</code>和<code>pop</code>函数必须共享栈和栈顶指针, 因此定义在函数外部, 作为外部变量. 由于main函数本身没有引用栈或栈顶指针, 因此, 对于main函数就是将它们隐藏起来了</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#F97583">#include</span><span style="color:#9ECBFF"> &lt;ctype.h&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#B392F0"> getch</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">void</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> ungetch</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">/* 获取下一个运算符或数值操作数 */</span></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#B392F0"> getop</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">char</span><span style="color:#FFAB70"> s</span><span style="color:#F97583">[]</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    int</span><span style="color:#E1E4E8"> i, c;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8">((</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> c </span><span style="color:#F97583">=</span><span style="color:#B392F0"> getch</span><span style="color:#E1E4E8">()) </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> ' '</span><span style="color:#F97583"> ||</span><span style="color:#E1E4E8"> c </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> '</span><span style="color:#79B8FF">\t</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        ;</span></span>
+<span class="line"><span style="color:#FFAB70">    s</span><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> '</span><span style="color:#79B8FF">\0</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> (</span><span style="color:#F97583">!</span><span style="color:#B392F0">isdigit</span><span style="color:#E1E4E8">(c) </span><span style="color:#F97583">&amp;&amp;</span><span style="color:#E1E4E8"> c </span><span style="color:#F97583">!=</span><span style="color:#9ECBFF"> '.'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> c;</span><span style="color:#6A737D">  /* 不是数 */</span></span>
+<span class="line"><span style="color:#E1E4E8">    i </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> (</span><span style="color:#B392F0">isdigit</span><span style="color:#E1E4E8">(c))</span></span>
+<span class="line"><span style="color:#F97583">        while</span><span style="color:#E1E4E8"> (</span><span style="color:#B392F0">isdigit</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">[</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">i] </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> c </span><span style="color:#F97583">=</span><span style="color:#B392F0"> getch</span><span style="color:#E1E4E8">()))</span></span>
+<span class="line"><span style="color:#E1E4E8">            ;</span><span style="color:#6A737D">  /* 整数部分 */</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> (c </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> '.'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">        while</span><span style="color:#E1E4E8"> (</span><span style="color:#B392F0">isdigit</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">[</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">i] </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> c </span><span style="color:#F97583">=</span><span style="color:#B392F0"> getch</span><span style="color:#E1E4E8">()))</span></span>
+<span class="line"><span style="color:#E1E4E8">            ;</span><span style="color:#6A737D">  /* 小数部分 */</span></span>
+<span class="line"><span style="color:#FFAB70">    s</span><span style="color:#E1E4E8">[i] </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> '</span><span style="color:#79B8FF">\0</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8">(c </span><span style="color:#F97583">!=</span><span style="color:#E1E4E8"> EOF)</span></span>
+<span class="line"><span style="color:#B392F0">        ungetch</span><span style="color:#E1E4E8">(c);</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> NUMBER;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">#define</span><span style="color:#B392F0"> BUFSIZE</span><span style="color:#79B8FF"> 100</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">char</span><span style="color:#FFAB70"> buf</span><span style="color:#E1E4E8">[BUFSIZE];</span><span style="color:#6A737D">  /* 用于ungetch函数的缓冲区 */</span></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#E1E4E8"> bufp </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">;</span><span style="color:#6A737D">       /* buf中下一个空闲位置 */</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#B392F0"> getch</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">void</span><span style="color:#E1E4E8">){</span><span style="color:#6A737D">    /* 取一个字符, 可能是ungetch写回的字符 */</span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> (bufp </span><span style="color:#F97583">&gt;</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">?</span><span style="color:#FFAB70"> buf</span><span style="color:#E1E4E8">[</span><span style="color:#F97583">--</span><span style="color:#E1E4E8">bufp] </span><span style="color:#F97583">:</span><span style="color:#B392F0"> getchar</span><span style="color:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> ungetch</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#FFAB70"> c</span><span style="color:#E1E4E8">){</span><span style="color:#6A737D"> /* 写回字符 */</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> (bufp </span><span style="color:#F97583">&gt;=</span><span style="color:#E1E4E8"> BUFSIZE)</span></span>
+<span class="line"><span style="color:#B392F0">        printf</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"ungetch: too many characters</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#F97583">    else</span></span>
+<span class="line"><span style="color:#FFAB70">        buf</span><span style="color:#E1E4E8">[bufp</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> c;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>程序中经常会出现这样的情况: 程序不能确定它已经读入的输入是否已经足够, 除非超前多读入一些输入. 读入一些字符以合成一个数字的情况便是一例(上述): 在看到第一个非数字字符之前, 已经读入的数的完整性是不能确定的. 由于程序要超前读入一个字符, 这样就导致最后有一个字符不属于当前所要读入的数</li>
+<li>上述, ungetch函数将要压回的字符放到一个共享缓冲区中, 当该缓冲区不空时, getch函数从缓冲区中读取字符; 当缓冲区为空时, getch函数调用getchar函数直接从输入读取字符</li>
+<li>如果要在外部变量的定义之前使用该变量, 或者外部变量的定义与变量的使用不在同一个源文件中, 则必须在相应的变量<code>声明</code>中强制性地使用关键字 extern</li>
+<li>外部变量的<code>声明</code>和<code>定义</code>严格区分是重要的: <code>变量声明</code>用于说明变量的属性(主要是类型), <code>变量定义</code>除此之外还将引起存储器的分配.</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D">/* 定义外部变量, 并为止分配存储单元, 并可以作为该源文件其余部分的声明 */</span></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#E1E4E8"> sp;</span></span>
+<span class="line"><span style="color:#F97583">double</span><span style="color:#FFAB70"> val</span><span style="color:#E1E4E8">[MAXVAL];</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">/* 为源文件的其余部分声明了外部变量, 但这2个声明并没有建立变量或为它们分配存储单元 */</span></span>
+<span class="line"><span style="color:#F97583">extern</span><span style="color:#F97583"> int</span><span style="color:#E1E4E8"> sp;</span></span>
+<span class="line"><span style="color:#F97583">extern</span><span style="color:#F97583"> double</span><span style="color:#E1E4E8"> val</span><span style="color:#F97583">[]</span><span style="color:#E1E4E8">;</span></span></code></pre>
+<ul>
+<li>在一个源程序的所有源文件中, 一个外部变量只能在某个文件中定义1次, 而其他文件可以通过extern声明来访问它\
+(定义外部变量的源文件中也可以包含对该外部变量的extern声明)</li>
+<li>外部变量的初始化只能出现在其定义中</li>
+<li>尽可能将共享部分集中在一起, 这样就只需一个副本, 改进程序时也容易保证程序的正确性</li>
+<li>一方面期望每个文件只能访问它完成任务所需的信息; 另一方面是现实中维护较多的头文件比较困难. 折中的做法是: 对于某些中等规模的程序, 最好只用一个头文件存放程序中各部分共享的对象; 较大的程序需要使用更多的头文件, 需要精心组织</li>
+<li>用<code>static</code>声明限定外部变量和函数, 将其后声明的对象的作用域限定为被编译源文件的剩余部分(作用域限定在本源文件内)</li>
+<li>static类型的内部变量是某种特定函数的局部变量, 只能在该函数中使用, 但不管其所在的函数是否被调用, 它一直存在. 换言之, static类型的内部变量是一种只能在某个特定函数中使用但一直占据存储空间(一直存在)的变量</li>
+<li><code>register</code>声明告诉编译器, 它所声明的变量在程序中使用频率较高. 其思想是, 将register变量放在机器的寄存器中, 是程序更小, 执行速度更快</li>
+<li>register声明只适用于局部变量以及函数的形式参数</li>
+<li>每个函数中只有很少的变量可以保存在寄存器中, 且只允许某些类型的变量.</li>
+<li>过量的寄存器声明并没有害处, 因为编译器可以忽略过量的或不支持的寄存器变量声明. 无论寄存器变量实际上是否存放在寄存器中, 它的地址都不能访问</li>
+<li>c语言不允许在函数中定义函数, 但在函数中可以通过<strong>程序块</strong>结构的形式定义变量. 一对花括号包裹的, 即为一个复合语句程序块, 在程序块内声明的变量可以隐藏程序块之外的同名变量, 它们之间没有任何联系</li>
+<li>每次进入程序块, 在程序块中声明以及初始化的自动变量都将被初始化, 但静态变量(static关键字修饰的)只在第一次进入程序块时被初始化一次</li>
+<li>在一个好的程序设计风格中, 应该避免出现变量名隐藏外部作用域中相同名字的情况, 否则, 很可能引起混乱和错误</li>
+<li>在不显式初始化的情况下, 外部变量和静态变量都将被初始化为0; 局部变量和寄存器变量的初值没有定义, 为无效值</li>
+<li>对于外部变量与静态变量, 初始化表达式必须是常数表达式, 且只初始化一次; 对于局部变量和寄存器变量, 在每次进入函数或程序块时都将被初始化</li>
+<li>局部变量的初始化等效于简写的赋值语句. 但考虑到变量声明中的初始化表达式容易被忽略, 且距离使用的位置较远, 一般使用显式的赋值语句</li>
+<li>数组的初始化可以在声明的后面紧跟一个初始化<strong>表达式列表</strong>, 初始化表达式列表用花括号括起来, 各初始化表达式之间用逗号分隔</li>
+<li>当省略数组长度时, 编译器将把花括号中初始化表达式的个数作为数组的长度; 若初始化表达式的个数比数组元素少, 在对外部变量, 静态变量和局部变量, 没有初始化表达式的元素用0进行初始化</li>
+<li>字符数组的初始化可用一个字符串代替花括号形式的初始化表达式序列. <code>char a = "kissg";</code> 等价于 <code>char a = {'k', 'i', 's', 's', 'g', '\0'}</code></li>
+<li>数字是以反序生成的: 低位数字先于高位数字生成, 但它们必须以与此相反的次序打印</li>
+<li>函数递归调用自身时, 每次调用的都会得到一个与之前的局部变量几乎不同的新的局部变量集合</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D">/* 快速排序(递增)</span></span>
+<span class="line"><span style="color:#6A737D">   对一个给定的数组, 从中选择一个元素, 以该元素为界将其余元素划分为两个子集,</span></span>
+<span class="line"><span style="color:#6A737D">   一个子集中的所有元素都小于该元素, 另一个子集中的所有元素都大于或等于该元素.*/</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> qsort</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#FFAB70"> v</span><span style="color:#F97583">[]</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#FFAB70"> left</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#FFAB70"> right</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">    int</span><span style="color:#E1E4E8"> i, last;</span></span>
+<span class="line"><span style="color:#F97583">    void</span><span style="color:#B392F0"> swap</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#E1E4E8"> v</span><span style="color:#F97583">[]</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#E1E4E8"> i, </span><span style="color:#F97583">int</span><span style="color:#E1E4E8"> j);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> (left </span><span style="color:#F97583">&gt;=</span><span style="color:#E1E4E8"> right)</span><span style="color:#6A737D">  /* 数组包含的元素少于2个, 不执行任何操作 */</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#B392F0">    swap</span><span style="color:#E1E4E8">(v, left, (left </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> right)</span><span style="color:#F97583">/</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">);</span><span style="color:#6A737D">  /* 将划分子集的元素 */</span></span>
+<span class="line"><span style="color:#E1E4E8">    last </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> left;</span><span style="color:#6A737D">                      /* 移动到v[0] */</span></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> (i </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> left</span><span style="color:#F97583">+</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">; i </span><span style="color:#F97583">&lt;=</span><span style="color:#E1E4E8"> right; i</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">){</span><span style="color:#6A737D">/* 划分子集 */</span></span>
+<span class="line"><span style="color:#F97583">        if</span><span style="color:#E1E4E8"> (</span><span style="color:#FFAB70">v</span><span style="color:#E1E4E8">[i] </span><span style="color:#F97583">&lt;</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[left])</span></span>
+<span class="line"><span style="color:#B392F0">            swap</span><span style="color:#E1E4E8">(v, </span><span style="color:#F97583">++</span><span style="color:#E1E4E8">last, i);</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#B392F0">    swap</span><span style="color:#E1E4E8">(v, left, last);</span><span style="color:#6A737D">              /* 恢复划分子集的元素 */</span></span>
+<span class="line"><span style="color:#B392F0">    qsort</span><span style="color:#E1E4E8">(v, left, last</span><span style="color:#F97583">-</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#B392F0">    qsort</span><span style="color:#E1E4E8">(v, last</span><span style="color:#F97583">+</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, right);</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> swap</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">int</span><span style="color:#FFAB70"> v</span><span style="color:#F97583">[]</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#FFAB70"> i</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">int</span><span style="color:#FFAB70"> j</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">    int</span><span style="color:#E1E4E8"> temp;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    temp </span><span style="color:#F97583">=</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[i];</span></span>
+<span class="line"><span style="color:#FFAB70">    v</span><span style="color:#E1E4E8">[i] </span><span style="color:#F97583">=</span><span style="color:#FFAB70"> v</span><span style="color:#E1E4E8">[j];</span></span>
+<span class="line"><span style="color:#FFAB70">    v</span><span style="color:#E1E4E8">[j] </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> temp;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>递归并不节省存储的开销, 递归调用过程中必须在某个地方维护一个存储处理值的栈; 递归的执行速度也不快, 但递归代码比较紧凑, 并且相比于非递归代码更易编写与理解</li>
+<li>C预处理:</li>
+<li>文件包含:</li>
+<li><code>#include "filename"</code>或<code>#include &lt;filename&gt;</code>行都将被替换为filename指定的文件内容. 引号格式, 将在源文件所在位置查找目标文件; 若在源文件所在位置没有找到指定文件, 或使用&lt;&gt;格式, 将根据相应的规则查找该文件. 被包含的文件本身也可以包含#include指令</li>
+<li>在大的程序中, #include指令是将所有声明捆绑在一起的较好的方法, 它保证了所有的源文件都具有相同的定义与变量声明, 可以避免出现一些不必要的错误</li>
+<li>宏替换</li>
+<li><code>#define name subtext</code> - 后续所有出现name记号的地方都被替换为subtext</li>
+<li>较长的宏定义可以分成若干行, 需要在行末加上反斜杆.</li>
+<li>#define指令定义的name的作用域从其定义点开始, 到被编译的源文件的末尾处结束</li>
+<li>替换只对记号进行, 对括在引号中的字符串不起作用</li>
+<li>subtext是任意的, <code>#define forever for(;;)</code>定义了一个名为forever的无限循环</li>
+<li>宏定义可以使用参数, 这样可以对不同的宏调用使用不同的替换文本\
+<code>#define max(A, B) ((A) &gt; (B) ? (A) : (B))</code> - 使用时看起来像函数调用, 但其直接将替换文本插入到代码中(跟宏汇编很像)</li>
+<li>通过<code>#undef</code>指令取消名字的宏定义, 这样可以保证后续的调用是函数调用, 而不是宏调用</li>
+<li>形式参数不能用带引号的字符串替换? 如果在替换文本中, 参数名以<code>#</code>作为前缀, 则结果将被扩展为由实际参数替换该参数的带引号的字符串\
+#define dpirnt(expr) printf(#expr “= %g\n”, expr)\
+dprint(x/y) -&gt; printf(“x/y” “= %g \n”, x/y)</li>
+<li>预处理器的<code>##</code>运算符为宏扩展提供了一种连接实际参数的手段. 如果subtext中的参数与##相邻, 则该参数将被实际参数替换, ##与前后的空白字符将被删除, 并对替换后的结果重新扫描:\
+#define paste(front, back) front ## back\
+paste(name, 1) - 建立记号为name1 (我不懂)</li>
+<li>条件包含
+<ul>
+<li>使用条件语句对预处理本身进行控制, 条件语句的值在预处理执行的过程中进行计算. 为编译过程中根据计算所得的条件值选择性地包含不同代码提供了一种手段</li>
+<li><code>#if</code>语句对其中的常量整型表达式进行求值, 若该表达式的值不等于0, 则包含其后的各行, 直到遇到<code>#endif</code>, <code>#elif</code>或<code>#else</code>语句</li>
+<li>c语句专门定义了<code>#ifdef</code>和<code>ifndef</code>语句, 用于测试某个名字是否已经定义</li>
+</ul>
+</li>
+</ul>
+<h2 id="chapter-5-指针与数组">Chapter 5 指针与数组</h2>
+<ul>
+<li>ANSI C使用类型<code>void*</code>作为通用指针类型, 它可以存放指向任何类型的指针, 但不能间接引用自身</li>
+<li>指针是一种保存变量地址的变量, 使用指针通常可以生成更高效的, 更紧凑的代码</li>
+<li>一元运算符<code>&amp;</code>可用于取一个对象的地址, 如<code>p = &amp;c</code>. &amp;只能应用于内存中的对象, 即变量与数组元素, 不能作用于表达式, 常量或寄存器变量</li>
+<li>一元运算法<code>*</code>是间接寻址或间接引用运算符. 当它作用于指针时, 将访问指针所指向的的对象</li>
+<li><code>int *ip;</code> - ip是指向int类型的指针. 该声明语句表明<code>表达式*ip</code>的结果是int类型\
+<code>ip</code>与<code>*ip</code>的区别: <code>ip</code>是指针, 是一个变量, 存放的是内存地址; <code>*ip</code>是一个表达式, 其结果是存放在指针指向地址的值\
+通俗地讲: 在指针ip所指向的内存地址, 给我一个int类型的变量</li>
+<li>指针只能指向某种特定类型的对象, 即每个指针都必须指向某种特定的数据类型</li>
+<li>c语言以传值的方式将参数值传递给被调用函数, 因此, 被调用函数不能直接修改主调函数中变量的值; 若要实现对变量的修改, 可通过传地址的方式实现, 通过指针间接访问指向它们指向的操作数</li>
+<li>指针参数使得被调函数能够访问和修改主调函数中对象的值, 就好像给一个房间的地址, 让被调函数自己去房间里做修改, 改成什么样就是什么样</li>
+<li>scanf函数的大致实现原理: 将标识是否到达文件结尾的状态作为函数的返回值, 同时使用一个指针参数实现修改, 并传回给主调函数\
+(利用指针作修改, 利用函数返回来返回状态量)</li>
+<li>通过数组下标所能完成的任何操作都可以通过指针来实现. 一般来说, 用指针编写的程序比用数组下标编写的程序执行速度更快, 但理解起来会稍微困难一点</li>
+<li>无论数组中的元素是何种类型或数组长度是多少, “指针+1”的操作都成立, 它意味着, pa+1指向pa所指向的对象的下一个对象. 对pa+i, 类似.\
+在计算pa+i时, i将根据pa指向的对象的长度按比例缩放, 而pa指向的对象的长度取决于pa的声明</li>
+<li>数组名所代表的就是该数组第一个元素的地址.</li>
+<li>在计算数值元素a[i]的值时, c语言实际上先将其转换为<code>*(a+i)</code>的形式, 再进行求值. 在程序中, 这两种形式是等价的. 同理, &amp;a[i]与a+i的含义也是相同的.换言之, 一个通过数组和下标实现的表达式可等价地通过指针和偏移量实现</li>
+<li>数组名与指针仍有不同, 指针是一个变量, 但数组名不是. 因此, pa=a, pa++是合法的, a=pa, a++是非法的(a为数组名, pa是指针)</li>
+<li>当把数组名传递给一个函数时, 实际上传递的是该数组第一个元素的地址, 在被调用函数中, 该参数是一个局部变量, 因此, 数组名参数必须是指针, 即一个存储地址值的变量</li>
+<li>在函数定义中, 形参<code>char s[]</code>和<code>char *s</code>是等价的, 但通常更习惯于使用后者, 它比前者更直观地表明了该参数是一个指针</li>
+<li>如果确信相应的元素存在, 可通过下标访问数组第一个元素之前的元素, 但引用数组边界之外的对象是非法的</li>
+<li>c语言中的地址算术运算方法是一致且有规律的, 将指针, 数组和地址的算术运算集成在一起是c语言的一大特点</li>
+<li>c语言保证0永远不是有效的数据地址</li>
+<li>指针和整数之间不能相互转换, 但0是唯一的例外: 常量0可以赋值给指针, 指针也可以和常量0进行比较. 程序中经常用符号常量<code>NULL</code>代替常量0, 这样便于更清晰地说明常量0是指针的一个特殊值</li>
+<li>在<strong>某些</strong>情况下, 对指针可以进行比较运算. 例如, 如果指针p和q指向同一个数组的成员, 那么它们之间就可以进行类似于==, !=, &lt;的关系比较运算. 任何指针与0进行相等或不等的比较运算都是有意义的. 指向不同数组的元素的指针之间的算术或比较运算没有定义, 通常是没有意义的</li>
+<li><strong>指针的减法运算也是有意义的</strong>: 如果p和q指向相同数组中的元素, 且p&lt;q, 那么q-p+1就是位于p和q指向的元素之间的元素数目(长度)</li>
+<li>指针的算术运算具有一致性: 如果处理的数据类型是比字符类型占据更多存储空间的浮点类型, 并且p是一个指向浮点类型的指针, 那么在执行p++之后, p指向下一个浮点数的地址. 所有指针运算都会自动考虑它所指向的对象的长度</li>
+<li>有效的指针运算包括:</li>
+<li>相同类型指针之间的赋值运算</li>
+<li>指针同整数之间的加法或减法运算</li>
+<li>指向相同数组中元素的两个指针间的减法或比较运算</li>
+<li>将指针赋值为0或指针与0之间的比较运算</li>
+<li><em>字符串常量</em>是一个字符数组, “I am kissg”在字符串内部表示中, 字符串数组以空字符’\0’结尾, 程序可以通过检查空字符找到字符串数组的结尾. 字符串常量占据的存储单元数也因此比双引号内的字符数大1</li>
+<li>字符串常量作为函数参数, 实际上是通过字符指针访问该字符串的. 换言之, 字符串常量可通过一个指向其第一个元素的指针访问</li>
+<li><strong>c语言没有提供将整个字符串作为一个整体进行处理的操作符</strong></li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#F97583">char</span><span style="color:#E1E4E8"> amessage</span><span style="color:#F97583">[]</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "I am kissg"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8">pmessage </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "I am kissg"</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">/*           _      ______________</span></span>
+<span class="line"><span style="color:#6A737D">  pmessage: | | --&gt; |I am kissg\0|</span></span>
+<span class="line"><span style="color:#6A737D">            ______________</span></span>
+<span class="line"><span style="color:#6A737D">  amessage: |I am kissg\0|</span></span>
+<span class="line"><span style="color:#6A737D">*/</span></span></code></pre>
+<ul>
+<li>上述声明中, amessage是一个仅仅足以存放初始化字符串以及空字符’\0’的一维数组, 数组中的单个字符可以进行修改, 但amessage始终指向同一个存储位置. pmessage是一个指针, 其初始值指向一个字符串常量, 之后它可以被修改为以指向其他地址, 但如果试图修改字符串的内容, 结果无定义.</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D">/* 代码进化史 */</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> strcpy</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">t</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">    int</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8"> ((</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">[i] </span><span style="color:#F97583">=</span><span style="color:#FFAB70"> t</span><span style="color:#E1E4E8">[i]) </span><span style="color:#F97583">!=</span><span style="color:#9ECBFF"> '</span><span style="color:#79B8FF">\0</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        i</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> strcpy</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">t</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8"> ((</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">s </span><span style="color:#F97583">=</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8">t) </span><span style="color:#F97583">!=</span><span style="color:#9ECBFF"> '</span><span style="color:#79B8FF">\0</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        t</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">        s</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> strcpy</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">t</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8"> ((</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">s</span><span style="color:#F97583">++</span><span style="color:#F97583"> =</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8">t</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">!=</span><span style="color:#9ECBFF"> '</span><span style="color:#79B8FF">\0</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        ;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> strcpy</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">s</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">char</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">t</span><span style="color:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8"> (</span><span style="color:#F97583">*</span><span style="color:#E1E4E8">s</span><span style="color:#F97583">++</span><span style="color:#F97583"> =</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8">t</span><span style="color:#F97583">++</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        ;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>进栈与出栈的标准写法:</li>
+<li><code>*p++ = val;</code></li>
+<li><code>val = *--p;</code></li>
+<li><code>char *lineptr[MAXLINES]</code> - 表示lineptr是一个具有MAXLINES个元素的一维数组, 其中数组的每个元素都是一个指向字符类型对象的指针. 即, lineptr[i]是一个字符指针, *lineptr[i]是该指针指向的第i个文本行的首字符</li>
+<li>在c语言中, 二维数组实际上是一种特殊的一维数组, 它的每个元素也是一个一维数组</li>
+<li>如果将二维数组作为参数传递给函数, 那么在函数的参数声明中, 必须指明数组的<strong>列数</strong>. 数组的行数没有太大的关系, 因为函数调用时传递的是指针, 它指向由行向量构成的一维数组</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D">/* 二维数组 vs. 指针数组 */</span></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#FFAB70"> a</span><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">][</span><span style="color:#79B8FF">20</span><span style="color:#E1E4E8">];</span></span>
+<span class="line"><span style="color:#F97583">int</span><span style="color:#F97583"> *</span><span style="color:#FFAB70">b</span><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">10</span><span style="color:#E1E4E8">];</span></span></code></pre>
+<ul>
+<li>从语法角度讲, a[3][4]和b[3][4]都是对一个int对象的合法引用. 但a是一个真正的二维数组, 它分配了200个int类型长度的存储空间, 并且通过常规的矩阵下标计算公式20*row+col计算得到a[row][col]的位置; 但对b来说, 该定义仅仅分配了10个指针, 并且没有初始化, 它们的初始化必须以显式的方式进行, 比如静态初始化或通过代码初始化, 假定b的每个元素指向一个具有20个元素的数组, 那么编译器就要为它分配200个int类型长度的存储空间以及10个指针的存储空间</li>
+<li>指针数组的一个重要优点在于, <strong>数组的每一行长度可以不同</strong>. 指针数组最频繁的用户是存放具有不同长度的字符串, 如<code>char *name[] = {"kissg", "Engine", "Treasure"};</code></li>
+<li>在支持c语言的环境中, 可以在程序开始执行时将命令行参数传递给程序. 调用主函数main时, 它带有2个参数, 第一个参数, 通常称为argc, 用于参数计数, 第二个参数, 称为argv, 用于参数向量, 是一个指向字符串数组的指针, 其中每个字符串对应一个参数</li>
+<li>按照c语言的约定, argv[0]的值是启动该程序的程序名, 因此argc至少为1. ANSI标准要求argv[argc]的值必须为一个空指针.</li>
+<li>标准库函数<code>strstr(s, t)</code>返回一个指针, 该指针指向字符串t在字符串s中第一次出现的位置; 如字符串t没有在s中出现, 函数返回NULL</li>
+<li>Unix系统中的C语言程序有一个公共的约定: 以负号开头的参数表示可选标志或参数. 可选参数应该允许以任意次序出现, 同时程序的其余部分应该与命令行中参数的数目无关. 此外, 如果可选参数能够组合使用, 将为使用者带来更大的方便</li>
+<li>在c语言中, <strong>函数本身不是指针</strong>, 但可以定义指向函数的指针. 这种类型的指针可以被赋值, 存放在数组中, 传递给函数以及作为函数的返回值等等</li>
+<li>一个例子: <code>void qsort(void *lineptr[], int left, int right, int (*comp)(void *, void *));</code></li>
+<li><strong>任何类型的指针都可以转换为void *类型, 并且在将它转换回原来的类型时不会丢失</strong></li>
+<li><code>int (*comp)(void *, void*)</code> - 表明comp是一个指向函数的指针, *代表一个函数, 该函数具有2个void *类型的参数, 其返回值类型是int</li>
+<li><code>int \*comp(void *, void *)</code> - 表明comp是一个函数, 该函数返回一个指向int类型的指针</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D">/*</span></span>
+<span class="line"><span style="color:#6A737D">char **argv</span></span>
+<span class="line"><span style="color:#6A737D">    argv: pointer to pointer to char, 指针的指针</span></span>
+<span class="line"><span style="color:#6A737D">int (*daytab)[13]</span></span>
+<span class="line"><span style="color:#6A737D">    daytab: pointer to array[13] of int, 数组指针</span></span>
+<span class="line"><span style="color:#6A737D">int *daytab[13]</span></span>
+<span class="line"><span style="color:#6A737D">    daytab: array[13] of pointer to int, 指针数组</span></span>
+<span class="line"><span style="color:#6A737D">void *comp()</span></span>
+<span class="line"><span style="color:#6A737D">    comp: function returning pointer to void, 返回值为void *型的函数</span></span>
+<span class="line"><span style="color:#6A737D">void (*comp)()</span></span>
+<span class="line"><span style="color:#6A737D">    comp: pointer to function returning void, 函数指针</span></span>
+<span class="line"><span style="color:#6A737D">char (*(*x())[])()</span></span>
+<span class="line"><span style="color:#6A737D">    x: function returning pointer to array[] of pointer to function returning char, 这...</span></span>
+<span class="line"><span style="color:#6A737D">char (*(*x[3])())[5]</span></span>
+<span class="line"><span style="color:#6A737D">    x: array[3] of pointer to function returning pointer to array[5] of char, zhe ...</span></span>
+<span class="line"><span style="color:#6A737D">*/</span></span></code></pre>
+<ul>
+<li>如上所述, c语言的声明不能从左至右阅读, 而且使用了太多的圆括号. 前缀运算符*优先级低于(), 因此, 加不加(), 相差巨大.</li>
+</ul>
+<h2 id="chapter-6-结构">Chapter 6 结构</h2>
+<ul>
+<li>结构是一个或多个变量的集合, 这些变量可能为不同的类型, 为了处理的方便而将这些变量组织在一个名字下. 由于结构将一组相关的变量看作一个单元而不是各自独立的实体, 结构有助于组织复杂的数据</li>
+<li>结构可以拷贝, 赋值, 传递给函数, 作为函数的返回值</li>
+<li>关键字<code>struct</code>引入结构声明, 结构声明由包含在花括号内的一系列声明组成. 关键字<code>struct</code>后的名字是<em>可选的</em>, 称为<code>结构标记</code>, 用于为结构命名, 在定义之后, 结构标记就代表花括号内的声明</li>
+<li>struct声明定义了一种数据结构, 在标志结构成员表结束的右花括号之后可以跟一个变量表, 这与其他基本类型的变量声明相同</li>
+<li>如果结构声明之后不带变量表, 则不需要为其分配存储空间, 它仅仅描述了一个结构的模板或轮廓.</li>
+<li>通过点标记法(a.b)来引用某个特定结构的成员</li>
+<li>结构可以嵌套</li>
+<li>结构的合法操作只有:</li>
+<li>作为一个整体复制与赋值, 包括向函数传递参数以及从函数返回</li>
+<li>通过&amp;运算符取地址</li>
+<li>访问其成员</li>
+<li>结构之间不能进行比较</li>
+<li>传递结构的方法:</li>
+</ul>
+<ol>
+<li>分别传递结构成员</li>
+<li>传递整个结构</li>
+<li>传递指向结构的指针…</li>
+</ol>
+<ul>
+<li>参数名和结构成员同名不会引起冲突. 事实上, 使用重名可以强调两者之间的关系</li>
+<li>如果传递给函数的结构很大, 使用指针方式的效率通常比复制整个结构的效率高</li>
+<li>结构成员运算符<code>.</code>的优先级比<code>*</code>的优先级高, 因此*pp.x等价*(pp.x)</li>
+<li>在所有运算符中, 结构运算符<code>.</code>和<code>-&gt;</code>, 用于函数调用的<code>()</code>以及用于下标的<code>[]</code>优先级最高, 它们同操作数之间的结构也最紧密</li>
+<li><code>++p-&gt;len</code>将增加len的值, 而不是p的值, 因为-&gt;运算的优先级更高</li>
+<li><strong>一元运算符</strong>`sizeof, 可用于计算任意对象的长度, 用整型值表示对象或类型占用的存储空间字节数, 其中对象可以是变量, 数组或结构; 类型可以是基本类型(int, double等), 也可以是结构类型或指针类型</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#F97583">#define</span><span style="color:#B392F0"> NKEYS</span><span style="color:#E1E4E8"> (</span><span style="color:#F97583">sizeof</span><span style="color:#E1E4E8"> keytab </span><span style="color:#F97583">/</span><span style="color:#F97583"> sizeof</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">struct</span><span style="color:#E1E4E8"> key))</span></span>
+<span class="line"><span style="color:#F97583">#define</span><span style="color:#B392F0"> NKEYS</span><span style="color:#E1E4E8"> (</span><span style="color:#F97583">sizeof</span><span style="color:#E1E4E8"> keytab </span><span style="color:#F97583">/</span><span style="color:#F97583"> sizeof</span><span style="color:#FFAB70"> keytab</span><span style="color:#E1E4E8">[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">])</span></span></code></pre>
+<ul>
+<li>以上, 使用第二种方法, 即使类型改变了, 也不需要改动程序</li>
+<li>条件编译语句#if不能使用sizeof, 因为预处理器不对类型名进行分析</li>
+<li>但预处理器并不计算#define语句中的表达式, 因此在#define中使用sizeof是合法的</li>
+<li>两个指针之间的加法运算是非法的, 但指针的减法运算是合法的, 因此:</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#E1E4E8">mid </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> (low </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> high) </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#E1E4E8">mid </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> low </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> (high </span><span style="color:#F97583">-</span><span style="color:#B392F0"> low</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 2</span></span></code></pre>
+<ul>
+<li>c语言的定义保证数组末尾之后的第一个元素的指针运算是可以正常执行的(即&amp;tab[n])</li>
+<li>结构的长度不等于各成员长度之和, 因为不同的对象有不同的<strong>对齐</strong>要求, 故, 结构中可能会出现未命名的空穴</li>
+<li>一个包含其自身实例的结构是非法的, 但是声明<code>struct tnode \*left;</code>是合法的, 它将left声明为指向tnode的指针, 而不是tnode实例本身</li>
+<li><code>散列查找</code> - 将输入的名字转换为一个小的非负整数, 该整数随后将作为一个指针数组的下标. 数组的每个元素指向某个链表的表头, 链表中的各个块用于描述具有该散列值的名字. 若没有名字散列到该值, 则数组元素的值为NULL</li>
+<li>c语言提供了一个称为<code>typedef</code>的功能, 用来建立新的数据类型名.</li>
+<li>从任何意义上讲, typedef声明没有创建一个新的类型, 只是为某个已存在的类型增加一个新的名称而已. typedef声明也没有增加任何新的语义</li>
+<li><code>typedef int (\*PEI)(char \*, char \*)</code>该语句定义了类型PEI是“一个指向函数的指针, 该函数具有两个char *类型的参数, 返回值类型为int”</li>
+<li>除了表达方式更简洁外名, 使用typedef还有另外两个重要原因. 首先, 它可以使程序参数化, 以提高程序的可移植性, 如果typedef声明的数据类型与机器有关, 那么, 当程序移植到其他机器上时, 只需改变typedef类型定义即可. 一个经常用到的情况是, 对于各种不同大小的整型值来说, 都使用typedef定义的类型名, 然后分别为各个不同的宿主机选择一组合适的short, int和long类型大小. 其次, typedef为程序提供更好的说明性</li>
+<li><code>联合(union)</code>是可以在(不同时刻)保存不同类型和长度的对象的变量, 编译器负责跟踪对象的长度和对齐要求. 联合提供了一种方法, 以在单块存储区中管理不同类型的数据, 而不需要在程序中嵌入任何同机器相关的信息</li>
+<li>联合的目的是: 一个变量可以合法地保存多种数据类型中任何一种类型的对象</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#F97583">union</span><span style="color:#E1E4E8"> u_tag{</span></span>
+<span class="line"><span style="color:#F97583">    int</span><span style="color:#E1E4E8"> ival;</span></span>
+<span class="line"><span style="color:#F97583">    float</span><span style="color:#E1E4E8"> fval;</span></span>
+<span class="line"><span style="color:#F97583">    char</span><span style="color:#F97583"> *</span><span style="color:#E1E4E8">sval;</span></span>
+<span class="line"><span style="color:#E1E4E8">} u;</span></span></code></pre>
+<ul>
+<li>变量u必须足够大, 以保存这3种类型中最大的一种. 这些类型中的任何一种类型的对象都可赋给u, 且可使用在随后的表达式中, 但必须保证是一致的: 读取的类型必须是最近一次存入的类型</li>
+<li>联合可以用在结构和数组中, 反之亦然. 访问结构中的联合(或反之)的某一成员的表达法和嵌套结构相同</li>
+<li>实际上, 联合就是一个结构, 它的所有成员相对于基地址的偏移量都是0, 此结构空间要大到足够容纳最“宽”的成员, 且, 对齐方式要适合于联合中的所有类型的成员. 对联合允许的操作与对结构允许的操作相同: 作为一个整体单元进行赋值与复制, 取地址及访问其中一个成员</li>
+<li>联合只能用其第一个成员类型的值进行初始化</li>
+<li><code>位字段</code>是“字”中相邻位的集合. “字”是单个的存储单元:</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#F97583">struct</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    unsigned</span><span style="color:#F97583"> int</span><span style="color:#E1E4E8"> is_keyword : </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    unsigned</span><span style="color:#F97583"> int</span><span style="color:#E1E4E8"> is_extern : </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    unsigned</span><span style="color:#F97583"> int</span><span style="color:#E1E4E8"> is_static : </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>冒号后的数字表示字段的宽度(用二进制位数表示), 单个字段的引用方式与其他结构成员相同</li>
+<li>字段可以不命名, 无名字段(只有一个冒号和宽度)起填充作用, 特殊宽度0可以用来强制在下一个字边界上对齐</li>
+<li>为了移植方便, 需要显式声明类型是signed类型还是unsigned类型.</li>
+<li>字段不是数组, 并且没有地址, 因此不能对其使用&amp;运算符</li>
+</ul>
+<h2 id="chapter-7-输入与输出">Chapter 7 输入与输出</h2>
+<ul>
+<li>ANSI标准精确地定义了库函数, 所以, 在任何可以使用c语言的系统中都有库函数的兼容形式. 如果程序的系统交互部分仅仅使用了标准库提供的功能, 则可以不经修改地从一个系统移植到另一个系统中</li>
+<li>文本流由一系列行组成, 每一行的结尾是一个换行符(\n)</li>
+<li>在许多环境中, 用符号<code>&lt;</code>来实现<strong>输入重定向</strong>, 它将键盘输入替换为文件输入</li>
+<li>当文件名用<code>&lt;&gt;</code>括起来时, 预处理器将在由具体实现定义的有关位置中查找指定的文件</li>
+<li><code>getchar</code>函数从标准输入中一次读取一个字符</li>
+<li><code>putchar(c)</code>函数将字符c送至标准输出, 在默认情况下, 标准输出为屏幕显示</li>
+<li>头文件&lt;stdio.h&gt;中的getchar和putchar以及&lt;ctype.h&gt;中的tolower一般都是宏, 这样就避免了对每个字符进行函数调用的开销</li>
+<li>输出函数printf将内部数值转换为字符的形式, 在输出格式的控制下, 将其参数进行转换和格式化, 并在标准输出设备上打印出来, 返回打印的字数</li>
+<li>格式字符串包含2种类型的对象: 普通字符和转换说明. 在输出时, 普通字符将原样复制到输出流中, 而转换说明并不直接输出到输出流中, 而是用于控制printf中参数的转换和打印. 每个转换说明都由一个百分号字符开始, 以一个转换字符结束</li>
+<li>在转换说明中, 宽度和精度可以用星号表示, 这时, 宽度和精度的值通过转换下一个参数来计算</li>
+<li>sprintf的执行和转换和printf相同, 但它将输出保存到一个字符串中, 而不是输出到标准输出中</li>
+<li><code>scanf</code>从标准输入中读取字符序列, 按照format中的格式说明对字符序列进行解释, 并将结果保存到其余的参数中, 其它所有参数都必须是指针, 用于指定经格式转换后的相应输入保存的位置</li>
+<li><code>sscanf</code>从一个字符串中读取字符序列</li>
+<li>scanf与sscanf的所有参数必须是指针</li>
+<li>转换说明控制下一个输入字段的转换. 一般而言, 转换结果存放在相应的参数指向的变量中. 但若转换说明中有赋值禁止字符*, 则跳过该输入字段, 不进行赋值. 输入字段定义为一个不包含空白符的字符串, 其边界定义为到下一个空白符或达到指定的字段宽度</li>
+<li>字符字面值也可以出现在scanf的格式串中, 它们必须与输入中相同的字符匹配, 如要读入形如mm/dd/yy的数据, 可用<code>scanf("%d/%d/%d", &amp;month, &amp;day, &amp;year)</code></li>
+<li>scanf函数可以与其他输入函数混合使用, 无论调用哪个输入函数, 下一个输入函数的调用将从scanf没有读取的第一个字符处开始读取数据</li>
+<li>标准输入和输出是操作系统自动提供给程序访问的</li>
+<li>文件访问: 在读写一个文件之前, 必须通过库函数<code>fopen</code>打开该文件, 该函数用外部文件名与操作系统进行某些必要的连接和通信, 并返回一个可用于文件读写操作的指针, 称为<strong>文件指针</strong>, 它指向一个包含文件的结构, 包括: 缓冲区的位置, 缓冲区中当前字符的位置, 文件的读写状态, 是否出错, 是否已经到达文件结尾等等. 在&lt;stdio.h&gt;中, 用结构<code>FILE</code>表示</li>
+<li><code>int getc(FILE *fp)</code> - 从文件中返回一个字符, 需要知道文件指针, 以确定对哪个文件执行操作</li>
+<li><code>int putc(int c, FILE *fp)</code> - 将字符c写入到fp指向的文件中. putc与getc是宏而不是函数</li>
+<li>启动c语言程序时, 操作系统环境负责打开3个文件, 并将这3个文件的指针提供给该程序. 这3个文件分别是<strong>标准输入</strong>, <strong>标准输出</strong>, <strong>标准错误</strong>, 相应的文件指针分别是stdin, stdout, stderr, 均在&lt;stdio.h&gt;中声明. 在大多数环境中, stdin指向键盘, stdout和stderr指向显示器. stdin和stdout可以被重定向到文件或管道(&lt;, &gt;, |)</li>
+<li><code>fclose</code>执行与fopen相反的操作, 断开由fopen函数建立的文件指针和外部名之间的连接, 并释放文件指针以供其他文件使用. 此外, fclose会将缓冲区中由putc正在收集的输出写到文件中, 当程序正常终止时, 程序会自动为每个打开的文件调用fclose函数</li>
+<li>即使对标准输出stdout进行了重定向, 写到stderr中的输出通常也会显示在屏幕上</li>
+<li>使用标准库函数<code>exit</code>, 当函数被调用时, 它将终止调用程序的运行. exit为每个已打开的输出调用fclose函数, 以将缓冲区的所有输出写到相应的文件中</li>
+<li>在主程序main中, 语句<code>return expr</code>等价于<code>exit(expr)</code>. 但使用exit有一个优点, 它可以从其他函数中调用</li>
+<li><code>char *fgets(char *line, int maxline, FILE *fp)</code> - 函数从fp指向的文件中读取下一个输入行(包括换行符), 将其存放在字符数组line中, 最多可读取maxline - 1个字符. 读取的行将以<code>\0</code>结尾保存到数组中</li>
+<li><code>int fputs(char *line, FILE *fp)</code> - 将一个字符串(不需要包含换符)写入到文件中</li>
+<li>库函数gets和puts的功能与fgets和fputs类似, 但它们对stdin和stdout进行操作. gets函数在读取字符串时将删除结尾的换行符, 而puts函数在写入字符串时将在结尾添加一个换行符</li>
+<li><code>int ungetc(int c, FILE *fp)</code> - 函数将字符c写回到文件中, 并返回c. 每个文件只能接收一个写回字符, ungetc可以与任何一个输入函数一起使用</li>
+<li><code>system(char *s)</code>执行包含在字符串s中的命令</li>
+<li>函数malloc和calloc用于动态地分配存储块. 用<code>free(p)</code>函数释放p指向的存储空间, p是此前通过malloc或calloc函数得到的指针. 存储空间的释放顺序没有限制, 但是, 如果释放一个不是通过调用malloc或calloc函数得到的指针所指向的存储空间, 将是一个严重错误
+.</li>
+<li>使用已经释放的存储空间是错误的, 正确的处理方法好似, 在释放项目之前先将一切必要的信息保存起来:</li>
+</ul>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#F97583">for</span><span style="color:#E1E4E8"> (p </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> head; p </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> NULL</span><span style="color:#E1E4E8">; p </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> p</span><span style="color:#F97583">-&gt;</span><span style="color:#E1E4E8">next)</span></span>
+<span class="line"><span style="color:#B392F0">    free</span><span style="color:#E1E4E8">(p);</span><span style="color:#6A737D">                           /* 错误 */</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">for</span><span style="color:#E1E4E8"> (p </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> head; p </span><span style="color:#F97583">!=</span><span style="color:#79B8FF"> NULL</span><span style="color:#E1E4E8">; p </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> q){</span></span>
+<span class="line"><span style="color:#E1E4E8">    q </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> p-&gt;next;</span></span>
+<span class="line"><span style="color:#B392F0">    free</span><span style="color:#E1E4E8">(p);</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>函数rand()生成介于0和RAND_MAX之间的伪随机整数序列</li>
+<li><code>#define frand() ((double) rand() / (RAND_MAX + 1.0))</code> - 生成[0, 1)的随机浮点数</li>
+<li>函数srand(unsigned)`设置rand函数的种子数</li>
+</ul>
+<h2 id="chapter-8-unix系统接口">Chapter 8 UNIX系统接口</h2>
+<ul>
+<li>unix系统通过一系列<strong>系统调用</strong>提供服务, 这些系统调用实际上是操作系统内的函数, 可被用户程序调用. 借助系统调用, 可获得最高的效率, 或者访问标准库没有的某些功能</li>
+<li>在unix系统中, 所有外围设备都被视为文件系统中的文件, 因此, 所有的输入输出都要通过读文件或写文件完成, 即通过一个单一接口就可以处理外围设备与程序之间的所有通信</li>
+<li>通常情况下, 在读写文件之前, 必须先将这个意图通知操作系统, 该过层称为<strong>打开文件</strong>. 如果一切正常, OS将返回一个小的非负整数, 称为<strong>文件描述符</strong>, 任何时候对文件的I/O都是通过文件描述符标识文件, 而不是通过文件名标识文件. 系统负责维护已打开的文件的所有信息, 用户程序只能通过文件描述符引用文件</li>
+<li>用shell运行一个程序时, 将打开3个文件, 对应的文件描述符为0, 1, 2, 依次表示stdin, stdout, stderr. 如果程序从文件0中读, 对1和2进行写, 就可以进行I/O而不必关心打开文件的问题</li>
+<li>通过&lt;或&gt;重定向程序的I/O时, shell将文件描述符的0和1的默认赋值改变为指定的文件. 在任何情况下, 文件赋值的改变都不是由程序完成的, 而是由shell完成的. 只要程序使用文件0作为输入, 1和2作为输出, 就不需要知道输入从何而来, 又输出到哪去</li>
+<li>I/O通过<code>read</code>和<code>write</code>系统调用实现. 在c语言程序中, 通过函数read和write访问这2个系统调用. 在一次调用中, 读出或写入的数据的字节数可以为任意大小, 最常用的值为1, 或是类似于4096这样的与外围设备的物理块大小相应的值</li>
+<li>除了默认的标准输入, 标准输出和标准错误文件外, 其他文件都必须在读写之前显式地打开. 系统调用open和creat实现该功能</li>
+<li>open与fopen相似, 但前者返回一个文件描述符, 仅仅是一个int类型的数值, 后者返回一个文件指针</li>
+<li>在unix文件系统中, 每个文件对应一个9比特的权限信息, 分别控制文件的所有者, 所有者组和其他成员对文件的读, 写和执行访问.</li>
+<li>一个程序同时打开的文件数是有限制的(通常为20). 相应的, 如果一个程序需要同时处理多个文件, 必须重用文件描述符. 函数close(int fd)用来断开文件描述符与已打开文件之间的连接, 并释放此文件的文件描述符, 以供其他文件使用. close函数与标准库中的fclose相对应, 但不需要清洗(flush)缓冲区. 若程序通过exit函数退出或从主程序中返回, 所有打开的程序将被关闭</li>
+<li>函数unlink(char *name)将文件name从文件系统中删除, 它对应的标准库函数为remove</li>
+<li>系统调用iseek可以在文件中任意移动位置而不实际读写任何数据.\
+<code>long lseek(int fd, long offset, int origin)</code> - 将文件描述符为fd的文件的当前位置设置为offset, offset是相对于origin指定的位置而言的. 随后进行的读写操作将从此位置开始. origin的值可以为0, 1, 2, 分别用于指定offset从文件开始, 从当前位置或从文件结束处开始</li>
+<li>使用lssek系统调用, 可以将文件视为一个大的数组, 其代价是访问速度会慢一些. lseek返回的long类型的值表示文件的新位置</li>
+<li>标准库中的文件不是通过文件描述符描述的, 而是使用文件指针描述的. 文件指针是一个指向包含文件各种信息的结构的指针, 该结构包括: 一个指向缓冲区的指针, 通过它可以一次读入文件中的一大块内容; 一个记录缓冲区中剩余的字符数的计数器; 一个指向缓冲区下一个字符的指针; 文件描述符; 描述读写模式的标识; 描述错误状态的标识等</li>
+<li>描述文件的数据结构包含在头文件&lt;stdio.h&gt;中, 任何需要使用标识输入/输出库中函数的程序都必须在源文件中包含这个头文件</li>
+<li>长语句可用反斜杆分成多行表示</li>
+<li>通常还需要对文件系统执行另一种操作, 以获得文件的有关信息, 而不是读取文件的具体内容. 目录列表程序便是一个例子(ls)</li>
+<li>在unix中, 目录就是文件, 它包含一个文件名列表和一些指示文件位置的信息. “位置”是一个指向其他表的索引. 文件的inode是存放除文件名意外的所有文件信息的地方. 目录项通常仅包含两个条目: 文件名和inode</li>
+<li>为使程序的可移植性更像, 有时候需要分离不可移植部分分别处理</li>
+<li>许多程序并不是“系统程序”, 它们仅仅使用由OS维护的信息. 对于这样的程序, 很重要的一点是, 信息的表示仅出现在标准头文件中, 使用它们的程序只需要在文件中包含这些头文件即可, 而不需要包含相应的声明. 其次, 有可能为系统相关的对象创建一个与系统无关的接口, 标准库中的函数就是一个很好的例子</li>
+<li>通过一种与系统无关的方式编写与系统有关的代码</li>
+<li>malloc并不是从一个编译时就确定的固定大小的数组中分配存储空间, 而是在需要时向OS申请空间. malloc管理的空间不一定是连续的, 空闲存储空间以空闲块链表的方式组织, 每个块包含一个长度, 一个指向下一块的指针, 一个指向自身的存储空间的指针. 这些块按照存储地址升序组织, 最后一块指向第一块</li>
+<li>当有申请时, malloc将扫描空闲块链表, 直到找到一个足够大的块为止, 称为“首次适应(first fit)”; 寻找满足条件的最小块, 称为“最佳适应(best fit)”</li>
+<li>释放的过程也是首先搜索空闲块链表, 以找到可以插入或被释放的合适位置. 空闲块链表以地址的递增顺序链接在一起, 很容易判断相邻的块是否空闲</li>
+<li>空闲块包含一个指向链表中下一个块的指针, 一个块大小的记录, 一个指向空闲空间本身的指针. 位于块开始处的控制信息称为“头部”, 为了简化块的对齐, 所有块的大小必须以头部大小的整数倍, 且头部已正确对齐</li>
+<li>在malloc函数中, 请求的长度(以字符为单位)将被舍入, 以保证它是头部大小的整数倍, 实际分配的块将多包含一个单元, 用于头部本身. 实际分配的块的大小将被记录在头部的size字段中, malloc函数返回的指针指向空闲空间, 而非块的头部, 用户可对获得的存储空间进行任何操作. 但, 如果在分配的存储空间之外写入数据, 可能会破坏块链表</li>
+<li>向系统请求存储空间是一个开销很大的操作</li>
+<li>类型的强制转换使得指针的转换是显式进行的, 这样甚至可以处理设计不够好的系统接口问题</li>
+</ul>
+<h2 id="the-end">The End</h2>
+</div><aside class="sidenotes" data-sidenotes aria-label="侧注" data-astro-cid-veasemt3></aside></div><footer class="reading-end" data-astro-cid-veasemt3><section class="related" data-related-content aria-labelledby="related-title" data-astro-cid-veasemt3><h2 id="related-title" class="rule-heading" data-astro-cid-veasemt3>继续阅读</h2><ol data-astro-cid-veasemt3><li data-astro-cid-veasemt3><a href="/articles/python-visualization-with-bokeh/" data-astro-cid-veasemt3>[译|转]Python: 利用 Bokeh 进行可视化</a><span data-astro-cid-veasemt3>文章</span></li><li data-astro-cid-veasemt3><a href="/articles/apartment-finding-slackbot/" data-astro-cid-veasemt3>[译|转]我是如何写一个 Slack 机器人以帮助我在旧金山找到房子的</a><span data-astro-cid-veasemt3>文章</span></li><li data-astro-cid-veasemt3><a href="/articles/breaking-out-of-two-loops/" data-astro-cid-veasemt3>[译|转]跳出两重循环</a><span data-astro-cid-veasemt3>文章</span></li></ol></section><section class="share-tools" data-share-region aria-labelledby="share-title" data-astro-cid-j62koywo><h2 id="share-title" class="rule-heading" data-astro-cid-j62koywo>分享本文</h2><div class="share-tools__actions" data-astro-cid-j62koywo><button type="button" data-web-share hidden data-astro-cid-j62koywo>分享</button><button type="button" data-copy-link data-copy-value="https://lifelonglove.cn/notes/notes-on-the-c-programming-language/" data-astro-cid-j62koywo>复制链接</button><a href="mailto:?subject=%5B%E7%AC%94%E8%AE%B0%5DC%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E8%AF%AD%E8%A8%80&amp;body=Notes%20on%20%22The%20C%20programming%20language%22%0A%0Ahttps%3A%2F%2Flifelonglove.cn%2Fnotes%2Fnotes-on-the-c-programming-language%2F" data-astro-cid-j62koywo>邮件</a><a href="https://x.com/intent/tweet?text=%5B%E7%AC%94%E8%AE%B0%5DC%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E8%AF%AD%E8%A8%80%0ANotes%20on%20%22The%20C%20programming%20language%22&amp;url=https%3A%2F%2Flifelonglove.cn%2Fnotes%2Fnotes-on-the-c-programming-language%2F" rel="external" data-astro-cid-j62koywo>X</a><button type="button" data-copy-share data-copy-value="[笔记]C程序设计语言
+Notes on &quot;The C programming language&quot;
+https://lifelonglove.cn/notes/notes-on-the-c-programming-language/" data-astro-cid-j62koywo>复制后发布到小红书</button><button type="button" data-copy-share data-copy-value="[笔记]C程序设计语言
+Notes on &quot;The C programming language&quot;
+https://lifelonglove.cn/notes/notes-on-the-c-programming-language/" data-astro-cid-j62koywo>复制后发布到知乎</button></div><p class="share-tools__status meta" data-share-status aria-live="polite" data-astro-cid-j62koywo></p><details class="share-tools__fallback" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>手动复制分享文字</summary><label data-astro-cid-j62koywo><span class="meta" data-astro-cid-j62koywo>标题、摘要与干净链接</span><textarea readonly rows="5" data-astro-cid-j62koywo>[笔记]C程序设计语言
+Notes on &quot;The C programming language&quot;
+https://lifelonglove.cn/notes/notes-on-the-c-programming-language/</textarea></label></details><details class="share-tools__qr" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>桌面二维码</summary><div data-share-qr data-astro-cid-j62koywo><svg xmlns="http://www.w3.org/2000/svg" width="184" height="184" viewBox="0 0 39 39" shape-rendering="crispEdges"><path fill="#f4efe4" d="M0 0h39v39H0z"/><path stroke="#17213e" d="M1 1.5h7m1 0h2m1 0h4m1 0h2m1 0h2m1 0h2m1 0h2m3 0h7M1 2.5h1m5 0h1m1 0h3m3 0h1m4 0h1m1 0h4m5 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h3m2 0h2m1 0h1m2 0h1m1 0h3m1 0h3m2 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m2 0h4m3 0h2m2 0h2m1 0h3m1 0h2m1 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h2m4 0h3m2 0h1m1 0h1m4 0h1m1 0h1m1 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m3 0h1m1 0h1m1 0h3m5 0h2m4 0h1m1 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M11 8.5h2m3 0h5m2 0h2m1 0h1m1 0h2M1 9.5h1m2 0h7m1 0h1m1 0h2m4 0h1m1 0h4m1 0h1m1 0h2m2 0h1m1 0h3M2 10.5h3m3 0h1m1 0h1m1 0h4m1 0h1m1 0h1m2 0h1m2 0h4m3 0h3m1 0h1M1 11.5h1m1 0h5m2 0h1m2 0h2m1 0h2m1 0h3m1 0h2m3 0h2m2 0h2m3 0h1M2 12.5h1m1 0h1m3 0h1m1 0h2m1 0h1m1 0h1m1 0h2m1 0h2m8 0h2m2 0h4M3 13.5h2m2 0h2m2 0h3m2 0h2m1 0h1m5 0h1m3 0h1m1 0h2m4 0h1M3 14.5h3m2 0h2m2 0h3m1 0h2m1 0h1m2 0h4m1 0h3m3 0h2M2 15.5h4m1 0h4m1 0h3m1 0h2m1 0h3m3 0h1m1 0h2m1 0h1m2 0h3m1 0h1M1 16.5h1m1 0h1m1 0h2m8 0h1m1 0h1m2 0h1m1 0h3m2 0h2m1 0h3m1 0h3M1 17.5h1m1 0h5m3 0h4m3 0h3m1 0h2m1 0h2m4 0h1m3 0h3M4 18.5h1m1 0h1m2 0h1m3 0h1m1 0h1m7 0h1m1 0h2m1 0h3m1 0h1m2 0h1M2 19.5h2m1 0h7m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m1 0h1m3 0h1m1 0h1m1 0h1m1 0h2m1 0h1M2 20.5h1m6 0h9m2 0h2m4 0h1m1 0h7m2 0h1M1 21.5h1m2 0h1m2 0h1m1 0h1m2 0h1m2 0h1m1 0h2m1 0h1m4 0h1m1 0h7M1 22.5h4m3 0h3m2 0h2m1 0h1m1 0h3m2 0h2m3 0h1m4 0h1m1 0h1M1 23.5h2m1 0h1m2 0h2m1 0h1m2 0h4m4 0h2m1 0h1m1 0h1m1 0h1m3 0h1m1 0h1m2 0h1M1 24.5h3m1 0h2m4 0h4m4 0h3m3 0h1m1 0h1m3 0h5m1 0h1M4 25.5h2m1 0h3m1 0h1m2 0h3m1 0h1m2 0h5m3 0h1m1 0h1M1 26.5h1m2 0h1m3 0h1m5 0h2m2 0h3m2 0h2m1 0h1m1 0h2m3 0h1M1 27.5h2m1 0h2m1 0h1m1 0h2m1 0h1m2 0h2m1 0h1m3 0h1m4 0h5m1 0h2m1 0h2M1 28.5h1m1 0h1m4 0h2m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m3 0h1m2 0h2m3 0h4M1 29.5h1m2 0h1m1 0h4m1 0h1m1 0h5m2 0h2m1 0h4m2 0h9M9 30.5h2m1 0h3m1 0h1m1 0h5m6 0h1m3 0h1m1 0h2M1 31.5h7m1 0h2m2 0h1m2 0h1m1 0h3m3 0h3m2 0h1m1 0h1m1 0h1m2 0h2M1 32.5h1m5 0h1m1 0h1m3 0h1m3 0h1m4 0h1m1 0h1m1 0h1m1 0h2m3 0h1m2 0h2M1 33.5h1m1 0h3m1 0h1m1 0h1m2 0h3m2 0h1m1 0h1m1 0h2m1 0h2m1 0h7m2 0h2M1 34.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h2m2 0h1m2 0h1m1 0h2m2 0h5m2 0h1m2 0h1M1 35.5h1m1 0h3m1 0h1m2 0h3m2 0h1m8 0h1m5 0h1m2 0h1m1 0h1m1 0h1M1 36.5h1m5 0h1m2 0h5m1 0h1m1 0h2m4 0h2m1 0h1m2 0h1m2 0h5M1 37.5h7m1 0h1m1 0h1m1 0h2m2 0h1m1 0h3m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m2 0h1"/></svg>
+</div><p class="meta" data-astro-cid-j62koywo>用手机打开本文；二维码由本站在构建时生成。</p></details><p class="meta" data-astro-cid-j62koywo>链接始终可直接打开：<a href="https://lifelonglove.cn/notes/notes-on-the-c-programming-language/" data-astro-cid-j62koywo>https://lifelonglove.cn/notes/notes-on-the-c-programming-language/</a></p></section><script>
+  (() => {
+    const root = document.currentScript?.previousElementSibling;
+    if (!(root instanceof HTMLElement) || !root.matches("[data-share-region]")) return;
+    const status = root.querySelector("[data-share-status]");
+    const fallback = root.querySelector("textarea");
+    const report = (message) => { if (status) status.textContent = message; };
+    const copy = async (value) => {
+      try {
+        if (!navigator.clipboard) throw new Error("clipboard unavailable");
+        await navigator.clipboard.writeText(value);
+        report("已复制");
+      } catch {
+        if (fallback instanceof HTMLTextAreaElement) {
+          fallback.value = value;
+          fallback.closest("details").open = true;
+          fallback.focus();
+          fallback.select();
+        }
+        report("请手动复制已选中的文字");
+      }
+    };
+    const webShare = root.querySelector("[data-web-share]");
+    if (webShare instanceof HTMLButtonElement && navigator.share) {
+      webShare.hidden = false;
+      webShare.addEventListener("click", async () => {
+        try {
+          await navigator.share({ title: document.title, url: location.href });
+        } catch (error) {
+          if (error?.name !== "AbortError") report("系统分享不可用，请复制链接");
+        }
+      });
+    }
+    for (const button of root.querySelectorAll("[data-copy-link], [data-copy-share]")) {
+      button.addEventListener("click", () => copy(button.dataset.copyValue || location.href));
+    }
+  })();
+</script></footer></article><dialog class="lightbox" data-lightbox aria-label="图片放大查看" data-astro-cid-veasemt3><button class="lightbox__close" type="button" data-lightbox-close aria-label="关闭图片" data-astro-cid-veasemt3>关闭 ×</button><figure data-astro-cid-veasemt3><img src="" alt="" data-astro-cid-veasemt3><figcaption data-astro-cid-veasemt3></figcaption></figure><div class="lightbox__nav" data-astro-cid-veasemt3><button type="button" data-lightbox-prev data-astro-cid-veasemt3>← 上一张</button><button type="button" data-lightbox-next data-astro-cid-veasemt3>下一张 →</button></div></dialog><template data-code-tools-template data-astro-cid-veasemt3><div class="code-tools" data-code-tools data-astro-cid-veasemt3><span data-code-filename data-astro-cid-veasemt3></span><button type="button" data-code-copy data-astro-cid-veasemt3>复制代码</button></div></template></main><footer class="site-footer" data-astro-cid-nns7i3if><div class="site-footer__inner shell" data-astro-cid-nns7i3if><div data-astro-cid-nns7i3if><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><p data-astro-cid-nns7i3if>长期写作，公开学习，也保存生活留下的纹理。</p></div><nav aria-label="页脚导航" data-astro-cid-nns7i3if><a href="/feed.xml" data-astro-cid-nns7i3if>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-nns7i3if>GitHub</a><a href="/colophon/" data-astro-cid-nns7i3if>版本说明</a></nav></div></footer><dialog class="search-overlay" data-search-overlay aria-modal="true" aria-labelledby="search-overlay-title" data-astro-cid-fdy5zvyj><div class="search-overlay__frame" data-astro-cid-fdy5zvyj><div class="search-overlay__top" data-astro-cid-fdy5zvyj><div data-astro-cid-fdy5zvyj><p class="eyebrow" data-astro-cid-fdy5zvyj>Search / 搜索</p><h2 id="search-overlay-title" data-astro-cid-fdy5zvyj>在站内找一段文字</h2></div><button type="button" data-search-close aria-label="关闭搜索" data-astro-cid-fdy5zvyj>关闭 ×</button></div><section class="pagefind-search" data-pagefind-search data-astro-cid-dm6ph42g><label data-astro-cid-dm6ph42g><span data-astro-cid-dm6ph42g>搜索标题、正文与主题</span><input type="search" name="q" placeholder="输入关键词…" autocomplete="off" data-astro-cid-dm6ph42g></label><p class="pagefind-search__status" role="status" aria-live="polite" data-astro-cid-dm6ph42g>输入关键词开始搜索。</p><ol class="pagefind-search__results" data-astro-cid-dm6ph42g></ol><noscript><p data-astro-cid-dm6ph42g>搜索需要 JavaScript；你仍可以前往<a href="/archive/" data-astro-cid-dm6ph42g>完整归档</a>浏览所有内容。</p></noscript></section><script>
+  (() => {
+    const modulePath = "/pagefind/pagefind.js";
+    const escapeHtml = (value) => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    for (const root of document.querySelectorAll("[data-pagefind-search]")) {
+      if (root.dataset.bound === "true") continue;
+      root.dataset.bound = "true";
+      const input = root.querySelector('input[type="search"]');
+      const status = root.querySelector('[role="status"]');
+      const results = root.querySelector("ol");
+      let timer;
+
+      const search = async () => {
+        const query = input.value.trim();
+        if (!query) {
+          status.textContent = "输入关键词开始搜索。";
+          results.replaceChildren();
+          return;
+        }
+        status.textContent = "正在翻阅…";
+        try {
+          const pagefind = await import(/* @vite-ignore */ modulePath);
+          await pagefind.init();
+          const response = await pagefind.search(query);
+          const items = await Promise.all(response.results.slice(0, 12).map((item) => item.data()));
+          status.textContent = items.length ? `找到 ${items.length} 条结果。` : "没有找到，换个词试试。";
+          results.innerHTML = items.map((item) => `
+            <li>
+              <a href="${escapeHtml(item.url)}">${escapeHtml(item.meta?.title || item.url)}</a>
+              <p>${item.excerpt || ""}</p>
+            </li>`).join("");
+        } catch {
+          status.innerHTML = '搜索暂时不可用，请前往<a href="/archive/">完整归档</a>。';
+          results.replaceChildren();
+        }
+      };
+
+      input.addEventListener("input", () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(search, 180);
+      });
+    }
+  })();
+</script><p class="search-overlay__hint" data-astro-cid-fdy5zvyj><kbd data-astro-cid-fdy5zvyj>/</kbd> 打开 · <kbd data-astro-cid-fdy5zvyj>Esc</kbd> 关闭 · <a href="/search/" data-astro-cid-fdy5zvyj>独立搜索页</a></p></div></dialog><script>
+  (() => {
+    const dialog = document.querySelector("[data-search-overlay]");
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    let trigger;
+    const open = (source) => {
+      trigger = source;
+      dialog.showModal();
+      window.setTimeout(() => dialog.querySelector('input[type="search"]')?.focus(), 0);
+    };
+    for (const opener of document.querySelectorAll("[data-search-open]")) {
+      opener.addEventListener("click", (event) => {
+        event.preventDefault();
+        open(opener);
+      });
+    }
+    dialog.querySelector("[data-search-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => trigger?.focus());
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isEditing = target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+      if (event.key === "/" && !isEditing && !dialog.open) {
+        event.preventDefault();
+        open(document.querySelector("[data-search-open]"));
+      }
+    });
+  })();
+</script><script type="module">var e=document.documentElement,t=[...document.querySelectorAll(`[data-theme-toggle]`)],n=window.matchMedia(`(prefers-color-scheme: dark)`),r=()=>e.dataset.theme||(n.matches?`dark`:`light`),i=()=>{let e=r()===`dark`;for(let n of t){n.setAttribute(`aria-pressed`,String(e));let t=n.querySelector(`[data-theme-icon]`);t&&(t.textContent=e?`☀`:`◐`)}};for(let n of t)n.addEventListener(`click`,()=>{let t=r()===`dark`?`light`:`dark`;e.dataset.theme=t;try{localStorage.setItem(`iamkissg-theme`,t)}catch{}i()});n.addEventListener(`change`,i),document.addEventListener(`keydown`,e=>{if(e.key!==`Escape`)return;let t=document.querySelector(`details[data-mobile-menu][open]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});for(let e of document.querySelectorAll(`[data-mobile-menu-close]`))e.addEventListener(`click`,()=>{let t=e.closest(`details[data-mobile-menu]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});i();</script></body></html><script>
+  (() => {
+    const prose = document.querySelector("[data-prose]");
+    if (!prose) return;
+
+    const footnotes = prose.querySelector(".footnotes");
+    const sidenotes = document.querySelector("[data-sidenotes]");
+    const originalFootnoteParent = footnotes?.parentElement;
+    const placeFootnotes = () => {
+      if (!footnotes || !sidenotes || !originalFootnoteParent) return;
+      const desktop = window.matchMedia("(min-width: 68.01rem)").matches;
+      (desktop ? sidenotes : originalFootnoteParent).append(footnotes);
+    };
+    placeFootnotes();
+    window.addEventListener("resize", placeFootnotes, { passive: true });
+
+    const template = document.querySelector("[data-code-tools-template]");
+    for (const pre of prose.querySelectorAll("pre")) {
+      if (!(template instanceof HTMLTemplateElement) || pre.parentElement?.classList.contains("code-frame")) continue;
+      const frame = document.createElement("div");
+      frame.className = "code-frame";
+      pre.before(frame);
+      frame.append(pre);
+      const tools = template.content.firstElementChild.cloneNode(true);
+      const filename = pre.dataset.filename || pre.querySelector("code")?.dataset.title || "";
+      const filenameNode = tools.querySelector("[data-code-filename]");
+      filenameNode.textContent = filename;
+      if (!filename) filenameNode.hidden = true;
+      tools.querySelector("[data-code-copy]").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        try {
+          await navigator.clipboard.writeText(pre.querySelector("code")?.textContent || pre.textContent || "");
+          button.textContent = "已复制";
+        } catch {
+          button.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { button.textContent = "复制代码"; }, 1800);
+      });
+      frame.prepend(tools);
+    }
+
+    const dialog = document.querySelector("[data-lightbox]");
+    const images = [...prose.querySelectorAll("img")].filter((image) => !image.closest("a"));
+    if (!(dialog instanceof HTMLDialogElement) || images.length === 0) return;
+    const dialogImage = dialog.querySelector("img");
+    const caption = dialog.querySelector("figcaption");
+    const previous = dialog.querySelector("[data-lightbox-prev]");
+    const next = dialog.querySelector("[data-lightbox-next]");
+    let activeIndex = 0;
+    let trigger;
+
+    const show = (index) => {
+      activeIndex = (index + images.length) % images.length;
+      const image = images[activeIndex];
+      dialogImage.src = image.currentSrc || image.src;
+      dialogImage.alt = image.alt;
+      caption.textContent = image.alt;
+    };
+    const open = (image) => {
+      trigger = image;
+      show(images.indexOf(image));
+      dialog.showModal();
+      dialog.querySelector("[data-lightbox-close]")?.focus();
+    };
+    for (const image of images) {
+      image.tabIndex = 0;
+      image.setAttribute("role", "button");
+      image.setAttribute("aria-label", `${image.alt || "正文图片"}，点击放大`);
+      image.addEventListener("click", () => open(image));
+      image.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(image);
+        }
+      });
+    }
+    previous.hidden = images.length < 2;
+    next.hidden = images.length < 2;
+    previous.addEventListener("click", () => show(activeIndex - 1));
+    next.addEventListener("click", () => show(activeIndex + 1));
+    dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener("close", () => trigger?.focus());
+  })();
+</script>

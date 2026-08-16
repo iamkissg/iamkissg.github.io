@@ -1,0 +1,351 @@
+<!DOCTYPE html><html lang="zh-CN" data-site-theme="default"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="从 0 到 1"><meta property="og:locale" content="zh_CN"><meta property="og:site_name" content="iamkissg | 赵喧典"><meta property="og:type" content="article"><meta property="og:title" content="[译记]Word Embeddings · iamkissg"><meta property="og:description" content="从 0 到 1"><meta property="og:url" content="https://lifelonglove.cn/notes/word_embeddings_0to1/"><meta property="og:image" content="https://lifelonglove.cn/og/note/word_embeddings_0to1.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2017-12-25T00:00:00.000Z"><meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#11172a" media="(prefers-color-scheme: dark)"><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="https://lifelonglove.cn/notes/word_embeddings_0to1/"><link rel="alternate" type="application/rss+xml" title="iamkissg 全站订阅" href="/feed.xml"><style>@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/0eb9804d3b64a408.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/e1d714986df79163.woff2") format("woff2");font-display:swap;font-weight:700;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman";src:local("Times New Roman");font-display:swap;font-weight:400;font-style:normal;size-adjust:118.4%;ascent-override:78.3784%;descent-override:21.6216%;line-gap-override:0%;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold";src:local("Times New Roman Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:111.1837%;ascent-override:83.4654%;descent-override:23.0249%;line-gap-override:0%;}:root{--font-lxgw-wenkai:"LXGW WenKai-20380bdfa2bfaa98","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold",serif;}</style><link rel="preload" href="/_astro/fonts/0eb9804d3b64a408.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/_astro/fonts/e1d714986df79163.woff2" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:400;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:500;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:600;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:700;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:400;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:500;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:600;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold";src:local("Arial Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:89.1703%;ascent-override:118.2008%;descent-override:32.4099%;line-gap-override:0%;}:root{--font-ysabeau-office:"Ysabeau Office-21f4cd69c7bfb7ce","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold",sans-serif;}</style><title>[译记]Word Embeddings · iamkissg</title><script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("iamkissg-theme");
+          if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+        } catch {}
+      })();
+    </script><style>.quaily-subscription[data-astro-cid-hc5keh3e]{max-width:var(--measure);margin:var(--space-7) auto 0;padding:var(--space-5);background:color-mix(in srgb, var(--color-amber) 10%, var(--color-paper));border:1px solid color-mix(in srgb, var(--color-amber) 50%, var(--color-line))}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e],.quaily-subscription--compact[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e]{margin-top:0}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] p[data-astro-cid-hc5keh3e]:last-child{color:var(--color-ink-muted)}.quaily-subscription[data-astro-cid-hc5keh3e] iframe[data-astro-cid-hc5keh3e]{border:0;width:100%;min-height:21rem;display:block}.quaily-subscription__fallback[data-astro-cid-hc5keh3e]{margin:var(--space-2) 0 0;text-align:center}@media (width<=34rem){.quaily-subscription[data-astro-cid-hc5keh3e]{padding:var(--space-3)}}
+</style><link rel="stylesheet" href="/_astro/SiteLayout.BstC_56N.css"><link rel="stylesheet" href="/_astro/ReadingLayout.BDKO8nUo.css"></head><body class="reading-page reading-page--compact"><a class="skip-link" href="#main-content" data-astro-cid-fzpbxy5g>跳到正文</a><header class="site-header" data-astro-cid-fzpbxy5g><div class="site-header__inner shell" data-astro-cid-fzpbxy5g><a class="site-header__brand" href="/" aria-label="iamkissg 首页" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span></a><nav class="desktop-nav" aria-label="主导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g>归档</a><a href="/about/" data-astro-cid-fzpbxy5g>关于</a><a href="/search/" data-astro-cid-fzpbxy5g>搜索</a></nav><div class="site-header__actions" data-astro-cid-fzpbxy5g><a class="icon-action desktop-search" href="/search/" aria-label="搜索" data-search-open data-astro-cid-fzpbxy5g>⌕</a><button class="icon-action" type="button" data-theme-toggle aria-label="切换明暗主题" title="切换明暗主题" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-theme-icon data-astro-cid-fzpbxy5g>◐</span></button><a class="seal-link" href="/about/" aria-label="关于赵喧典" data-astro-cid-fzpbxy5g><span class="seal-mark" aria-hidden="true" data-astro-cid-v3e57phd>趙</span></a><details class="mobile-menu" data-mobile-menu data-astro-cid-fzpbxy5g><summary aria-label="打开导航" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-astro-cid-fzpbxy5g>菜单</span></summary><div class="mobile-menu__panel" data-astro-cid-fzpbxy5g><div class="mobile-menu__top" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><button class="mobile-menu__close" type="button" data-mobile-menu-close data-astro-cid-fzpbxy5g>关闭 ×</button></div><nav aria-label="移动端导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>01</span>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>02</span>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>03</span>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>04</span>归档</a><a href="/about/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>05</span>关于</a><a href="/search/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>06</span>搜索</a></nav><div class="mobile-menu__meta" data-astro-cid-fzpbxy5g><a href="/feed.xml" data-astro-cid-fzpbxy5g>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-fzpbxy5g>GitHub</a><a href="/colophon/" data-astro-cid-fzpbxy5g>版本说明</a><button type="button" data-theme-toggle data-astro-cid-fzpbxy5g>切换明暗主题</button></div></div></details></div></div></header><main id="main-content" data-pagefind-body><article class="reading" data-reading-layout="compact" data-astro-cid-veasemt3><header class="reading-hero" data-print-url="https://lifelonglove.cn/notes/word_embeddings_0to1/" data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>短笺</p><h1 data-astro-cid-veasemt3>[译记]Word Embeddings</h1><p class="reading-deck" data-astro-cid-veasemt3>从 0 到 1</p><div class="reading-meta meta" data-astro-cid-veasemt3><span data-astro-cid-veasemt3>发布于 <time datetime="2017-12-25T00:00:00.000Z" data-astro-cid-veasemt3>2017年12月25日</time></span><span data-reading-time data-astro-cid-veasemt3>20 分钟阅读</span></div><details class="mobile-toc" data-mobile-toc data-astro-cid-veasemt3><summary data-astro-cid-veasemt3>展开目录</summary><nav aria-label="文章目录" data-astro-cid-veasemt3><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#brief-history" data-astro-cid-veasemt3>Brief history</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#models" data-astro-cid-veasemt3>Models</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#bengios-classic-neural-language-model" data-astro-cid-veasemt3>Bengio’s classic neural language model</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#cw-model" data-astro-cid-veasemt3>C&amp;W model</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#word2vec" data-astro-cid-veasemt3>Word2Vec</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#word-embeddings-vs-distributional-semantics-models" data-astro-cid-veasemt3>Word embeddings vs. distributional semantics models</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#models-1" data-astro-cid-veasemt3>Models</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#recommendations" data-astro-cid-veasemt3>Recommendations</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#reference" data-astro-cid-veasemt3>Reference</a></li></ol></nav></details></header><div class="reading-grid" data-astro-cid-veasemt3><aside class="desktop-toc" data-desktop-toc aria-label="文章目录" data-astro-cid-veasemt3><nav data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>目录</p><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#brief-history" data-astro-cid-veasemt3>Brief history</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#models" data-astro-cid-veasemt3>Models</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#bengios-classic-neural-language-model" data-astro-cid-veasemt3>Bengio’s classic neural language model</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#cw-model" data-astro-cid-veasemt3>C&amp;W model</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#word2vec" data-astro-cid-veasemt3>Word2Vec</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#word-embeddings-vs-distributional-semantics-models" data-astro-cid-veasemt3>Word embeddings vs. distributional semantics models</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#models-1" data-astro-cid-veasemt3>Models</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#recommendations" data-astro-cid-veasemt3>Recommendations</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#reference" data-astro-cid-veasemt3>Reference</a></li></ol></nav></aside><div class="prose" data-prose data-astro-cid-veasemt3><blockquote>
+<p>在做一个课程作业, 看了一些 Word Embeddings 相关的论文和博客. 以下内容基本上是看博客的时候摘译的, 写得很好, 恨不得全翻了. 论文笔记反正已经欠了一屁股了:(</p>
+</blockquote>
+<h2 id="brief-history">Brief history</h2>
+<ul>
+<li>Bengio 2003 年的文章发明了 word embeddings 一词, 此时 word embedding 和模型参数一起训练</li>
+<li>Collobert 2008 年的文章 (A unified architecture for natural language processing) 第一次将 word embeddings 作为后续任务的工具.</li>
+<li>Mikolov 2013 年的两篇文章创造性地提出了 word2vec.</li>
+<li>Pennington 2014 年提出了 GloVe 模型, 预示着 word embeddings 成为 NLP 领域的主流.</li>
+</ul>
+<h2 id="models">Models</h2>
+<ul>
+<li>在之前的神经网络学习任务中, word embeddings 只是<code>副产品, by-product</code>; 后来的 word2vec 等模型则以生成 word embeddings 为直接目标. 两者的主要区别在于:
+<ol>
+<li><code>计算复杂度 computational complexity</code>: 用深度神经网络来生成 word embeddings 开销太大; 2013 出现的 word2vec 提出了训练 word embeddings 的简单模型, 计算开销大大减小, 燃. (计算复杂度是 word embeddings 模型的关键之一)</li>
+<li>word2vec 和 GloVe 能将语义关系编码进最终的 word embeddings, 这对于需要这一层关系的后续任务是很有帮助的; 常规的神经网络生成 task-specific embeddings, 不适用于其他任务.</li>
+</ol>
+</li>
+<li>(word2vec, GloVe 之于 NLP, 就向 VGG 之于 CV)</li>
+<li>word embeddings 模型通常使用 <a href="https://en.wikipedia.org/wiki/Perplexity">perplexity</a> 来评估, 这是一种基于 <code>交叉熵, cross entropy</code> 的度量方法.</li>
+<li><code>语言模型, language models, LM</code>通常在给定前 n-1 个词的情况下预测 w_t 的概率 <img src="/img/2017-12-25-word_embeddings_0to1/LM_probability.png" alt="LM_probability">. 基于<code>链式法则, chain rule</code> 和<code>马尔可夫假设, Markov assumption</code>, 通过计算每个词在给定先行词下的概率的积, 能估计整个句子或文档的积: <img src="/img/2017-12-25-word_embeddings_0to1/LM_sentence_product.png" alt="LM_sentence_product.png"></li>
+<li>在基于 n-gram 的 LM 中, 通过单词所在 n-grams 的频率来计算其概率: <img src="/img/2017-12-25-word_embeddings_0to1/probability_in_ngrams.png" alt="probability_in_ngrams.png"></li>
+<li>5-gram + Kneser-Ney smoothing 能得到 smoothed 5-gram models, 这是一个 LM 的 strong baseline.</li>
+<li>在神经网络中, 一般使用 softmax 来计算单词概率: <img src="/img/2017-12-25-word_embeddings_0to1/softmax_in_NLP.png" alt="softmax_in_NLP.png">. h 是输出层前一层的输出向量, v’ 是单词对应的 embedding. 此公式表示的神经语言模型结构如下 (Bengio 2006).</li>
+</ul>
+<p><img src="/img/2017-12-25-word_embeddings_0to1/nn_language_model-1.jpg" alt="nn_language_model-1.jpg"></p>
+<ul>
+<li>推理(测试)时, 每次选择预测概率最大的词(贪婪), 或使用 beam search.</li>
+</ul>
+<h3 id="bengios-classic-neural-language-model">Bengio’s classic neural language model</h3>
+<ul>
+<li>Bengio 在 2003 年提出的经典神经语言模型如下所示: 使用了单隐层的前馈神经网络(实线很好理解; 紫色虚线表示通过单词索引乘以共享参数的矩阵 C 得到 word embeddings; 绿色虚线, 还没看过这篇论文的我猜不出). 其目标函数是: <img src="/img/2017-12-25-word_embeddings_0to1/bengio_language_model_objective.png" alt="bengio_language_model_objective.png"></li>
+</ul>
+<p><img src="/img/2017-12-25-word_embeddings_0to1/bengio_language_model.png" alt="bengio_language_model.png"></p>
+<ul>
+<li>Bengio et al 2003 论文指出, softmax layer 是主要瓶颈, softmax 的计算开销和 vocab 大小成比例.</li>
+</ul>
+<h3 id="cw-model">C&amp;W model</h3>
+<ul>
+<li>Collobert and Weston (C&amp;W) 在 2008 的时候指出, 在充分大的数据集上训练得到的 word embeddings 习得了<code>句法, syntactic</code>和<code>语义, semantic</code>, 能提成后续任务的性能.</li>
+<li>C&amp;W 使用不同的 objective function 避免了 softmax 的计算开销. 其目标是(相比与错误的单词序列, )对于正确的单词序列输出更高的分数. 为实现此目标, 他们提出来<code>pairwise ranking criterion</code>, 像这样 <img src="/img/2017-12-25-word_embeddings_0to1/c&amp;w_pairwise_ranking_criterion.png" alt="c&amp;w_pairwise_ranking_criterion.png"></li>
+<li>C&amp;W 模型从所有可能的 windows X 中采样正确的 windows x, 再用错误的单词替换掉 x 的中心单词得到 x^(w). 现在来看上面的 objective function, 意在最大化正确单词序列的得分与错误单词序列得分之间的距离, with a margin of 1. (模型如下)</li>
+</ul>
+<p><img src="/img/2017-12-25-word_embeddings_0to1/nlp_almost_from_scratch_window_approach.png" alt="nlp_almost_from_scratch_window_approach.png"></p>
+<h3 id="word2vec">Word2Vec</h3>
+<ul>
+<li>Technically, word2vec 不属于 Deep learning 的范畴, 它的设计理念是简单, 避免高昂的计算开销, 因此它的架构简单不深, 甚至没有使用 non-linear function.</li>
+<li>Mikolov et al 用两篇文章介绍了 word2vec. 在第一篇文章中, 他们提出了两种新的模型: <code>Continuous bag-of-words, CBOW</code> 和 <code>Skip-gram</code>; 第二篇文章使用了其他策略提高了这两个模型的训练速度和精度.</li>
+<li>CBOW 和 Skip-gram 相对于之前模型的优点在于:
+<ol>
+<li>没有隐层, 避免了隐层带来的开销;</li>
+<li>使得 LM 能学习更多的内容 (得益于 1).</li>
+</ol>
+</li>
+</ul>
+<h4 id="cbow">CBOW</h4>
+<ul>
+<li>LM 只根据 previous words 来预测下一个单词, 对于只是要生成好的 word embeddings 的模型, 不必受限于 previous words. 类似于 C&amp;W 的做法, CBOW 在 target word 的前后各取 n 个单词, 来预测它. (Bag-of-Word 方法不考虑 bags 的顺序, CBOW 也是如此. 此处的 Continuous 表示模型使用 continuous representations)</li>
+</ul>
+<p><img src="/img/2017-12-25-word_embeddings_0to1/cbow.png" alt="cbow.png"></p>
+<ul>
+<li>CBOW 的 objective function 和 LM objective 略有不同, 它预测的是中心单词: <img src="/img/2017-12-25-word_embeddings_0to1/cbow_objective.png" alt="cbow_objective.png"></li>
+</ul>
+<h4 id="skip-gram">Skip-gram</h4>
+<ul>
+<li>Skip-gram 的做法和 CBOW 正好相反, 它先确定一个 target word, 然后预测邻近的单词. 其结构如下:</li>
+</ul>
+<p><img src="/img/2017-12-25-word_embeddings_0to1/skip-gram.png" alt="skip-gram.png"></p>
+<ul>
+<li>Skip-gram 的 objective function 很自然地表示为所有邻近单词的概率和: <img src="/img/2017-12-25-word_embeddings_0to1/skip-gram_objective.png" alt="skip-gram_objective.png"></li>
+<li>给定 target word w_t, w_{t+j} 的条件概率计算与上类似: <img src="/img/2017-12-25-word_embeddings_0to1/skip-gram_conditional_probability.png" alt="skip-gram_conditional_probability.png">. 与上面公式使用隐层状态 h 不同的是, skip-gram 模型没有隐层, 因此直接用输入的 word embedding. 因此, 此处计算的是 input word embedding 与 output word embedding 的内积</li>
+</ul>
+<h4 id="glove">GloVe</h4>
+<ul>
+<li>简单地说, GloVe 通过显式地将<code>意义, meaning</code> encode 成 embeddings space 中 vector 的<code>偏移量, offset</code>. (<code>Skip-gram with negative sampling</code>, SGNS 隐式地做了这项工作).</li>
+<li>GloVe 作者表明<code>两个单词同时出现概率的比例, the ratio of the co-occurrence probabilities of 2 words</code>包含了某种信息, glove 旨在将这种信息 encode 为 <code>向量的差, vector differences</code>.</li>
+<li>为此, 他们提出了一个<code>加权最小二乘, weighted least squares</code> objective function J, 直接最小化 A. <strong>两个单词的 vectors 的点积</strong>与 B. <strong>它们同时出现的次数的对数</strong> 的差:</li>
+</ul>
+<p><img src="/img/2017-12-25-word_embeddings_0to1/glove_objective.png" alt="glove_objective.png"></p>
+<ul>
+<li>式中, w_i, b_i 是单词 i 的词向量和 bias, wtilde_j, b_j 是单词 j 的 convtext word vector 和 bias. X_ij 是 i 出现在 j 的context 中的次数. f 是一个 weighting function, 它为很少同时出现和频繁同时出现的情况赋一个较低的权值.</li>
+<li><code>co-occurrence</code> 次数可直接 encode 进 word-context co-occurence matrix. GloVe 使用该矩阵, 而不是整个 corpus 作为输入.</li>
+</ul>
+<h2 id="word-embeddings-vs-distributional-semantics-models">Word embeddings vs. distributional semantics models</h2>
+<ul>
+<li><code>Distributional Semantics Models, DSM</code> 通过操作 co-occurrence matrixs 来统计单词间的 co-occurrence. 而 neural word embedding models 尝试着预测单词</li>
+<li>Levy et al (2015) 将 GloVe 被视作预测模型, 同时它又利用了 word-context co-occurrence  matrix, 有点像传统方法, 如 PCA, LSA. Levy et al还演示了 word2vec 隐式地 <code>分解, factorize</code>了 word-contxt PMI matrix.</li>
+<li>所以, DSMs 和 word embedding models 表面上看上去使用了不同的算法来学习 word representations, 本质上却都是基于数据统计量的, 即单词间的 co-occurrence counts.</li>
+</ul>
+<h3 id="models-1">Models</h3>
+<ul>
+<li><code>Pointwise Mutual Information, PMI</code>是一种度量两个单词间<code>关联强度, strength of association</code> 的常用方法, 定义为两个单词的<code>联合概率, jointly probability</code>与<code>边缘概率, marginal probabilities</code>点积的<code>对数比, log ratio</code>: <img src="/img/2017-12-25-word_embeddings_0to1/PMI_equation.png" alt="PMI_equation.png">. 当两个单词从来没有同时出现过, P(w, c)=0, PMI(w, c)=log0=-∞. 实际应用时, PMI 常被替换为 <code>Positive PMI, PPMI</code>, PPMI(w, c)=max(PMI(w, c), 0)</li>
+<li><code>奇异值分解, Singular Value Decomposition, SVD</code>是降维的最常用方法之一, 通过<code>Latent Semantic Analysis, LSA</code>被引入 NLP. SVD 将 word-context co-occurrence matrix 写成三个矩阵的积: <img src="/img/2017-12-25-word_embeddings_0to1/SVD_word_context_co-occurrence_matrix.png" alt="SVD_word_context_co-occurrence_matrix.png">. U 和 V 是<code>正交矩阵, orthonormal matrix</code>, \Sigma 是特征值按降序排列的<code>对角矩阵, diagonal matrix</code>. 实际应用中, SVD 常被用于因子化 PPMI 得到的矩阵. 一般而言, \Sigma 中只有 top d 个元素会被保留, 从而得到了 <img src="/img/2017-12-25-word_embeddings_0to1/SVD_W_topd.png" alt="SVD_W_topd.png"> 和 <img src="/img/2017-12-25-word_embeddings_0to1/SVD_C_topd.png" alt="SVD_C_topd.png">, 分别用作 word representation 和 context representation.</li>
+<li>Word2vec 介绍了 3 种<code>预处理, pre-processing</code> corous 的方法, 同样可用于 DSMs
+<ol>
+<li><code>Dynamic context window</code>. 在传统 DSMs 中, context window 是不带权的, 固定大小的. 考虑到更接近的单词一般具有更重要的意义, SGNS 和 GloVe 将更多的权值赋给了更近的单词. SGNS 的 windows size 不固定, 训练时, 在 1 和预设最大 window size 中<code>均匀采样, sample uniformly</code>.</li>
+<li><code>Subsampling frequent words</code>. SGNS 以概率 <img src="/img/2017-12-25-word_embeddings_0to1/sgns_subsampling_frequent_words.png" alt="sgns_subsampling_frequent_words.png">(t 为阈值, f 为词频) 剔除单词来 dilutes (稀疏的意思) 高频单词. subsampling 在创建 windows 之前执行, 因此 SGNS 实际使用的 context windows 要大于 context window size 指示的大小 (这就是因为前面说的高频词汇被挖掉了, 比如 The dog is chasing a ball, context window size=2时, 在挖掉高频词汇 the, is, a 后, ball 就在 dog 的 context 中了).</li>
+<li><code>Deleting rare words</code>. 在 SGNS 的预处理中, 罕用单词在创建 context windows 前被删除, 这更加增大了 context windows 的实际大小. (Levy et al (2015) 发现这并不能带来显著的性能提升)(context window 增大的例子与上类似)</li>
+</ol>
+</li>
+<li>PMI 被证明是度量单词间<code>关联性, association</code>的有效<code>度量, metric</code>. Levy &amp; Goldberg (2014) 证明了 SGNS 隐式分解了 PMI matrix, 由此, 以下源于此的变种可以引入 PMI 中:
+<ol>
+<li><code>Shifted PMI</code>. 在 SGNS 中, negative samples 数 k 会影响 PMI matrix 的<code>漂移, shift</code>, 即参数 k 会将 PMI 值漂移 log k. 将这一特性应用于 PMI, 就得到了 <code>Shifted PPMI, SPPMI</code>: <img src="/img/2017-12-25-word_embeddings_0to1/SPPMI_equation.png" alt="SPPMI_equation.png"></li>
+<li><code>Context distribution smoothing</code>. 在 SGNS 中, negative samples 从 <code>smoothed unigram distribution</code> 中采样. 所谓 smoothed unigram distribution 就是 unigram distribution 的 \alpha 次幂, 通常取 \alpha=3/4. 这导致高频单词被采样的次数比少于它们的词频. 将这一特性应用于 PMI, 可以通过将 context words 的频率修改为原先的 \alpha 次幂倍: <img src="/img/2017-12-25-word_embeddings_0to1/context_distribution_smoothing_to_PMI_1.png" alt="context_distribution_smoothing_to_PMI_1.png">, 其中 <img src="/img/2017-12-25-word_embeddings_0to1/context_distribution_smoothing_to_PMI_2.png" alt="context_distribution_smoothing_to_PMI_2.png">, f 是词频函数.</li>
+</ol>
+</li>
+<li>3 种修改 word vectors 的<code>后处理, post-processing</code>方法:
+<ol>
+<li><code>Adding context vectors</code>. GloVe 的作者提出了将 word vectors 和 context vectors 相加作为 output vectors 的方法, 即 <img src="/img/2017-12-25-word_embeddings_0to1/adding_context_vectors.png" alt="adding_context_vectors.png">. 这种做法将<code>一阶相似项, first-order similarity terms</code>相加起来. 不能应用于 PMI, 因为 PMI 生成的向量是<code>稀疏的, sparse</code>.</li>
+<li><code>Eigenvalue weighting</code>. 前文提到, SVD 能生成 <img src="/img/2017-12-25-word_embeddings_0to1/SVD_W_topd.png" alt="SVD_W_topd.png"> 和 <img src="/img/2017-12-25-word_embeddings_0to1/SVD_C_topd.png" alt="SVD_C_topd.png">. 其中 C 阵是正交的, W 阵不是. 可以用额外的参数 p 来为特征值矩阵加权, 调整 W 阵: <img src="/img/2017-12-25-word_embeddings_0to1/weighted_SVD_W_topd.png" alt="weighted_SVD_W_topd.png"></li>
+<li><code>Vector normalisation</code>.</li>
+</ol>
+</li>
+<li>Levy et al. 发现 SVD 而不是任何 word embeddings 算法在相似性任务上取得最好的效果, SGNS 在类比任务上效果最好. 他们同时指出:
+<ol>
+<li>hyperparameters 的设置通常比算法的选择更重要. 没有任何算法总是表现地比其他方法更优.</li>
+<li>在更大的 corpus 上训练, 对于一些任务有帮助. 但超过 1/2 的情况下, 调整超参数的效果带来的提升更大.</li>
+</ol>
+</li>
+<li>只要 hyperparameters 调得好, 没有哪种方法总是优于其他方法; SGNS 在各种任务中都优于 GloVe; CBOW 在任何任务中都不如 SGNS</li>
+</ul>
+<h3 id="recommendations">Recommendations</h3>
+<ul>
+<li>不要对 SPPMI 使用 SVD;</li>
+<li>不要使用“自以为是”地使用 SVD, 比如不使用 eigenvector weighting (不使用 eigenvalue weighting (p=0.5), 性能下降了 15 %)</li>
+<li>对 PPMI 和 SVD 使用 short context (比如 window size of 2)</li>
+<li>对 SGNS 使用多 negative samples</li>
+<li>对所有方法都使用 context distribution smoothing (用 \alpha=0.75 对 unigram distribution 求幂)</li>
+<li>使用 SGNS 作为 baseline (SGNS, robust, fast and cheap to train)</li>
+<li>试着向 SGNS 和 GloVe 加入 context vectors</li>
+</ul>
+<h2 id="reference">Reference</h2>
+<ul>
+<li><a href="http://ruder.io/word-embeddings-1/index.html">On word embeddings - Part 1</a></li>
+<li><a href="http://ruder.io/secret-word2vec/index.html">On word embeddings - Part 3: The secret ingredients of word2vec</a></li>
+</ul>
+</div><aside class="sidenotes" data-sidenotes aria-label="侧注" data-astro-cid-veasemt3></aside></div><footer class="reading-end" data-astro-cid-veasemt3><section class="related" data-related-content aria-labelledby="related-title" data-astro-cid-veasemt3><h2 id="related-title" class="rule-heading" data-astro-cid-veasemt3>继续阅读</h2><ol data-astro-cid-veasemt3><li data-astro-cid-veasemt3><a href="/notes/word_embeddings_3/" data-astro-cid-veasemt3>论文笔记 4</a><span data-astro-cid-veasemt3>短笺</span></li><li data-astro-cid-veasemt3><a href="/notes/word_embeddings_1to2/" data-astro-cid-veasemt3>[译记]Word Embeddings 2</a><span data-astro-cid-veasemt3>短笺</span></li><li data-astro-cid-veasemt3><a href="/notes/papernotes_applying_deep_learning_to_airbnb_search/" data-astro-cid-veasemt3>【Papernotes】Applying Deep Learning to Airbnb Search</a><span data-astro-cid-veasemt3>短笺</span></li></ol></section><section class="share-tools" data-share-region aria-labelledby="share-title" data-astro-cid-j62koywo><h2 id="share-title" class="rule-heading" data-astro-cid-j62koywo>分享本文</h2><div class="share-tools__actions" data-astro-cid-j62koywo><button type="button" data-web-share hidden data-astro-cid-j62koywo>分享</button><button type="button" data-copy-link data-copy-value="https://lifelonglove.cn/notes/word_embeddings_0to1/" data-astro-cid-j62koywo>复制链接</button><a href="mailto:?subject=%5B%E8%AF%91%E8%AE%B0%5DWord%20Embeddings&amp;body=%E4%BB%8E%200%20%E5%88%B0%201%0A%0Ahttps%3A%2F%2Flifelonglove.cn%2Fnotes%2Fword_embeddings_0to1%2F" data-astro-cid-j62koywo>邮件</a><a href="https://x.com/intent/tweet?text=%5B%E8%AF%91%E8%AE%B0%5DWord%20Embeddings%0A%E4%BB%8E%200%20%E5%88%B0%201&amp;url=https%3A%2F%2Flifelonglove.cn%2Fnotes%2Fword_embeddings_0to1%2F" rel="external" data-astro-cid-j62koywo>X</a><button type="button" data-copy-share data-copy-value="[译记]Word Embeddings
+从 0 到 1
+https://lifelonglove.cn/notes/word_embeddings_0to1/" data-astro-cid-j62koywo>复制后发布到小红书</button><button type="button" data-copy-share data-copy-value="[译记]Word Embeddings
+从 0 到 1
+https://lifelonglove.cn/notes/word_embeddings_0to1/" data-astro-cid-j62koywo>复制后发布到知乎</button></div><p class="share-tools__status meta" data-share-status aria-live="polite" data-astro-cid-j62koywo></p><details class="share-tools__fallback" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>手动复制分享文字</summary><label data-astro-cid-j62koywo><span class="meta" data-astro-cid-j62koywo>标题、摘要与干净链接</span><textarea readonly rows="5" data-astro-cid-j62koywo>[译记]Word Embeddings
+从 0 到 1
+https://lifelonglove.cn/notes/word_embeddings_0to1/</textarea></label></details><details class="share-tools__qr" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>桌面二维码</summary><div data-share-qr data-astro-cid-j62koywo><svg xmlns="http://www.w3.org/2000/svg" width="184" height="184" viewBox="0 0 35 35" shape-rendering="crispEdges"><path fill="#f4efe4" d="M0 0h35v35H0z"/><path stroke="#17213e" d="M1 1.5h7m5 0h1m5 0h4m1 0h1m2 0h7M1 2.5h1m5 0h1m3 0h2m3 0h2m1 0h1m5 0h1m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h3m3 0h1m4 0h4m3 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h1m2 0h1m3 0h1m2 0h2m1 0h3m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h2m1 0h6m3 0h1m1 0h2m2 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h1m2 0h4m2 0h3m2 0h1m3 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h1m1 0h2m2 0h1m1 0h1m2 0h5M1 9.5h1m1 0h5m3 0h1m2 0h2m1 0h2m1 0h1m2 0h1m1 0h1m1 0h5M2 10.5h1m1 0h3m3 0h6m1 0h4m3 0h1m2 0h2m1 0h2m1 0h1M4 11.5h1m1 0h2m2 0h1m2 0h6m2 0h1m1 0h1m2 0h1m2 0h1m1 0h2M4 12.5h1m5 0h2m1 0h2m1 0h4m1 0h3m2 0h1m2 0h3m1 0h1M1 13.5h1m1 0h5m1 0h1m5 0h3m7 0h2m1 0h3M2 14.5h1m2 0h2m1 0h2m3 0h2m1 0h1m1 0h2m3 0h2m2 0h1m2 0h4M1 15.5h2m4 0h2m1 0h3m2 0h4m2 0h1m1 0h1m1 0h5m1 0h2M1 16.5h3m2 0h1m2 0h1m2 0h2m2 0h1m2 0h4m1 0h1m1 0h3m1 0h2M4 17.5h1m1 0h2m1 0h2m5 0h1m1 0h3m2 0h4m1 0h4m1 0h1M2 18.5h2m1 0h2m2 0h3m5 0h1m1 0h4m1 0h1m2 0h2m1 0h4M2 19.5h1m1 0h2m1 0h3m1 0h3m2 0h1m2 0h1m2 0h1m2 0h2m1 0h2m1 0h2M2 20.5h1m1 0h1m3 0h1m2 0h2m1 0h1m1 0h2m2 0h3m1 0h1m3 0h6M2 21.5h2m3 0h2m7 0h1m2 0h1m3 0h1m1 0h2m1 0h3m1 0h2M1 22.5h4m4 0h5m1 0h4m1 0h1m1 0h3m2 0h1m2 0h1m2 0h1M1 23.5h1m1 0h5m1 0h1m1 0h2m2 0h1m2 0h1m2 0h1m1 0h1m2 0h2m2 0h1m1 0h1M1 24.5h1m2 0h3m3 0h2m2 0h1m2 0h1m4 0h2m1 0h1m3 0h5M1 25.5h1m3 0h3m1 0h1m4 0h2m1 0h2m2 0h1m1 0h7M9 26.5h1m1 0h2m1 0h2m1 0h6m2 0h1m3 0h1m1 0h1m1 0h1M1 27.5h7m2 0h5m1 0h3m2 0h5m1 0h1m1 0h1m1 0h2M1 28.5h1m5 0h1m1 0h2m2 0h2m2 0h6m1 0h2m3 0h5M1 29.5h1m1 0h3m1 0h1m1 0h3m1 0h3m1 0h1m2 0h2m1 0h1m1 0h6m1 0h1M1 30.5h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h1m1 0h3m3 0h3m2 0h5M1 31.5h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h4m2 0h3m3 0h2m1 0h2M1 32.5h1m5 0h1m2 0h1m2 0h1m1 0h2m2 0h4m3 0h1m2 0h3M1 33.5h7m1 0h2m1 0h2m1 0h2m1 0h1m1 0h1m2 0h3m2 0h1m3 0h1"/></svg>
+</div><p class="meta" data-astro-cid-j62koywo>用手机打开本文；二维码由本站在构建时生成。</p></details><p class="meta" data-astro-cid-j62koywo>链接始终可直接打开：<a href="https://lifelonglove.cn/notes/word_embeddings_0to1/" data-astro-cid-j62koywo>https://lifelonglove.cn/notes/word_embeddings_0to1/</a></p></section><script>
+  (() => {
+    const root = document.currentScript?.previousElementSibling;
+    if (!(root instanceof HTMLElement) || !root.matches("[data-share-region]")) return;
+    const status = root.querySelector("[data-share-status]");
+    const fallback = root.querySelector("textarea");
+    const report = (message) => { if (status) status.textContent = message; };
+    const copy = async (value) => {
+      try {
+        if (!navigator.clipboard) throw new Error("clipboard unavailable");
+        await navigator.clipboard.writeText(value);
+        report("已复制");
+      } catch {
+        if (fallback instanceof HTMLTextAreaElement) {
+          fallback.value = value;
+          fallback.closest("details").open = true;
+          fallback.focus();
+          fallback.select();
+        }
+        report("请手动复制已选中的文字");
+      }
+    };
+    const webShare = root.querySelector("[data-web-share]");
+    if (webShare instanceof HTMLButtonElement && navigator.share) {
+      webShare.hidden = false;
+      webShare.addEventListener("click", async () => {
+        try {
+          await navigator.share({ title: document.title, url: location.href });
+        } catch (error) {
+          if (error?.name !== "AbortError") report("系统分享不可用，请复制链接");
+        }
+      });
+    }
+    for (const button of root.querySelectorAll("[data-copy-link], [data-copy-share]")) {
+      button.addEventListener("click", () => copy(button.dataset.copyValue || location.href));
+    }
+  })();
+</script></footer></article><dialog class="lightbox" data-lightbox aria-label="图片放大查看" data-astro-cid-veasemt3><button class="lightbox__close" type="button" data-lightbox-close aria-label="关闭图片" data-astro-cid-veasemt3>关闭 ×</button><figure data-astro-cid-veasemt3><img src="" alt="" data-astro-cid-veasemt3><figcaption data-astro-cid-veasemt3></figcaption></figure><div class="lightbox__nav" data-astro-cid-veasemt3><button type="button" data-lightbox-prev data-astro-cid-veasemt3>← 上一张</button><button type="button" data-lightbox-next data-astro-cid-veasemt3>下一张 →</button></div></dialog><template data-code-tools-template data-astro-cid-veasemt3><div class="code-tools" data-code-tools data-astro-cid-veasemt3><span data-code-filename data-astro-cid-veasemt3></span><button type="button" data-code-copy data-astro-cid-veasemt3>复制代码</button></div></template></main><footer class="site-footer" data-astro-cid-nns7i3if><div class="site-footer__inner shell" data-astro-cid-nns7i3if><div data-astro-cid-nns7i3if><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><p data-astro-cid-nns7i3if>长期写作，公开学习，也保存生活留下的纹理。</p></div><nav aria-label="页脚导航" data-astro-cid-nns7i3if><a href="/feed.xml" data-astro-cid-nns7i3if>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-nns7i3if>GitHub</a><a href="/colophon/" data-astro-cid-nns7i3if>版本说明</a></nav></div></footer><dialog class="search-overlay" data-search-overlay aria-modal="true" aria-labelledby="search-overlay-title" data-astro-cid-fdy5zvyj><div class="search-overlay__frame" data-astro-cid-fdy5zvyj><div class="search-overlay__top" data-astro-cid-fdy5zvyj><div data-astro-cid-fdy5zvyj><p class="eyebrow" data-astro-cid-fdy5zvyj>Search / 搜索</p><h2 id="search-overlay-title" data-astro-cid-fdy5zvyj>在站内找一段文字</h2></div><button type="button" data-search-close aria-label="关闭搜索" data-astro-cid-fdy5zvyj>关闭 ×</button></div><section class="pagefind-search" data-pagefind-search data-astro-cid-dm6ph42g><label data-astro-cid-dm6ph42g><span data-astro-cid-dm6ph42g>搜索标题、正文与主题</span><input type="search" name="q" placeholder="输入关键词…" autocomplete="off" data-astro-cid-dm6ph42g></label><p class="pagefind-search__status" role="status" aria-live="polite" data-astro-cid-dm6ph42g>输入关键词开始搜索。</p><ol class="pagefind-search__results" data-astro-cid-dm6ph42g></ol><noscript><p data-astro-cid-dm6ph42g>搜索需要 JavaScript；你仍可以前往<a href="/archive/" data-astro-cid-dm6ph42g>完整归档</a>浏览所有内容。</p></noscript></section><script>
+  (() => {
+    const modulePath = "/pagefind/pagefind.js";
+    const escapeHtml = (value) => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    for (const root of document.querySelectorAll("[data-pagefind-search]")) {
+      if (root.dataset.bound === "true") continue;
+      root.dataset.bound = "true";
+      const input = root.querySelector('input[type="search"]');
+      const status = root.querySelector('[role="status"]');
+      const results = root.querySelector("ol");
+      let timer;
+
+      const search = async () => {
+        const query = input.value.trim();
+        if (!query) {
+          status.textContent = "输入关键词开始搜索。";
+          results.replaceChildren();
+          return;
+        }
+        status.textContent = "正在翻阅…";
+        try {
+          const pagefind = await import(/* @vite-ignore */ modulePath);
+          await pagefind.init();
+          const response = await pagefind.search(query);
+          const items = await Promise.all(response.results.slice(0, 12).map((item) => item.data()));
+          status.textContent = items.length ? `找到 ${items.length} 条结果。` : "没有找到，换个词试试。";
+          results.innerHTML = items.map((item) => `
+            <li>
+              <a href="${escapeHtml(item.url)}">${escapeHtml(item.meta?.title || item.url)}</a>
+              <p>${item.excerpt || ""}</p>
+            </li>`).join("");
+        } catch {
+          status.innerHTML = '搜索暂时不可用，请前往<a href="/archive/">完整归档</a>。';
+          results.replaceChildren();
+        }
+      };
+
+      input.addEventListener("input", () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(search, 180);
+      });
+    }
+  })();
+</script><p class="search-overlay__hint" data-astro-cid-fdy5zvyj><kbd data-astro-cid-fdy5zvyj>/</kbd> 打开 · <kbd data-astro-cid-fdy5zvyj>Esc</kbd> 关闭 · <a href="/search/" data-astro-cid-fdy5zvyj>独立搜索页</a></p></div></dialog><script>
+  (() => {
+    const dialog = document.querySelector("[data-search-overlay]");
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    let trigger;
+    const open = (source) => {
+      trigger = source;
+      dialog.showModal();
+      window.setTimeout(() => dialog.querySelector('input[type="search"]')?.focus(), 0);
+    };
+    for (const opener of document.querySelectorAll("[data-search-open]")) {
+      opener.addEventListener("click", (event) => {
+        event.preventDefault();
+        open(opener);
+      });
+    }
+    dialog.querySelector("[data-search-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => trigger?.focus());
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isEditing = target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+      if (event.key === "/" && !isEditing && !dialog.open) {
+        event.preventDefault();
+        open(document.querySelector("[data-search-open]"));
+      }
+    });
+  })();
+</script><script type="module">var e=document.documentElement,t=[...document.querySelectorAll(`[data-theme-toggle]`)],n=window.matchMedia(`(prefers-color-scheme: dark)`),r=()=>e.dataset.theme||(n.matches?`dark`:`light`),i=()=>{let e=r()===`dark`;for(let n of t){n.setAttribute(`aria-pressed`,String(e));let t=n.querySelector(`[data-theme-icon]`);t&&(t.textContent=e?`☀`:`◐`)}};for(let n of t)n.addEventListener(`click`,()=>{let t=r()===`dark`?`light`:`dark`;e.dataset.theme=t;try{localStorage.setItem(`iamkissg-theme`,t)}catch{}i()});n.addEventListener(`change`,i),document.addEventListener(`keydown`,e=>{if(e.key!==`Escape`)return;let t=document.querySelector(`details[data-mobile-menu][open]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});for(let e of document.querySelectorAll(`[data-mobile-menu-close]`))e.addEventListener(`click`,()=>{let t=e.closest(`details[data-mobile-menu]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});i();</script></body></html><script>
+  (() => {
+    const prose = document.querySelector("[data-prose]");
+    if (!prose) return;
+
+    const footnotes = prose.querySelector(".footnotes");
+    const sidenotes = document.querySelector("[data-sidenotes]");
+    const originalFootnoteParent = footnotes?.parentElement;
+    const placeFootnotes = () => {
+      if (!footnotes || !sidenotes || !originalFootnoteParent) return;
+      const desktop = window.matchMedia("(min-width: 68.01rem)").matches;
+      (desktop ? sidenotes : originalFootnoteParent).append(footnotes);
+    };
+    placeFootnotes();
+    window.addEventListener("resize", placeFootnotes, { passive: true });
+
+    const template = document.querySelector("[data-code-tools-template]");
+    for (const pre of prose.querySelectorAll("pre")) {
+      if (!(template instanceof HTMLTemplateElement) || pre.parentElement?.classList.contains("code-frame")) continue;
+      const frame = document.createElement("div");
+      frame.className = "code-frame";
+      pre.before(frame);
+      frame.append(pre);
+      const tools = template.content.firstElementChild.cloneNode(true);
+      const filename = pre.dataset.filename || pre.querySelector("code")?.dataset.title || "";
+      const filenameNode = tools.querySelector("[data-code-filename]");
+      filenameNode.textContent = filename;
+      if (!filename) filenameNode.hidden = true;
+      tools.querySelector("[data-code-copy]").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        try {
+          await navigator.clipboard.writeText(pre.querySelector("code")?.textContent || pre.textContent || "");
+          button.textContent = "已复制";
+        } catch {
+          button.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { button.textContent = "复制代码"; }, 1800);
+      });
+      frame.prepend(tools);
+    }
+
+    const dialog = document.querySelector("[data-lightbox]");
+    const images = [...prose.querySelectorAll("img")].filter((image) => !image.closest("a"));
+    if (!(dialog instanceof HTMLDialogElement) || images.length === 0) return;
+    const dialogImage = dialog.querySelector("img");
+    const caption = dialog.querySelector("figcaption");
+    const previous = dialog.querySelector("[data-lightbox-prev]");
+    const next = dialog.querySelector("[data-lightbox-next]");
+    let activeIndex = 0;
+    let trigger;
+
+    const show = (index) => {
+      activeIndex = (index + images.length) % images.length;
+      const image = images[activeIndex];
+      dialogImage.src = image.currentSrc || image.src;
+      dialogImage.alt = image.alt;
+      caption.textContent = image.alt;
+    };
+    const open = (image) => {
+      trigger = image;
+      show(images.indexOf(image));
+      dialog.showModal();
+      dialog.querySelector("[data-lightbox-close]")?.focus();
+    };
+    for (const image of images) {
+      image.tabIndex = 0;
+      image.setAttribute("role", "button");
+      image.setAttribute("aria-label", `${image.alt || "正文图片"}，点击放大`);
+      image.addEventListener("click", () => open(image));
+      image.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(image);
+        }
+      });
+    }
+    previous.hidden = images.length < 2;
+    next.hidden = images.length < 2;
+    previous.addEventListener("click", () => show(activeIndex - 1));
+    next.addEventListener("click", () => show(activeIndex + 1));
+    dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener("close", () => trigger?.focus());
+  })();
+</script>

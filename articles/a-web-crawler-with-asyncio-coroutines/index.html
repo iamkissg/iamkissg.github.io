@@ -1,0 +1,416 @@
+<!DOCTYPE html><html lang="zh-CN" data-site-theme="default"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="换种姿势写爬虫~"><meta property="og:locale" content="zh_CN"><meta property="og:site_name" content="iamkissg | 赵喧典"><meta property="og:type" content="article"><meta property="og:title" content="[译]基于异步协程的网络爬虫 · iamkissg"><meta property="og:description" content="换种姿势写爬虫~"><meta property="og:url" content="https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/"><meta property="og:image" content="https://lifelonglove.cn/og/article/a-web-crawler-with-asyncio-coroutines.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta property="article:published_time" content="2016-06-01T00:00:00.000Z"><meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#11172a" media="(prefers-color-scheme: dark)"><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/"><link rel="alternate" type="application/rss+xml" title="iamkissg 全站订阅" href="/feed.xml"><style>@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/0eb9804d3b64a408.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98";src:url("/_astro/fonts/e1d714986df79163.woff2") format("woff2");font-display:swap;font-weight:700;font-style:normal;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman";src:local("Times New Roman");font-display:swap;font-weight:400;font-style:normal;size-adjust:118.4%;ascent-override:78.3784%;descent-override:21.6216%;line-gap-override:0%;}@font-face{font-family:"LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold";src:local("Times New Roman Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:111.1837%;ascent-override:83.4654%;descent-override:23.0249%;line-gap-override:0%;}:root{--font-lxgw-wenkai:"LXGW WenKai-20380bdfa2bfaa98","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman","LXGW WenKai-20380bdfa2bfaa98 fallback: Times New Roman Bold",serif;}</style><link rel="preload" href="/_astro/fonts/0eb9804d3b64a408.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/_astro/fonts/e1d714986df79163.woff2" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:400;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:500;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:600;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce";src:url("/_astro/fonts/1a3f90c2aa67257f.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:700;font-style:normal;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:400;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:500;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial";src:local("Arial");font-display:swap;font-weight:600;font-style:normal;size-adjust:96.007%;ascent-override:109.7837%;descent-override:30.102%;line-gap-override:0%;}@font-face{font-family:"Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold";src:local("Arial Bold");font-display:swap;font-weight:700;font-style:normal;size-adjust:89.1703%;ascent-override:118.2008%;descent-override:32.4099%;line-gap-override:0%;}:root{--font-ysabeau-office:"Ysabeau Office-21f4cd69c7bfb7ce","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial","Ysabeau Office-21f4cd69c7bfb7ce fallback: Arial Bold",sans-serif;}</style><style>@font-face{font-family:"Maple Mono CN-bcb1a43a405a7837";src:url("/_astro/fonts/284f517f4cd904d3.woff2") format("woff2");font-display:swap;font-weight:400;font-style:normal;}@font-face{font-family:"Maple Mono CN-bcb1a43a405a7837 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:400;font-style:normal;size-adjust:99.9837%;ascent-override:102.0166%;descent-override:30.0049%;}:root{--font-maple-mono-cn:"Maple Mono CN-bcb1a43a405a7837","Maple Mono CN-bcb1a43a405a7837 fallback: Courier New",monospace;}</style><title>[译]基于异步协程的网络爬虫 · iamkissg</title><script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("iamkissg-theme");
+          if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+        } catch {}
+      })();
+    </script><style>.quaily-subscription[data-astro-cid-hc5keh3e]{max-width:var(--measure);margin:var(--space-7) auto 0;padding:var(--space-5);background:color-mix(in srgb, var(--color-amber) 10%, var(--color-paper));border:1px solid color-mix(in srgb, var(--color-amber) 50%, var(--color-line))}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e],.quaily-subscription--compact[data-astro-cid-hc5keh3e] h2[data-astro-cid-hc5keh3e]{margin-top:0}.quaily-subscription[data-astro-cid-hc5keh3e] header[data-astro-cid-hc5keh3e] p[data-astro-cid-hc5keh3e]:last-child{color:var(--color-ink-muted)}.quaily-subscription[data-astro-cid-hc5keh3e] iframe[data-astro-cid-hc5keh3e]{border:0;width:100%;min-height:21rem;display:block}.quaily-subscription__fallback[data-astro-cid-hc5keh3e]{margin:var(--space-2) 0 0;text-align:center}@media (width<=34rem){.quaily-subscription[data-astro-cid-hc5keh3e]{padding:var(--space-3)}}
+</style><link rel="stylesheet" href="/_astro/SiteLayout.BstC_56N.css"><link rel="stylesheet" href="/_astro/ReadingLayout.BDKO8nUo.css"></head><body class="reading-page reading-page--longform"><a class="skip-link" href="#main-content" data-astro-cid-fzpbxy5g>跳到正文</a><header class="site-header" data-astro-cid-fzpbxy5g><div class="site-header__inner shell" data-astro-cid-fzpbxy5g><a class="site-header__brand" href="/" aria-label="iamkissg 首页" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span></a><nav class="desktop-nav" aria-label="主导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g>归档</a><a href="/about/" data-astro-cid-fzpbxy5g>关于</a><a href="/search/" data-astro-cid-fzpbxy5g>搜索</a></nav><div class="site-header__actions" data-astro-cid-fzpbxy5g><a class="icon-action desktop-search" href="/search/" aria-label="搜索" data-search-open data-astro-cid-fzpbxy5g>⌕</a><button class="icon-action" type="button" data-theme-toggle aria-label="切换明暗主题" title="切换明暗主题" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-theme-icon data-astro-cid-fzpbxy5g>◐</span></button><a class="seal-link" href="/about/" aria-label="关于赵喧典" data-astro-cid-fzpbxy5g><span class="seal-mark" aria-hidden="true" data-astro-cid-v3e57phd>趙</span></a><details class="mobile-menu" data-mobile-menu data-astro-cid-fzpbxy5g><summary aria-label="打开导航" data-astro-cid-fzpbxy5g><span aria-hidden="true" data-astro-cid-fzpbxy5g>菜单</span></summary><div class="mobile-menu__panel" data-astro-cid-fzpbxy5g><div class="mobile-menu__top" data-astro-cid-fzpbxy5g><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><button class="mobile-menu__close" type="button" data-mobile-menu-close data-astro-cid-fzpbxy5g>关闭 ×</button></div><nav aria-label="移动端导航" data-astro-cid-fzpbxy5g><a href="/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>01</span>首页</a><a href="/letters/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>02</span>酒馆来信</a><a href="/topics/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>03</span>主题</a><a href="/archive/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>04</span>归档</a><a href="/about/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>05</span>关于</a><a href="/search/" data-astro-cid-fzpbxy5g><span data-astro-cid-fzpbxy5g>06</span>搜索</a></nav><div class="mobile-menu__meta" data-astro-cid-fzpbxy5g><a href="/feed.xml" data-astro-cid-fzpbxy5g>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-fzpbxy5g>GitHub</a><a href="/colophon/" data-astro-cid-fzpbxy5g>版本说明</a><button type="button" data-theme-toggle data-astro-cid-fzpbxy5g>切换明暗主题</button></div></div></details></div></div></header><main id="main-content" data-pagefind-body><article class="reading" data-reading-layout="longform" data-astro-cid-veasemt3><header class="reading-hero" data-print-url="https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/" data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>文章</p><h1 data-astro-cid-veasemt3>[译]基于异步协程的网络爬虫</h1><p class="reading-deck" data-astro-cid-veasemt3>换种姿势写爬虫~</p><div class="reading-meta meta" data-astro-cid-veasemt3><span data-astro-cid-veasemt3>发布于 <time datetime="2016-06-01T00:00:00.000Z" data-astro-cid-veasemt3>2016年6月1日</time></span><span data-reading-time data-astro-cid-veasemt3>20 分钟阅读</span></div><details class="mobile-toc" data-mobile-toc data-astro-cid-veasemt3><summary data-astro-cid-veasemt3>展开目录</summary><nav aria-label="文章目录" data-astro-cid-veasemt3><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#译者的话" data-astro-cid-veasemt3>译者的话</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#简介" data-astro-cid-veasemt3>简介</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#任务描述" data-astro-cid-veasemt3>任务描述</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#传统方法" data-astro-cid-veasemt3>传统方法</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#异步" data-astro-cid-veasemt3>异步</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#回调编程" data-astro-cid-veasemt3>回调编程</a></li></ol></nav></details></header><div class="reading-grid" data-astro-cid-veasemt3><aside class="desktop-toc" data-desktop-toc aria-label="文章目录" data-astro-cid-veasemt3><nav data-astro-cid-veasemt3><p class="eyebrow" data-astro-cid-veasemt3>目录</p><ol data-astro-cid-veasemt3><li class="depth-2" data-astro-cid-veasemt3><a href="#译者的话" data-astro-cid-veasemt3>译者的话</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#简介" data-astro-cid-veasemt3>简介</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#任务描述" data-astro-cid-veasemt3>任务描述</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#传统方法" data-astro-cid-veasemt3>传统方法</a></li><li class="depth-2" data-astro-cid-veasemt3><a href="#异步" data-astro-cid-veasemt3>异步</a></li><li class="depth-3" data-astro-cid-veasemt3><a href="#回调编程" data-astro-cid-veasemt3>回调编程</a></li></ol></nav></aside><div class="prose" data-prose data-astro-cid-veasemt3><h2 id="译者的话">译者的话</h2>
+<p>最近英文资料看多了, 手很痒, 很想翻译一篇高质量的英文文章. 这不, 马上就去跟原作者要了翻译权. 下面开始吧~\
+(我是不会告诉你们, 期末将至, 我要落地, 要忙着应付各种实验, 课程设计, 报告, 期末考了. 之后的几篇如无意外, 都会以翻译的形式出现, 我尽量挑高质量的文章, 并尽量使译文能有原文80%的好.)</p>
+<h3 id="简介">简介</h3>
+<p>经典的计算机科学理论强调算法的高效性, 即计算应当尽可能快地完成. 但对于许多网络程序而言, 耗时的并非计算, 而是打开过多网络连接带来的时延, 或者突发事件造成的网络延迟. 这些程序引出的一个问题是: 对大量网络事件的等待. 解决此问题的时新方法是<code>异步I/O</code>, 或者称为<code>async</code>.</p>
+<p>本章用一个网络爬虫程序进行演示说明. 该爬虫是一个典型的异步程序, 它等待大量的响应, 却几乎不做计算. 爬虫一次性爬到的页面越多, 程序就能越快地完成. 如果采用一个线程发起一个请求的方式来实现快速爬取, 当并发数量上升时, 在套接字耗尽之前, 内存或其他线程相关的资源就已经耗尽了. 而采用异步I/O的方式, 就避免了对多线程的需求.</p>
+<p>我们用三步来实现这个例子. 首先, 我们将展示一个异步消息循环(async event loop)的例子, 并写出爬虫的大概样子, 它以回调的方式使用消息循环(这种方式的效率很高, 但若对其扩展以运用于更复杂的问题, 将会导致代码不可收拾). 其次, 我们将展示Python的协程的高效性与可扩展性. 我们通过生成器函数来实现简单的协程. 最后, 我们用Python标准库“asyncio”[^foot1], 实现全功能的协程, 并用一个异步队列来这些协程.</p>
+<h3 id="任务描述">任务描述</h3>
+<p>网络爬虫发现并下载一个网站上的所有网页, 可能会对这些网页进行归档或建立索引. 以一个URL的根路径为起点, 爬虫抓取每张页面, 解析得到新的链接, 并将它们加入一个链接的队列. 当抓取的页面没有任何链接, 并且链接队列为空时, 爬虫程序也就停止了.</p>
+<p>我们可以通过同时下载多张页面来加快爬取的速度, 当爬虫找到新的链接时, 它用分离的套接字实现对新页面的同步获取. 爬虫会解析收到的响应, 并将新的链接加入链接队列. 过高的并发性可能会降低性能, 因此需要为并发请求的数量设一个上限, 等到请求完成, 才从链接队列中取链接, 发起新的请求.</p>
+<h3 id="传统方法">传统方法</h3>
+<p>我们如何让爬虫并发执行? 传统的方法是, 创建一个线程池. 每个线程通过一个套接字, 每次下载一张页面. 举个例子, 从<code>xkcd.com</code>下载一张页面:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>def fetch(url):</span></span>
+<span class="line"><span>    sock = socket.socket()</span></span>
+<span class="line"><span>    sock.connect(('xkcd.com', 80))</span></span>
+<span class="line"><span>    request = 'GET {} HTTP/1.0\r\nHost: xkcd.com\r\n\r\n'.format(url)</span></span>
+<span class="line"><span>    sock.send(request.encode('ascii'))</span></span>
+<span class="line"><span>    response = b''</span></span>
+<span class="line"><span>    chunk = sock.recv(4096)</span></span>
+<span class="line"><span>    while chunk:</span></span>
+<span class="line"><span>        response += chunk</span></span>
+<span class="line"><span>        chunk = sock.recv(4096)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>    # Page is now downloaded.</span></span>
+<span class="line"><span>    links = parse_links(response)</span></span>
+<span class="line"><span>    q.add(links)</span></span></code></pre>
+<p>默认地, 套接字的操作是阻塞的: 当线程调用一个方法时, 比如<code>connect</code>或<code>recv</code>, 该线程将被暂停, 直到调用的操作完成[^foot2]. 因此, 为了一次性下载多个页面, 我们需要多个线程. 一个成熟的应用程序, 通过维持一个线程池, 复用线程的方式来抵消频繁创建进程的代价; 同样地, 它通过维持一个连接池, 实现套接字的复用.</p>
+<p>然而, 线程的代价是高昂的, 操作系统通常会强制为进程, 用户或机器设置不同的线程上限. 在我的系统中(Jesse’s system), 一个Python线程占用大约50k的内存资源, 并且启动成千上万的线程将导致故障. 如果我们将并发的套接字上的同步操作也按比例增加到上万的数量级, 在套接字耗尽之前, 就线程就已经耗尽了. 单个线程的开销或者系统对于线程数量的限制是瓶颈所在.</p>
+<p>Dan Kegel在他的著作“The C10K problem”[^foot3]中, 概括了多线程I/O并发的局限性. 开篇, 他写到:</p>
+<blockquote>
+<p>It’s time for web servers to handle ten thousand clients simultaneously, don’t you think? After all, the web is a big place now.</p>
+</blockquote>
+<p>Kegel在1999年的时候, 创造了“C10K”一词. 一万个连接, 现在听起来似乎挺不足道的, 但到今天, C10K问题也仅仅只是量变, 并没有本质的改变. 在当时, 用一个线性一条连接的方法解决C10K问题是不切实际的, 而现在, 也仅仅是天花板更高了而已. 讲真, 我们的爬虫能与线程配合得相当好. 然而, 对于那些维持着成千上万的连接的超大规模应用, 天花板依然存在: 大多数系统在耗尽线程之后, 仍然能创建套接字. 怎么才能解决这个问题呢?</p>
+<h2 id="异步">异步</h2>
+<p>异步I/O框架在单线程中使用非阻塞(non-blocking)套接字, 从而实现并发操作. 我们的异步爬虫, 在连接到服务器之前, 先设置套接字为非阻塞的:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">sock </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> socket.socket()</span></span>
+<span class="line"><span style="color:#E1E4E8">sock.setblocking(</span><span style="color:#79B8FF">False</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">try</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    sock.connect((</span><span style="color:#9ECBFF">'xkcd.com'</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">80</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#F97583">except</span><span style="color:#79B8FF"> BlockingIOError</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">    pass</span></span></code></pre>
+<p>令人恼火的是, 即使是正常工作时, 非阻塞的套接字也会在<code>connect</code>时抛出异常. 这个异常会反复调用底层的C函数, 为<code>EINPROGRESS</code>设置<code>errno</code>, 以此来提醒你, 连接已经开始.</p>
+<p>现在, 我们的爬虫需要一种方式来获知连接何时建立, 以便它发送HTTP请求. 可以简单地用一个紧密循环(tight loop)来实现:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">request </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> 'GET </span><span style="color:#79B8FF">{}</span><span style="color:#9ECBFF"> HTTP/1.0</span><span style="color:#79B8FF">\r\n</span><span style="color:#9ECBFF">Host: xkcd.com</span><span style="color:#79B8FF">\r\n\r\n</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">.format(url)</span></span>
+<span class="line"><span style="color:#E1E4E8">encoded </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> request.encode(</span><span style="color:#9ECBFF">'ascii'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">while</span><span style="color:#79B8FF"> True</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">    try</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">        sock.send(encoded)</span></span>
+<span class="line"><span style="color:#F97583">        break</span><span style="color:#6A737D">  # Done.</span></span>
+<span class="line"><span style="color:#F97583">    except</span><span style="color:#79B8FF"> OSError</span><span style="color:#F97583"> as</span><span style="color:#E1E4E8"> e:</span></span>
+<span class="line"><span style="color:#F97583">            pass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF">print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'sent'</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<p>然而, 这个方法不仅浪费电(囧), 还不能实现基于多套接字(multuple socket)事件的有效异步等待. 在“远古时代”, BSD Unix对此的解决方法是用<code>select</code>, 一个C函数, 用于等待一个非阻塞套接字事件的发生, 或者也可以是几个套接字的数组. 如今, 为了应付互联网应用超大连接数的需求, 采用如<code>poll</code>的代替方案, BSD上采用<code>kqueue</code>, Linux上采用<code>epoll</code>. 这些API与<code>select</code>类似, 但能更好地应付超大数量的连接数.</p>
+<p>Python 3.4的<code>DefaultSelector</code>使用基于系统的最优的类<code>select</code>函数. 为了实现网络I/O的通知, 我们创建一个非阻塞套接字, 并用<code>DefaultSelector</code>注册:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> selectors </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> DefaultSelector, </span><span style="color:#79B8FF">EVENT_WRITE</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">selector </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> DefaultSelector()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">sock </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> socket.socket()</span></span>
+<span class="line"><span style="color:#E1E4E8">sock.setblocking(</span><span style="color:#79B8FF">False</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">try</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    sock.connect((</span><span style="color:#9ECBFF">'xkcd.com'</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">80</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#F97583">except</span><span style="color:#79B8FF"> BlockingIOError</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">    pass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> connected</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#E1E4E8">    selector.unregister(sock.fileno())</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'connected!'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">selector.register(sock.fileno(), </span><span style="color:#79B8FF">EVENT_WRITE</span><span style="color:#E1E4E8">, connected)</span></span></code></pre>
+<p>我们忽略伪错误, 并调用<code>selector.register</code>, 传入套接字的文件描述符和一个表示我们正在等待的事件的常数. 为了在连接建立时得到通知, 我们需要传入一个<code>EVENT_WRITE</code>: 也就是说, 我们希望获知何时套接字是“可写的”. 我们还需要传入一个Python函数, <code>connected</code>. 当事件发生时, 执行该函数. 这样的函数就被称为<em>回调函数(callback)</em></p>
+<p>当选择器(selector)收到I/O通知时, 我们用一个循环来处理它:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> loop</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#79B8FF"> True</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">        events </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> selector.select()</span></span>
+<span class="line"><span style="color:#F97583">        for</span><span style="color:#E1E4E8"> event_key, event_mask </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> events:</span></span>
+<span class="line"><span style="color:#E1E4E8">            callback </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> event_key.data</span></span>
+<span class="line"><span style="color:#E1E4E8">            callback()</span></span></code></pre>
+<p>回调函数<code>connected</code>被存储为<code>event_key.data</code>. 因此, 一旦非阻塞套接字连通, 我们可以立即检索数据并回调函数.</p>
+<p>不同与之前的紧密循环, 此处对<code>select</code>的调用会暂停, 以异步等待下一个I/O事件. 接着, 在循环中执行对于发生的事件的回调. 未完成的操作会被挂起, 直到下一个时间循环时钟的到来, 才继续执行.</p>
+<p>所以到目前为止, 我们演示了什么呢? 我们展示了如何启动一个操作, 以及当操作准备就绪时执行回调函数. 异步框架就是建立在我们之前提到的<strong>非阻塞套接字</strong>和<strong>事件循环</strong>两个特征之上的, 这就在单线程中实现了并发操作.</p>
+<p>此处, 我们实现了“并发”, 但不是传统意义上所谓的“并行”. 也就是说, 我们创建了一个能重叠I/O的微型系统. 这意味着, 可以在其他操作期间创建并执行新的操作. 这并不是利用多核实现并行操作. 也就是说, 该系统是为I/O密集型问题设计的, 而不是CPU密集型问题.</p>
+<p>我们的事件循环是高效并发I/O的, 因为并没有为每一条连接都分配线程资源. 在真正开始之前, 有必要纠正一个普遍的误解——异步比多线程更快. 坦白说, 通常并不是这样的. 在Python中, 像我们所创建的事件循环, 在处理数量不大但交互频繁的连接时, 要比多线程方式慢. 在没有全局解释器锁(Global Interpreter Lock)的运行时环境下, 多线程同样表现得更出色. 而异步I/O的真正用武之处在于, 充满大量慢连接和不频繁事件的应用场景.</p>
+<h3 id="回调编程">回调编程</h3>
+<p>基于我们刚刚建立的简短的异步框架, 我们该如何创建一个网络爬虫呢? 即使是一个简单的URL捕捉器难于编写.</p>
+<p>我们从已经获取的全局URL集合开始, 如下所示:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">urls_todo </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> set</span><span style="color:#E1E4E8">([</span><span style="color:#9ECBFF">'/'</span><span style="color:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#E1E4E8">seen_urls </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> set</span><span style="color:#E1E4E8">([</span><span style="color:#9ECBFF">'/'</span><span style="color:#E1E4E8">])</span></span></code></pre>
+<p>集合<code>seen_urls</code>包含了<code>urls_todo</code>以及访问过的URL. 两个集合都用根URL“/“进行初始化.</p>
+<p>抓取一张页面需要一系列的回调. 当一个套接字连接成功时, <code>connected</code>回调函数被执行, 用于向服务器发送一个GET请求. 但之后它就必须异步地等待响应, 因此它会回调另一个函数. 当回调函数被执行后, 只有再次被调用, 它才能读取完整的响应.</p>
+<p>我们将这些回调函数封装进一个<code>Fetcher</code>对象. 因此, 它需要一个URL, 一个套接字对象, 和一个累积存储响应字节的地方:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> Fetcher</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#79B8FF"> __init__</span><span style="color:#E1E4E8">(self, url):</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.response </span><span style="color:#F97583">=</span><span style="color:#F97583"> b</span><span style="color:#9ECBFF">''</span><span style="color:#6A737D">  # Empty array of bytes.</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.url </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> url</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.sock </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span></code></pre>
+<p>我们以<code>Fetcher.fetch</code>开始:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D">    # Method on Fetcher class.</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> fetch</span><span style="color:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.sock </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> socket.socket()</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.sock.setblocking(</span><span style="color:#79B8FF">False</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">        try</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">            self</span><span style="color:#E1E4E8">.sock.connect((</span><span style="color:#9ECBFF">'xkcd.com'</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">80</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#F97583">        except</span><span style="color:#79B8FF"> BlockingIOError</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">            pass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">        # Register next callback.</span></span>
+<span class="line"><span style="color:#E1E4E8">        selector.register(</span><span style="color:#79B8FF">self</span><span style="color:#E1E4E8">.sock.fileno(),</span></span>
+<span class="line"><span style="color:#79B8FF">                          EVENT_WRITE</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">                          self</span><span style="color:#E1E4E8">.connected)</span></span></code></pre>
+<p><code>fetch</code>方法启动一个连接. 但请注意, 在连接建立之前, 该方法就返回了. 它必须将控制权返还给事件循环, 以等待连接的建立. 为了理解, 请想象完整的应用结构, 是这样的:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># Begin fetching http://xkcd.com/353/</span></span>
+<span class="line"><span style="color:#E1E4E8">fetcher </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> Fetcher(</span><span style="color:#9ECBFF">'/353/'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">fetcher.fetch()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">while</span><span style="color:#79B8FF"> True</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    events </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> selector.select()</span></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> event_key, event_mask </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> events:</span></span>
+<span class="line"><span style="color:#E1E4E8">        callback </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> event_key.data</span></span>
+<span class="line"><span style="color:#E1E4E8">        callback(event_key, event_mask)</span></span></code></pre>
+<p>所有的事件通知都是通过调用<code>select</code>函数, 然后在事件循环中进行处理. 因此, <code>fetch</code>方法必须将控制权交由事件循环, 如此, 程序才能知晓套接字已经建立. 然后, 在循环中回调<code>connected</code>函数, 在上述<code>fetch</code>方法的最后已经完成该回调函数的注册.</p>
+<p>以下是<code>connected</code>的实现:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D">    # Method on Fetcher class.</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> connected</span><span style="color:#E1E4E8">(self, key, mask):</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'connected!'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        selector.unregister(key.fd)</span></span>
+<span class="line"><span style="color:#E1E4E8">        request </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> 'GET </span><span style="color:#79B8FF">{}</span><span style="color:#9ECBFF"> HTTP/1.0</span><span style="color:#79B8FF">\r\n</span><span style="color:#9ECBFF">Host: xkcd.com</span><span style="color:#79B8FF">\r\n\r\n</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">.format(</span><span style="color:#79B8FF">self</span><span style="color:#E1E4E8">.url)</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.sock.send(request.encode(</span><span style="color:#9ECBFF">'ascii'</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">        # Register the next callback.</span></span>
+<span class="line"><span style="color:#E1E4E8">        selector.register(key.fd,</span></span>
+<span class="line"><span style="color:#79B8FF">                          EVENT_READ</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">                          self</span><span style="color:#E1E4E8">.read_response)</span></span></code></pre>
+<p>该方法发送一个GET请求. 一个真实的应用会检查<code>send</code>的返回值, 以防完整的消息不能一次性发送完毕. 但是我们的请求很简短, 我们的应用也很简单. 因此, 就“轻率”地调用<code>send</code>, 并等待响应. 当然, 必须注册另一个回调函数, 从而将控制权上交给事件循环. 下一个也是最后一个回调函数是<code>read_response</code>, 用于处理服务器的响应:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D">    # Method on Fetcher class.</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> read_response</span><span style="color:#E1E4E8">(self, key, mask):</span></span>
+<span class="line"><span style="color:#F97583">        global</span><span style="color:#E1E4E8"> stopped</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">        chunk </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> self</span><span style="color:#E1E4E8">.sock.recv(</span><span style="color:#79B8FF">4096</span><span style="color:#E1E4E8">)  </span><span style="color:#6A737D"># 4k chunk size.</span></span>
+<span class="line"><span style="color:#F97583">        if</span><span style="color:#E1E4E8"> chunk:</span></span>
+<span class="line"><span style="color:#79B8FF">            self</span><span style="color:#E1E4E8">.response </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> chunk</span></span>
+<span class="line"><span style="color:#F97583">        else</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">            selector.unregister(key.fd)  </span><span style="color:#6A737D"># Done reading.</span></span>
+<span class="line"><span style="color:#E1E4E8">            links </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> self</span><span style="color:#E1E4E8">.parse_links()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">            # Python set-logic:</span></span>
+<span class="line"><span style="color:#F97583">            for</span><span style="color:#E1E4E8"> link </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> links.difference(seen_urls):</span></span>
+<span class="line"><span style="color:#E1E4E8">                urls_todo.add(link)</span></span>
+<span class="line"><span style="color:#E1E4E8">                Fetcher(link).fetch()  </span><span style="color:#6A737D"># &lt;- New Fetcher.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">            seen_urls.update(links)</span></span>
+<span class="line"><span style="color:#E1E4E8">            urls_todo.remove(</span><span style="color:#79B8FF">self</span><span style="color:#E1E4E8">.url)</span></span>
+<span class="line"><span style="color:#F97583">            if</span><span style="color:#F97583"> not</span><span style="color:#E1E4E8"> urls_todo:</span></span>
+<span class="line"><span style="color:#E1E4E8">                stopped </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> True</span></span></code></pre>
+<p>每当选择器发现套接字是“可读的”, 就会执行回调函数. 此处“可读”的意思是, 套接字是有数据的, 或它已经被关闭.</p>
+<p>回调函数一次最多从套接字读取4kb的数据. 若数据少于4kb, <code>chunk</code>将读取所有数据; 若数据量超过4kb, <code>chunk</code>读取4kb的数据, 并保持套接字依旧可读, 下一个时钟到来时, 事件循环将再次调用回调函数读取数据. 响应结束时, 服务器将关闭套接字, <code>chunk</code>变空.</p>
+<p>上述代码中出现的<code>parse_links</code>方法, 返回一个URL的集合. 我们为每一个新的URL都启动一个新的抓取器, 并且不设置并发上限. 使用回调函数的异步编程的一个显著特征就是: 不需要为共享数据设置排他锁, 向<code>seen_urls</code>集合添加链接就是一个例子. 因为没有抢占式多任务, 我们的代码并不能随意地打断.</p>
+<p>我们用一个全局变量<code>stopped</code>来控制循环:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">stopped </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> False</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> loop</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#F97583"> not</span><span style="color:#E1E4E8"> stopped:</span></span>
+<span class="line"><span style="color:#E1E4E8">        events </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> selector.select()</span></span>
+<span class="line"><span style="color:#F97583">        for</span><span style="color:#E1E4E8"> event_key, event_mask </span><span style="color:#F97583">in</span><span style="color:#E1E4E8"> events:</span></span>
+<span class="line"><span style="color:#E1E4E8">            callback </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> event_key.data</span></span>
+<span class="line"><span style="color:#E1E4E8">            callback()</span></span></code></pre>
+<p>当所有页面都下载完毕, 抓取器停止全局事件循环, 程序结束.</p>
+<p>This example makes async’s problem plain: spaghetti code. 我们需要某种方式去实现一系列的计算与I/O操作, 并调度这一系列的操作并发地执行. 然后, 不适用多线程, 这一系列的操作就不能用一个单一函数完成: 启动I/O操作, 存储状态, 返回结果. 因此, 需要再思考并写一段状态存储代码.</p>
+<p>让我们来解释. 考虑下我们是如何在一个线程里通过常规阻塞套接字抓取URL的:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># Blocking version.</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> fetch</span><span style="color:#E1E4E8">(url):</span></span>
+<span class="line"><span style="color:#E1E4E8">    sock </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> socket.socket()</span></span>
+<span class="line"><span style="color:#E1E4E8">    sock.connect((</span><span style="color:#9ECBFF">'xkcd.com'</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">80</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#E1E4E8">    request </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> 'GET </span><span style="color:#79B8FF">{}</span><span style="color:#9ECBFF"> HTTP/1.0</span><span style="color:#79B8FF">\r\n</span><span style="color:#9ECBFF">Host: xkcd.com</span><span style="color:#79B8FF">\r\n\r\n</span><span style="color:#9ECBFF">'</span><span style="color:#E1E4E8">.format(url)</span></span>
+<span class="line"><span style="color:#E1E4E8">    sock.send(request.encode(</span><span style="color:#9ECBFF">'ascii'</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#E1E4E8">    response </span><span style="color:#F97583">=</span><span style="color:#F97583"> b</span><span style="color:#9ECBFF">''</span></span>
+<span class="line"><span style="color:#E1E4E8">    chunk </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> sock.recv(</span><span style="color:#79B8FF">4096</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8"> chunk:</span></span>
+<span class="line"><span style="color:#E1E4E8">        response </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> chunk</span></span>
+<span class="line"><span style="color:#E1E4E8">        chunk </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> sock.recv(</span><span style="color:#79B8FF">4096</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # Page is now downloaded.</span></span>
+<span class="line"><span style="color:#E1E4E8">    links </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> parse_links(response)</span></span>
+<span class="line"><span style="color:#E1E4E8">    q.add(links)</span></span></code></pre>
+<p>这个函数是如何记住一个套接字操作与下一个操作之间的状态的呢? 它包含了套接字, 一个URL, 可累积的响应对象. 单线程的函数通过使用编程语言提供的基本特征存储局部变量的临时状态, 通过一个局部栈. 该函数又有一点“附加部分”——即代码将在I/O完成时被执行. 通过线程的指令指针, 运行时会记得这个附加部分. 因此, I/O完成后, 你不需要考虑重新存储局部变量和附加部分. 而这一切都是建立在语言基础上的.</p>
+<p>但是使用基于回调的异步框架, 这些语言特征毫无帮助. 当等待I/O时, 函数必须显式地保存其状态, 因为在I/O完成前, 函数返回会丢失栈帧. 为了替代局部变量, 基于回调的例子将<code>sock</code>和<code>response</code>存储为Fetcher实例的实例属性. 为了替代指令指针, 通过注册回调函数<code>connected</code>和<code>read_response</code>来存储附加部分. 随着应用特征的增长, 我们通过手动回调的方式存储的状态复杂性也增加. 程序员并不乐意从事这样繁重的工作.</p>
+<p>更坏的情况是, 在执行下一个回调函数前, 当前的回调函数抛出了异常. 比如, 我们写了一个差劲的<code>parse_links</code>方法, 它在解析HTML文档时会抛出异常:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#B392F0">Traceback</span><span style="color:#E1E4E8"> (most </span><span style="color:#9ECBFF">recent</span><span style="color:#9ECBFF"> call</span><span style="color:#9ECBFF"> last</span><span style="color:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#B392F0">  File</span><span style="color:#9ECBFF"> "loop-with-callbacks.py",</span><span style="color:#9ECBFF"> line</span><span style="color:#9ECBFF"> 111,</span><span style="color:#9ECBFF"> in</span><span style="color:#F97583"> &lt;</span><span style="color:#9ECBFF">modul</span><span style="color:#E1E4E8">e</span><span style="color:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#B392F0">    loop</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#B392F0">  File</span><span style="color:#9ECBFF"> "loop-with-callbacks.py",</span><span style="color:#9ECBFF"> line</span><span style="color:#9ECBFF"> 106,</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> loop</span></span>
+<span class="line"><span style="color:#B392F0">    callback(event_key,</span><span style="color:#9ECBFF"> event_mask</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#B392F0">  File</span><span style="color:#9ECBFF"> "loop-with-callbacks.py",</span><span style="color:#9ECBFF"> line</span><span style="color:#9ECBFF"> 51,</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> read_response</span></span>
+<span class="line"><span style="color:#B392F0">    links</span><span style="color:#9ECBFF"> =</span><span style="color:#9ECBFF"> self.parse_links</span><span style="color:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#B392F0">  File</span><span style="color:#9ECBFF"> "loop-with-callbacks.py",</span><span style="color:#9ECBFF"> line</span><span style="color:#9ECBFF"> 67,</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> parse_links</span></span>
+<span class="line"><span style="color:#B392F0">    raise</span><span style="color:#9ECBFF"> Exception</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">'parse error'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#B392F0">Exception:</span><span style="color:#9ECBFF"> parse</span><span style="color:#9ECBFF"> error</span></span></code></pre>
+<p>以上栈回溯只是显示了事件循环正在执行一个回调函数. 我们并不能知道是错误的原因. 有2种可能会导致出错: 我们忘了将要去哪, 以及何时来. 这种上下文信息的丢失称为“stack ripping”, 它容易引发混淆. Stack ripping还会妨碍我们为回调函数链建立异常处理器, 采用“try/except”块包裹函数调用及其子树.</p>
+<p>因此, 暂且不说多线程与异步的相对效率, 两者在易错性上</p>
+</div><aside class="sidenotes" data-sidenotes aria-label="侧注" data-astro-cid-veasemt3></aside></div><footer class="reading-end" data-astro-cid-veasemt3><section class="related" data-related-content aria-labelledby="related-title" data-astro-cid-veasemt3><h2 id="related-title" class="rule-heading" data-astro-cid-veasemt3>继续阅读</h2><ol data-astro-cid-veasemt3><li data-astro-cid-veasemt3><a href="/articles/python-visualization-with-bokeh/" data-astro-cid-veasemt3>[译|转]Python: 利用 Bokeh 进行可视化</a><span data-astro-cid-veasemt3>文章</span></li><li data-astro-cid-veasemt3><a href="/articles/apartment-finding-slackbot/" data-astro-cid-veasemt3>[译|转]我是如何写一个 Slack 机器人以帮助我在旧金山找到房子的</a><span data-astro-cid-veasemt3>文章</span></li><li data-astro-cid-veasemt3><a href="/articles/breaking-out-of-two-loops/" data-astro-cid-veasemt3>[译|转]跳出两重循环</a><span data-astro-cid-veasemt3>文章</span></li></ol></section><section class="share-tools" data-share-region aria-labelledby="share-title" data-astro-cid-j62koywo><h2 id="share-title" class="rule-heading" data-astro-cid-j62koywo>分享本文</h2><div class="share-tools__actions" data-astro-cid-j62koywo><button type="button" data-web-share hidden data-astro-cid-j62koywo>分享</button><button type="button" data-copy-link data-copy-value="https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/" data-astro-cid-j62koywo>复制链接</button><a href="mailto:?subject=%5B%E8%AF%91%5D%E5%9F%BA%E4%BA%8E%E5%BC%82%E6%AD%A5%E5%8D%8F%E7%A8%8B%E7%9A%84%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB&amp;body=%E6%8D%A2%E7%A7%8D%E5%A7%BF%E5%8A%BF%E5%86%99%E7%88%AC%E8%99%AB~%0A%0Ahttps%3A%2F%2Flifelonglove.cn%2Farticles%2Fa-web-crawler-with-asyncio-coroutines%2F" data-astro-cid-j62koywo>邮件</a><a href="https://x.com/intent/tweet?text=%5B%E8%AF%91%5D%E5%9F%BA%E4%BA%8E%E5%BC%82%E6%AD%A5%E5%8D%8F%E7%A8%8B%E7%9A%84%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB%0A%E6%8D%A2%E7%A7%8D%E5%A7%BF%E5%8A%BF%E5%86%99%E7%88%AC%E8%99%AB~&amp;url=https%3A%2F%2Flifelonglove.cn%2Farticles%2Fa-web-crawler-with-asyncio-coroutines%2F" rel="external" data-astro-cid-j62koywo>X</a><button type="button" data-copy-share data-copy-value="[译]基于异步协程的网络爬虫
+换种姿势写爬虫~
+https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/" data-astro-cid-j62koywo>复制后发布到小红书</button><button type="button" data-copy-share data-copy-value="[译]基于异步协程的网络爬虫
+换种姿势写爬虫~
+https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/" data-astro-cid-j62koywo>复制后发布到知乎</button></div><p class="share-tools__status meta" data-share-status aria-live="polite" data-astro-cid-j62koywo></p><details class="share-tools__fallback" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>手动复制分享文字</summary><label data-astro-cid-j62koywo><span class="meta" data-astro-cid-j62koywo>标题、摘要与干净链接</span><textarea readonly rows="5" data-astro-cid-j62koywo>[译]基于异步协程的网络爬虫
+换种姿势写爬虫~
+https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/</textarea></label></details><details class="share-tools__qr" data-astro-cid-j62koywo><summary data-astro-cid-j62koywo>桌面二维码</summary><div data-share-qr data-astro-cid-j62koywo><svg xmlns="http://www.w3.org/2000/svg" width="184" height="184" viewBox="0 0 39 39" shape-rendering="crispEdges"><path fill="#f4efe4" d="M0 0h39v39H0z"/><path stroke="#17213e" d="M1 1.5h7m3 0h2m2 0h1m1 0h1m1 0h1m1 0h2m1 0h1m4 0h1m1 0h7M1 2.5h1m5 0h1m3 0h2m2 0h1m3 0h2m1 0h1m3 0h4m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h3m1 0h2m1 0h2m2 0h4m1 0h1m1 0h2m2 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h2m2 0h3m2 0h5m3 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h4m1 0h2m3 0h3m1 0h2m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h3m2 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h4m1 0h1m2 0h1m2 0h3m1 0h1m2 0h1m1 0h1M1 9.5h1m1 0h5m3 0h3m5 0h3m1 0h4m4 0h5M2 10.5h3m1 0h1m2 0h10m3 0h1m1 0h1m1 0h1m2 0h1m6 0h1M5 11.5h8m1 0h2m5 0h1m3 0h1m1 0h4m5 0h2M1 12.5h4m1 0h1m3 0h3m1 0h2m1 0h1m4 0h1m8 0h1m1 0h1m3 0h1M1 13.5h1m1 0h2m2 0h2m2 0h3m4 0h1m4 0h1m1 0h4m1 0h2m1 0h1m1 0h3M2 14.5h1m1 0h1m1 0h1m1 0h1m3 0h2m1 0h1m1 0h2m1 0h1m1 0h5m2 0h1m2 0h1M6 15.5h2m2 0h2m2 0h3m1 0h1m2 0h3m1 0h1m1 0h4m1 0h3m1 0h2M1 16.5h5m2 0h4m1 0h3m2 0h3m1 0h3m2 0h1m1 0h5m3 0h1M2 17.5h2m3 0h4m5 0h2m5 0h2m1 0h2m2 0h2m1 0h1m1 0h2M1 18.5h2m1 0h1m4 0h3m2 0h1m1 0h1m2 0h1m1 0h4m1 0h1m2 0h1m2 0h1m1 0h1m1 0h1M1 19.5h1m1 0h1m3 0h1m1 0h1m5 0h4m1 0h1m1 0h2m2 0h3m5 0h4M9 20.5h4m3 0h1m3 0h3m4 0h1m1 0h4m1 0h1m2 0h1M1 21.5h1m2 0h2m1 0h1m5 0h1m1 0h4m1 0h2m1 0h1m1 0h3m2 0h2m1 0h3M1 22.5h3m1 0h1m2 0h1m1 0h3m1 0h2m1 0h1m1 0h4m1 0h1m2 0h1m1 0h1m4 0h1M1 23.5h2m4 0h2m3 0h1m2 0h3m1 0h1m1 0h1m4 0h1m1 0h1m2 0h4m1 0h2M4 24.5h3m1 0h8m5 0h5m1 0h7m2 0h1M1 25.5h1m5 0h1m5 0h2m1 0h1m2 0h1m1 0h1m4 0h2m2 0h4m1 0h3M1 26.5h1m1 0h3m2 0h4m1 0h1m1 0h3m6 0h1m4 0h2m1 0h1m2 0h1M1 27.5h1m1 0h1m3 0h1m1 0h1m4 0h1m6 0h2m3 0h7m3 0h2M1 28.5h1m3 0h1m2 0h2m3 0h1m1 0h1m1 0h1m4 0h3m3 0h1m4 0h1m2 0h1M1 29.5h1m2 0h5m4 0h3m2 0h1m4 0h5m1 0h5m1 0h3M9 30.5h1m1 0h1m2 0h1m2 0h5m2 0h1m1 0h1m1 0h2m3 0h2m1 0h1M1 31.5h7m2 0h1m2 0h1m1 0h4m4 0h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h3M1 32.5h1m5 0h1m1 0h1m1 0h1m1 0h1m2 0h4m1 0h4m2 0h1m1 0h1m3 0h2m1 0h2M1 33.5h1m1 0h3m1 0h1m1 0h1m3 0h3m1 0h1m2 0h1m1 0h1m1 0h10m1 0h1m1 0h1M1 34.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h3m2 0h1m1 0h2m1 0h1m2 0h1m2 0h2m1 0h1m3 0h1M1 35.5h1m1 0h3m1 0h1m1 0h2m2 0h1m2 0h5m4 0h1m1 0h1m7 0h3M1 36.5h1m5 0h1m2 0h3m2 0h2m2 0h7m1 0h1m1 0h1m1 0h1m1 0h1m3 0h1M1 37.5h7m1 0h1m5 0h2m1 0h3m2 0h1m1 0h2m3 0h1m2 0h5"/></svg>
+</div><p class="meta" data-astro-cid-j62koywo>用手机打开本文；二维码由本站在构建时生成。</p></details><p class="meta" data-astro-cid-j62koywo>链接始终可直接打开：<a href="https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/" data-astro-cid-j62koywo>https://lifelonglove.cn/articles/a-web-crawler-with-asyncio-coroutines/</a></p></section><script>
+  (() => {
+    const root = document.currentScript?.previousElementSibling;
+    if (!(root instanceof HTMLElement) || !root.matches("[data-share-region]")) return;
+    const status = root.querySelector("[data-share-status]");
+    const fallback = root.querySelector("textarea");
+    const report = (message) => { if (status) status.textContent = message; };
+    const copy = async (value) => {
+      try {
+        if (!navigator.clipboard) throw new Error("clipboard unavailable");
+        await navigator.clipboard.writeText(value);
+        report("已复制");
+      } catch {
+        if (fallback instanceof HTMLTextAreaElement) {
+          fallback.value = value;
+          fallback.closest("details").open = true;
+          fallback.focus();
+          fallback.select();
+        }
+        report("请手动复制已选中的文字");
+      }
+    };
+    const webShare = root.querySelector("[data-web-share]");
+    if (webShare instanceof HTMLButtonElement && navigator.share) {
+      webShare.hidden = false;
+      webShare.addEventListener("click", async () => {
+        try {
+          await navigator.share({ title: document.title, url: location.href });
+        } catch (error) {
+          if (error?.name !== "AbortError") report("系统分享不可用，请复制链接");
+        }
+      });
+    }
+    for (const button of root.querySelectorAll("[data-copy-link], [data-copy-share]")) {
+      button.addEventListener("click", () => copy(button.dataset.copyValue || location.href));
+    }
+  })();
+</script><section class="comments" data-comments-mount aria-label="评论" data-astro-cid-veasemt3><span data-giscus-unconfigured hidden data-astro-cid-clnq4c4i>评论参数尚未配置</span></section></footer></article><dialog class="lightbox" data-lightbox aria-label="图片放大查看" data-astro-cid-veasemt3><button class="lightbox__close" type="button" data-lightbox-close aria-label="关闭图片" data-astro-cid-veasemt3>关闭 ×</button><figure data-astro-cid-veasemt3><img src="" alt="" data-astro-cid-veasemt3><figcaption data-astro-cid-veasemt3></figcaption></figure><div class="lightbox__nav" data-astro-cid-veasemt3><button type="button" data-lightbox-prev data-astro-cid-veasemt3>← 上一张</button><button type="button" data-lightbox-next data-astro-cid-veasemt3>下一张 →</button></div></dialog><template data-code-tools-template data-astro-cid-veasemt3><div class="code-tools" data-code-tools data-astro-cid-veasemt3><span data-code-filename data-astro-cid-veasemt3></span><button type="button" data-code-copy data-astro-cid-veasemt3>复制代码</button></div></template></main><footer class="site-footer" data-astro-cid-nns7i3if><div class="site-footer__inner shell" data-astro-cid-nns7i3if><div data-astro-cid-nns7i3if><span class="brand-mark" aria-label="iamkissg | 赵喧典" data-astro-cid-77qc4tpx><span class="brand-mark__latin" data-astro-cid-77qc4tpx>iamkissg</span><span class="brand-mark__divider" aria-hidden="true" data-astro-cid-77qc4tpx>|</span><span class="brand-mark__name" data-astro-cid-77qc4tpx>赵喧典</span></span><p data-astro-cid-nns7i3if>长期写作，公开学习，也保存生活留下的纹理。</p></div><nav aria-label="页脚导航" data-astro-cid-nns7i3if><a href="/feed.xml" data-astro-cid-nns7i3if>RSS</a><a href="https://github.com/iamkissg" data-astro-cid-nns7i3if>GitHub</a><a href="/colophon/" data-astro-cid-nns7i3if>版本说明</a></nav></div></footer><dialog class="search-overlay" data-search-overlay aria-modal="true" aria-labelledby="search-overlay-title" data-astro-cid-fdy5zvyj><div class="search-overlay__frame" data-astro-cid-fdy5zvyj><div class="search-overlay__top" data-astro-cid-fdy5zvyj><div data-astro-cid-fdy5zvyj><p class="eyebrow" data-astro-cid-fdy5zvyj>Search / 搜索</p><h2 id="search-overlay-title" data-astro-cid-fdy5zvyj>在站内找一段文字</h2></div><button type="button" data-search-close aria-label="关闭搜索" data-astro-cid-fdy5zvyj>关闭 ×</button></div><section class="pagefind-search" data-pagefind-search data-astro-cid-dm6ph42g><label data-astro-cid-dm6ph42g><span data-astro-cid-dm6ph42g>搜索标题、正文与主题</span><input type="search" name="q" placeholder="输入关键词…" autocomplete="off" data-astro-cid-dm6ph42g></label><p class="pagefind-search__status" role="status" aria-live="polite" data-astro-cid-dm6ph42g>输入关键词开始搜索。</p><ol class="pagefind-search__results" data-astro-cid-dm6ph42g></ol><noscript><p data-astro-cid-dm6ph42g>搜索需要 JavaScript；你仍可以前往<a href="/archive/" data-astro-cid-dm6ph42g>完整归档</a>浏览所有内容。</p></noscript></section><script>
+  (() => {
+    const modulePath = "/pagefind/pagefind.js";
+    const escapeHtml = (value) => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    for (const root of document.querySelectorAll("[data-pagefind-search]")) {
+      if (root.dataset.bound === "true") continue;
+      root.dataset.bound = "true";
+      const input = root.querySelector('input[type="search"]');
+      const status = root.querySelector('[role="status"]');
+      const results = root.querySelector("ol");
+      let timer;
+
+      const search = async () => {
+        const query = input.value.trim();
+        if (!query) {
+          status.textContent = "输入关键词开始搜索。";
+          results.replaceChildren();
+          return;
+        }
+        status.textContent = "正在翻阅…";
+        try {
+          const pagefind = await import(/* @vite-ignore */ modulePath);
+          await pagefind.init();
+          const response = await pagefind.search(query);
+          const items = await Promise.all(response.results.slice(0, 12).map((item) => item.data()));
+          status.textContent = items.length ? `找到 ${items.length} 条结果。` : "没有找到，换个词试试。";
+          results.innerHTML = items.map((item) => `
+            <li>
+              <a href="${escapeHtml(item.url)}">${escapeHtml(item.meta?.title || item.url)}</a>
+              <p>${item.excerpt || ""}</p>
+            </li>`).join("");
+        } catch {
+          status.innerHTML = '搜索暂时不可用，请前往<a href="/archive/">完整归档</a>。';
+          results.replaceChildren();
+        }
+      };
+
+      input.addEventListener("input", () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(search, 180);
+      });
+    }
+  })();
+</script><p class="search-overlay__hint" data-astro-cid-fdy5zvyj><kbd data-astro-cid-fdy5zvyj>/</kbd> 打开 · <kbd data-astro-cid-fdy5zvyj>Esc</kbd> 关闭 · <a href="/search/" data-astro-cid-fdy5zvyj>独立搜索页</a></p></div></dialog><script>
+  (() => {
+    const dialog = document.querySelector("[data-search-overlay]");
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    let trigger;
+    const open = (source) => {
+      trigger = source;
+      dialog.showModal();
+      window.setTimeout(() => dialog.querySelector('input[type="search"]')?.focus(), 0);
+    };
+    for (const opener of document.querySelectorAll("[data-search-open]")) {
+      opener.addEventListener("click", (event) => {
+        event.preventDefault();
+        open(opener);
+      });
+    }
+    dialog.querySelector("[data-search-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => trigger?.focus());
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isEditing = target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+      if (event.key === "/" && !isEditing && !dialog.open) {
+        event.preventDefault();
+        open(document.querySelector("[data-search-open]"));
+      }
+    });
+  })();
+</script><script type="module">var e=document.documentElement,t=[...document.querySelectorAll(`[data-theme-toggle]`)],n=window.matchMedia(`(prefers-color-scheme: dark)`),r=()=>e.dataset.theme||(n.matches?`dark`:`light`),i=()=>{let e=r()===`dark`;for(let n of t){n.setAttribute(`aria-pressed`,String(e));let t=n.querySelector(`[data-theme-icon]`);t&&(t.textContent=e?`☀`:`◐`)}};for(let n of t)n.addEventListener(`click`,()=>{let t=r()===`dark`?`light`:`dark`;e.dataset.theme=t;try{localStorage.setItem(`iamkissg-theme`,t)}catch{}i()});n.addEventListener(`change`,i),document.addEventListener(`keydown`,e=>{if(e.key!==`Escape`)return;let t=document.querySelector(`details[data-mobile-menu][open]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});for(let e of document.querySelectorAll(`[data-mobile-menu-close]`))e.addEventListener(`click`,()=>{let t=e.closest(`details[data-mobile-menu]`);t instanceof HTMLDetailsElement&&(t.open=!1,t.querySelector(`summary`)?.focus())});i();</script></body></html><script>
+  (() => {
+    const prose = document.querySelector("[data-prose]");
+    if (!prose) return;
+
+    const footnotes = prose.querySelector(".footnotes");
+    const sidenotes = document.querySelector("[data-sidenotes]");
+    const originalFootnoteParent = footnotes?.parentElement;
+    const placeFootnotes = () => {
+      if (!footnotes || !sidenotes || !originalFootnoteParent) return;
+      const desktop = window.matchMedia("(min-width: 68.01rem)").matches;
+      (desktop ? sidenotes : originalFootnoteParent).append(footnotes);
+    };
+    placeFootnotes();
+    window.addEventListener("resize", placeFootnotes, { passive: true });
+
+    const template = document.querySelector("[data-code-tools-template]");
+    for (const pre of prose.querySelectorAll("pre")) {
+      if (!(template instanceof HTMLTemplateElement) || pre.parentElement?.classList.contains("code-frame")) continue;
+      const frame = document.createElement("div");
+      frame.className = "code-frame";
+      pre.before(frame);
+      frame.append(pre);
+      const tools = template.content.firstElementChild.cloneNode(true);
+      const filename = pre.dataset.filename || pre.querySelector("code")?.dataset.title || "";
+      const filenameNode = tools.querySelector("[data-code-filename]");
+      filenameNode.textContent = filename;
+      if (!filename) filenameNode.hidden = true;
+      tools.querySelector("[data-code-copy]").addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        try {
+          await navigator.clipboard.writeText(pre.querySelector("code")?.textContent || pre.textContent || "");
+          button.textContent = "已复制";
+        } catch {
+          button.textContent = "请手动复制";
+        }
+        window.setTimeout(() => { button.textContent = "复制代码"; }, 1800);
+      });
+      frame.prepend(tools);
+    }
+
+    const dialog = document.querySelector("[data-lightbox]");
+    const images = [...prose.querySelectorAll("img")].filter((image) => !image.closest("a"));
+    if (!(dialog instanceof HTMLDialogElement) || images.length === 0) return;
+    const dialogImage = dialog.querySelector("img");
+    const caption = dialog.querySelector("figcaption");
+    const previous = dialog.querySelector("[data-lightbox-prev]");
+    const next = dialog.querySelector("[data-lightbox-next]");
+    let activeIndex = 0;
+    let trigger;
+
+    const show = (index) => {
+      activeIndex = (index + images.length) % images.length;
+      const image = images[activeIndex];
+      dialogImage.src = image.currentSrc || image.src;
+      dialogImage.alt = image.alt;
+      caption.textContent = image.alt;
+    };
+    const open = (image) => {
+      trigger = image;
+      show(images.indexOf(image));
+      dialog.showModal();
+      dialog.querySelector("[data-lightbox-close]")?.focus();
+    };
+    for (const image of images) {
+      image.tabIndex = 0;
+      image.setAttribute("role", "button");
+      image.setAttribute("aria-label", `${image.alt || "正文图片"}，点击放大`);
+      image.addEventListener("click", () => open(image));
+      image.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open(image);
+        }
+      });
+    }
+    previous.hidden = images.length < 2;
+    next.hidden = images.length < 2;
+    previous.addEventListener("click", () => show(activeIndex - 1));
+    next.addEventListener("click", () => show(activeIndex + 1));
+    dialog.querySelector("[data-lightbox-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener("close", () => trigger?.focus());
+  })();
+</script>
